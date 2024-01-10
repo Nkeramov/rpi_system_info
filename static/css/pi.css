@@ -1,0 +1,41 @@
+body {
+    background-color: #1a1a1a;
+}
+
+.container {
+    color: #00cc00;
+}
+
+h5 {
+    margin-bottom: 2px;
+}
+ 
+th, td {
+    padding-top: 5px !important;
+    padding-bottom: 5px !important;
+    color: #00cc00;
+}
+
+.g-header {
+    padding-top: 10px;
+    border-bottom: 1px solid #eee;
+    color: #FFD700;
+}
+
+.g-row {
+    padding-top: 5px;
+}
+
+.g-head {
+    font-weight: bold;
+}
+
+ table.sortable thead {
+    font-weight: bold;
+    cursor: default;
+}
+
+.item-count {
+    color: white;
+    font-size: 75%;
+}
