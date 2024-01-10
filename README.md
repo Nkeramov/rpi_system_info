@@ -1,4 +1,4 @@
-# Raspberry Pi system monitor
+# Raspberry Pi system info
 
 This project is a simple web server that displays system information about your Raspberry Pi.
 

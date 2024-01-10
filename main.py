@@ -87,7 +87,7 @@ def index():
     except Exception as ex:
         print(ex)
     finally:
-        return render_template("index.html", title='Raspberry Pi - System Monitor',
+        return render_template("index.html", title='Raspberry Pi System Info',
                                 sys_data = sys_data,
                                 pi_model = pi_model,
                                 ip_address = ip_address,

@@ -24,7 +24,7 @@
                  <img src="static/images/logo.png" style="width:64px">
              </div>
              <div class="nine columns">
-                 <h3 style="margin-top:10px;color:#FF8C00">Raspberry Pi - System Info</h3>
+                 <h3 style="margin-top:10px;color:#FF8C00">{{title}}</h3>
              </div>    
              <div style="float:right">
                     <div>
@@ -46,7 +46,7 @@
          </div>
          <div class="row g-row">
              <div class="three columns g-head">
-                 Name of the Pi
+                 Host Name
              </div>
              <div class="nine columns">
                  {{sys_data.machine_name}}
@@ -54,7 +54,7 @@
          </div>
          <div class="row g-row">
              <div class="three columns g-head">
-                 Model of the Pi
+                 Model
              </div>
              <div class="nine columns">
                  {{pi_model}}
@@ -150,7 +150,7 @@
          </div>
          <div class="row g-row">
              <div class="three columns g-head">
-                 Core Volt
+                 Core Voltage
              </div>
              <div class="nine columns">
                  {{cpu_core_volt}} V
@@ -158,7 +158,7 @@
          </div>
          <div class="row g-row">
              <div class="three columns g-head">
-                 CPU  Usage
+                 CPU Usage
              </div>
              <div class="nine columns">
                  {{cpu_usage_info['in_use']}} %
