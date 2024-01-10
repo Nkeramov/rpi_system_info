@@ -5,10 +5,21 @@ import socket
 import platform
 import subprocess
 from datetime import datetime
-from flask import Flask, render_template
 
+from flask import Flask, render_template
+from flask_caching import Cache
+
+config={
+    'CACHE_TYPE': 'SimpleCache',
+    "CACHE_DEFAULT_TIMEOUT": 300
+}
 
 app = Flask(__name__)
+
+app.config.from_mapping(config)
+
+cache = Cache(app)
+
 
 
 def get_mac_address(interface='eth0'):
@@ -72,7 +83,8 @@ def running_process_list():
 
 
 @app.route('/')
-@app.route('/home')
+# cached for 60 seconds
+@cache.cached(timeout=60)
 def index():
     sys_data = {"current_time": '',"machine_name": ''}
     try:
