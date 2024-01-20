@@ -1,32 +1,28 @@
- 
- <!DOCTYPE html>
- <html lang="en">
- <head>
-     <meta charset="utf-8">
-     <title>{{title}}</title>
-     <meta name="description" content="System information of Raspberry Pi">
-     <meta name="author" content="Ashok Raja T">
-     <meta name="viewport" content="width=device-width, initial-scale=1">
-     <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
-     <link rel="stylesheet" href="static/css/normalize.css">
-     <link rel="stylesheet" href="static/css/skeleton.css">
-     <link rel="stylesheet" href="static/css/pi.css">
-     <script src="static/js/sort.js"></script>
-     <link rel="icon" type="image/png" href="static/images/favicon.png">
-     <style>
- 
-     </style>
- </head>
- <body>
-     <div class="container" style="max-width:600px">
-         <div class="row" style="padding-top:20px;">
-             <div class="two columns">
-                 <img src="static/images/logo.png" style="width:64px">
-             </div>
-             <div class="nine columns">
-                 <h3 style="margin-top:10px;color:#FF8C00">{{title}}</h3>
-             </div>    
-             <div style="float:right">
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>{{title}}</title>
+        <meta name="description" content="System information of Raspberry Pi">
+        <meta name="author" content="Ashok Raja T">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="static/css/normalize.css">
+        <link rel="stylesheet" href="static/css/skeleton.css">
+        <link rel="stylesheet" href="static/css/pi.css">
+        <script src="static/js/sort.js"></script>
+        <link rel="icon" type="image/png" href="static/images/favicon.png">
+    </head>
+    <body>
+        <div class="container" style="max-width:600px">
+            <div class="row" style="padding-top:20px;">
+                <div class="two columns">
+                    <img src="static/images/logo.png" style="width:64px">
+                </div>
+                <div class="nine columns">
+                    <h3 style="margin-top:10px;color:#FF8C00">{{title}}</h3>
+                </div>
+                <div style="float:right">
                     <div>
                         <a href="restart" onclick="return confirm('Do you wish to re-start your system ?')">
                             <img src="static/images/reboot.png" style="width:24px; margin-top:5px" alt="Restart">
@@ -35,185 +31,191 @@
                     <div>
                         <a href="shutdown" onclick="return confirm('Do you wish to shutdown your system ?')">
                             <img src="static/images/shutdown.png" style="width:24px; margin-top:5px" alt="Shutdown">
-                        </a>
-                    </div>
+                    </a>
+                </div>
             </div>
         </div>
-         <div class="row g-header">
+        <div class="row g-header">
             <div>
                 <h5>Generic Info</h5>
             </div>
-         </div>
-         <div class="row g-row">
-             <div class="three columns g-head">
-                 Host Name
-             </div>
-             <div class="nine columns">
-                 {{sys_data.machine_name}}
-             </div>
-         </div>
-         <div class="row g-row">
-             <div class="three columns g-head">
-                 Model
-             </div>
-             <div class="nine columns">
-                 {{pi_model}}
-             </div>
-         </div>
-         <div class="row g-row">
-             <div class="three columns g-head">
-                 Hardware Type
-             </div>
-             <div class="nine columns">
-                 {{cpu_generic_info[1][1]}}
-             </div>
-         </div>
-         <div class="row g-row">
-             <div class="three columns g-head">
-                 Serial Number
-             </div>
-             <div class="nine columns">
-                 {{cpu_generic_info[2][1]}}
-             </div>
-         </div>
-         <div class="row g-row">
-             <div class="three columns g-head">
-                 Operating System
-             </div>
-             <div class="nine columns">
-                 {{os_name}}
-             </div>
-         </div>
-         <div class="row g-row">
-             <div class="three columns g-head">
-                 System Time
-             </div>
-             <div class="nine columns">
-                 {{sys_data.current_time}}
-             </div>
-         </div>
-         <div class="row g-row">
-             <div class="three columns g-head">
-                 Uptime
-             </div>
-             <div class="nine columns">
-                 {{boot_info.running_duration}}
-             </div>
-         </div>
-         <div class="row g-row">
-             <div class="three columns g-head">
-                 Started on
-             </div>
-             <div class="nine columns">
-                 {{boot_info.start_time}}
-             </div>
-         </div>
-         <div class="row g-header">
+        </div>
+        <div class="row g-row">
+            <div class="three columns g-head">
+                Host Name
+            </div>
+            <div class="nine columns">
+                {{pi_hostname}}
+            </div>
+        </div>
+        <div class="row g-row">
+            <div class="three columns g-head">
+                Model
+            </div>
+            <div class="nine columns">
+                {{pi_model}}
+            </div>
+        </div>
+        <div class="row g-row">
+            <div class="three columns g-head">
+                Operating System
+            </div>
+            <div class="nine columns">
+                {{pi_os}}
+            </div>
+        </div>
+        <div class="row g-row">
+            <div class="three columns g-head">
+                System Time
+            </div>
+            <div class="nine columns">
+                {{current_time}}
+            </div>
+        </div>
+        <div class="row g-row">
+            <div class="three columns g-head">
+                Uptime
+            </div>
+            <div class="nine columns">
+                {{uptime_pretty}}
+            </div>
+        </div>
+        <div class="row g-row">
+            <div class="three columns g-head">
+                Started on
+            </div>
+            <div class="nine columns">
+                {{uptime_since}}
+            </div>
+        </div>
+        <div class="row g-header">
             <div style="float:left; margin-right:15px">
                 <img src="static/images/cpu.png" style="width:32px">
             </div>
             <div>
                 <h5>CPU Details</h5>
             </div>
-         </div>
-         <div class="row g-row">
-             <div class="three columns g-head">
-                 Processor Type
-             </div>
-             <div class="nine columns">
-                 {{cpu_generic_info[0][1]}}
-             </div>
-         </div>
-         <div class="row g-row">
-             <div class="three columns g-head">
-                 Core Frequency
-             </div>
-             <div class="nine columns">
-                 {{cpu_core_frequency}} Mhz
-             </div>
-         </div>
-         <div class="row g-row">
-             <div class="three columns g-head">
-                 Cores
-             </div>
-             <div class="nine columns">
-                 {{cpu_processor_count}}
-             </div>
-         </div>
-         <div class="row g-row">
-             <div class="three columns g-head">
-                 Temperature
-             </div>
-             <div class="nine columns" style="color:{{cpu_temperature.color}}">
-                 {{cpu_temperature.temperature}} &#176; C
-             </div>
-         </div>
-         <div class="row g-row">
-             <div class="three columns g-head">
-                 Core Voltage
-             </div>
-             <div class="nine columns">
-                 {{cpu_core_volt}} V
-             </div>
-         </div>
-         <div class="row g-row">
-             <div class="three columns g-head">
-                 CPU Usage
-             </div>
-             <div class="nine columns">
-                 {{cpu_usage_info['in_use']}} %
-             </div>
-         </div>
-        <div class="row g-header">
-            <div style="float:left; margin-right:15px">
-                <img src="static/images/ram.png" style="width:32px">
+        </div>
+        <div class="row g-row">
+            <div class="three columns g-head">
+                Processor Type
             </div>
-            <div>
-                <h5>RAM Details</h5>
+            <div class="nine columns">
+                {{cpu_model_name}}
             </div>
-         </div>
-         <div class="row g-row">
-             <div class="three columns g-head">
-                 Total Memory
-             </div>
-             <div class="nine columns g-row">
-                 {{memory_usage_info.total}} MB
-             </div>
-         </div>
-         <div class="row g-row">
-             <div class="three columns g-head">
-                 Used
-             </div>
-             <div class="nine columns">
-                 {{memory_usage_info.used}} MB
-             </div>
-         </div>
-         <div class="row g-row">
-             <div class="three columns g-head">
-                 Free
-             </div>
-             <div class="nine columns">
-                 {{memory_usage_info.free}} MB
-             </div>
-         </div>
-         <div class="row g-row">
-             <div class="three columns g-head">
-                 Cache
-             </div>
-             <div class="nine columns">
-                 {{memory_usage_info.cache}} MB
-             </div>
-         </div>
-         <div class="row g-row">
-             <div class="three columns g-head">
-                 Available
-             </div>
-             <div class="nine columns">
-                 {{memory_usage_info.available}} MB
-             </div>
-         </div>
-
-
+        </div>
+        <div class="row g-row">
+            <div class="three columns g-head">
+                Hardware Type
+            </div>
+            <div class="nine columns">
+                {{cpu_hardware_type}}
+            </div>
+        </div>
+        <div class="row g-row">
+            <div class="three columns g-head">
+                Serial Number
+            </div>
+            <div class="nine columns">
+                {{cpu_serial_number}}
+            </div>
+        </div>
+        <div class="row g-row">
+            <div class="three columns g-head">
+                Revision
+            </div>
+            <div class="nine columns">
+                {{cpu_revision}}
+            </div>
+        </div>
+        <div class="row g-row">
+            <div class="three columns g-head">
+                Cores
+            </div>
+            <div class="nine columns">
+                {{cpu_core_count}}
+            </div>
+        </div>
+        <div class="row g-row">
+            <div class="three columns g-head">
+                Core Frequency
+            </div>
+            <div class="nine columns">
+                {{cpu_core_frequency}} Mhz
+            </div>
+        </div>
+        <div class="row g-row">
+            <div class="three columns g-head">
+                Core Voltage
+            </div>
+            <div class="nine columns">
+                {{cpu_core_voltage}} V
+            </div>
+        </div>
+        <div class="row g-row">
+            <div class="three columns g-head">
+                Temperature
+            </div>
+            <div class="nine columns" style="color:{{cpu_temperature.color}}">
+                {{cpu_temperature.temperature}} &#176; C
+            </div>
+        </div>
+        <div class="row g-row">
+            <div class="three columns g-head">
+                CPU Usage
+            </div>
+            <div class="nine columns">
+                {{cpu_usage}} %
+            </div>
+        </div>
+       <div class="row g-header">
+           <div style="float:left; margin-right:15px">
+               <img src="static/images/ram.png" style="width:32px">
+           </div>
+           <div>
+               <h5>RAM Details</h5>
+           </div>
+        </div>
+        <div class="row g-row">
+            <div class="three columns g-head">
+                Total Memory
+            </div>
+            <div class="nine columns g-row">
+                {{ram_info.total}} MB
+            </div>
+        </div>
+        <div class="row g-row">
+            <div class="three columns g-head">
+                Used
+            </div>
+            <div class="nine columns">
+                {{ram_info.used}} MB
+            </div>
+        </div>
+        <div class="row g-row">
+            <div class="three columns g-head">
+                Free
+            </div>
+            <div class="nine columns">
+                {{ram_info.free}} MB
+            </div>
+        </div>
+        <div class="row g-row">
+            <div class="three columns g-head">
+                Cache
+            </div>
+            <div class="nine columns">
+                {{ram_info.cache}} MB
+            </div>
+        </div>
+        <div class="row g-row">
+            <div class="three columns g-head">
+                Available
+            </div>
+            <div class="nine columns">
+                {{ram_info.available}} MB
+            </div>
+        </div>
         <div class="row g-header">
             <div style="float:left; margin-right:15px">
                 <img src="static/images/network.png" style="width:32px">
@@ -237,8 +239,7 @@
              <div class="nine columns">
                  {{mac_address}}
              </div>
-         </div>
-
+         </div>-
         <div class="row g-header">
             <div style="float:left; margin-right:15px">
                 <img src="static/images/storage.png" style="width:32px">
@@ -275,11 +276,6 @@
                  </tbody>
              </table>
          </div>
-
-
-
-
-
         <div class="row g-header">
             <div style="float:left; margin-right:15px">
                 <img src="static/images/processes.png" style="width:32px">
@@ -290,9 +286,6 @@
                  </h5>
             </div>
         </div>
-
-
-
          <div>
              <table class="u-full-width sortable">
                  <thead style="color:#C1FFC1">
@@ -318,8 +311,7 @@
                      {% endfor %}
                  </tbody>
              </table>
-         </div>
-     </div>
- </body>
- </html>
- 
+            </div>
+        </div>
+    </body>
+</html>
