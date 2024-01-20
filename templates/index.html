@@ -168,12 +168,12 @@
                 {{cpu_usage}} %
             </div>
         </div>
-       <div class="row g-header">
-           <div style="float:left; margin-right:15px">
-               <img src="static/images/ram.png" style="width:32px">
+        <div class="row g-header">
+            <div style="float:left; margin-right:15px">
+                <img src="static/images/ram.png" style="width:32px">
            </div>
            <div>
-               <h5>RAM Details</h5>
+                <h5>RAM Details</h5>
            </div>
         </div>
         <div class="row g-row">
@@ -223,94 +223,90 @@
             <div>
                 <h5>Network Details</h5>
             </div>
-         </div>
-         <div class="row g-row">
-             <div class="three columns g-head">
-                 IP address
-             </div>
-             <div class="nine columns g-row">
-                 {{ip_address}}
-             </div>
-         </div>
-         <div class="row g-row">
-             <div class="three columns g-head">
-                 MAC address
-             </div>
-             <div class="nine columns">
-                 {{mac_address}}
-             </div>
-         </div>-
+        </div>
+        <div class="row g-row">
+            <div class="three columns g-head">
+                IP address
+            </div>
+            <div class="nine columns g-row">
+                {{ip_address}}
+            </div>
+        </div>
+        <div class="row g-row">
+            <div class="three columns g-head">
+                MAC address
+            </div>
+            <div class="nine columns">
+                {{mac_address}}
+            </div>
+        </div>
         <div class="row g-header">
             <div style="float:left; margin-right:15px">
                 <img src="static/images/storage.png" style="width:32px">
             </div>
             <div>
-                <h5>
-                    Disk Details <span class="item-count"> ( {{ disk_usage_info | length}} ) </span>
-                 </h5>
+                <h5>Disk Details <span class="item-count"> ( {{ disk_usage_info | length}} ) </span></h5>
             </div>
         </div>
-         <div>
-             <table class="u-full-width sortable">
-                 <thead style="color:#C1FFC1">
-                     <tr>
-                         <th>File System</th>
-                         <th>Size</th>
-                         <th>Used</th>
-                         <th>Avail</th>
-                         <th>Used%</th>
-                         <th>Mounted On</th>
-                     </tr>
-                 </thead>
-                 <tbody>
-                     {% for disk_item in disk_usage_info %}
-                     <tr>
-                         <td>{{disk_item[0]}}</td>
-                         <td>{{disk_item[1]}}</td>
-                         <td>{{disk_item[2]}}</td>
-                         <td>{{disk_item[3]}}</td>
-                         <td>{{disk_item[4]}}</td>
-                         <td>{{disk_item[5]}}</td>
-                     </tr>
-                     {% endfor %}
-                 </tbody>
-             </table>
-         </div>
+        <div>
+            <table class="u-full-width sortable">
+                <thead style="color:#C1FFC1">
+                    <tr>
+                        <th>File System</th>
+                        <th>Size</th>
+                        <th>Used</th>
+                        <th>Avail</th>
+                        <th>Used%</th>
+                        <th>Mounted On</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for disk_item in disk_usage_info %}
+                    <tr>
+                        <td>{{disk_item[0]}}</td>
+                        <td>{{disk_item[1]}}</td>
+                        <td>{{disk_item[2]}}</td>
+                        <td>{{disk_item[3]}}</td>
+                        <td>{{disk_item[4]}}</td>
+                        <td>{{disk_item[5]}}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
         <div class="row g-header">
             <div style="float:left; margin-right:15px">
                 <img src="static/images/processes.png" style="width:32px">
             </div>
-            <div>
-                <h5>
-                    Running Process Details <span class="item-count"> ( total {{ running_process_info | length}} ) </span>
-                 </h5>
+                <div>
+                    <h5>Running Process Details <span class="item-count"> ( total {{ running_process_info | length}} ) </span></h5>
+                </div>
             </div>
-        </div>
-         <div>
-             <table class="u-full-width sortable">
-                 <thead style="color:#C1FFC1">
-                     <tr>
-                         <th>User</th>
-                         <th>ProcId</th>
-                         <th>CPU%</th>
-                         <th>Mem%</th>
-                         <th>Application</th>
-                         <th>Started On</th>
-                     </tr>
-                 </thead>
-                 <tbody>
-                     {% for procinfo in running_process_info %}
-                     <tr>
-                         <td>{{procinfo[0]}}</td>
-                         <td>{{procinfo[1]}}</td>
-                         <td>{{procinfo[2]}}</td>
-                         <td>{{procinfo[3]}}</td>
-                         <td>{{procinfo[4]}}</td>
-                         <td nowrap>{{ short_date( procinfo[7] , procinfo[6],  procinfo[8])  }}</td>
-                     </tr>
-                     {% endfor %}
-                 </tbody>
-             </table>
+            <div>
+                <table class="u-full-width sortable">
+                    <thead style="color:#C1FFC1">
+                        <tr>
+                            <th>User</th>
+                            <th>ProcId</th>
+                            <th>CPU%</th>
+                            <th>Mem%</th>
+                            <th>Application</th>
+                            <th>Started On</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for procinfo in running_process_info %}
+                        <tr>
+                            <td>{{procinfo[0]}}</td>
+                            <td>{{procinfo[1]}}</td>
+                            <td>{{procinfo[2]}}</td>
+                            <td>{{procinfo[3]}}</td>
+                            <td>{{procinfo[4]}}</td>
+                            <td nowrap>{{ short_date( procinfo[7] , procinfo[6],  procinfo[8])  }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </body>
