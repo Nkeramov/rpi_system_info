@@ -33,21 +33,27 @@ app.config.from_mapping(config)
 
 cache = Cache(app)
 
+app.logger.handlers = logger.handlers
+app.logger.setLevel(logger.level)
+
 
 @app.route('/')
 # cached for 60 seconds
 @cache.cached(timeout=60)
 def index():
+    app.logger.info('Request index.html')
     return render_template("index.html", title='Raspberry Pi System Info')
 
 
 @app.route('/restart')
 def restart():
+    app.logger.info('Restart')
     os.system('sudo reboot now')
 
 
 @app.route('/shutdown')
 def shutdown():
+    app.logger.info('Shutdown')
     os.system('sudo stutdown now')
 
 
@@ -166,4 +172,9 @@ def utility_processor():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8443, debug=False)
+    logger.info("Started")
+    try:
+        app.run(host="0.0.0.0", port=8443, debug=False)
+    except KeyboardInterrupt:
+        logger.info("Stopped")
+        exit()
