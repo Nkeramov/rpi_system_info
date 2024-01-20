@@ -17,9 +17,17 @@ class PiSystemInfo:
         except Exception as error:
             logger.error(error)
 
+    def get_hostname(self) -> str | None:
+        command = "hostname"
+        return self.__get_shell_cmd_output(command)
+
     def get_model(self) -> str | None:
         command = "cat /sys/firmware/devicetree/base/model"
         return self.__get_shell_cmd_output(command)
+
+    def get_os_name(self) -> str | None:
+        command = "cat /etc/*-release | grep PRETTY_NAME | cut -d= -f2"
+        return self.__get_shell_cmd_output(command).strip('"')
 
     def get_uptime_since(self) -> str | None:
         command = "uptime -s"
@@ -62,7 +70,7 @@ class PiSystemInfo:
     def get_cpu_core_voltage(self) -> float | None:
         command = "vcgencmd measure_volts| cut -d= -f2"
         result = self.__get_shell_cmd_output(command)
-        return round(float(result[:-1]), 3) if result is not None else result
+        return float(result[:-1]) if result is not None else result
 
     def get_cpu_temperature(self) -> float | None:
         command = "vcgencmd measure_temp | cut -d= -f2 | cut -d\\' -f1"
@@ -107,6 +115,17 @@ class PiSystemInfo:
         else:
             logger.error(f"Requested unknown ram volume unit: {unit}")
             return None
+
+    def get_disk_usage_info(self) -> list | None:
+        command = "df -h"
+        result = self.__get_shell_cmd_output(command)
+        return [s.split() for s in result.splitlines()[1:]]
+
+    def get_running_process_info(self) -> list | None:
+        command = "ps -Ao user,pid,pcpu,pmem,comm,lstart --sort=-pcpu"
+        result = self.__get_shell_cmd_output(command)
+        return [s.split() for s in result.splitlines()[1:]]
+
 
 
 def get_console_logger() -> logging.Logger:
