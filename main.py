@@ -17,7 +17,9 @@ logger = get_logger(LOG_LEVEL, LOG_MSG_FORMAT, LOG_DATE_FORMAT, LOG_FILENAME)
 
 from libs.pi_system_info import PiSystemInfo
 
-pi_sys_info = PiSystemInfo(logger)
+pi_sys_info = PiSystemInfo(
+    logger=logger
+)
 
 from flask import Flask, render_template
 from flask_caching import Cache

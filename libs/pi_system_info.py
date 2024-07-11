@@ -4,9 +4,14 @@ import logging
 import subprocess
 
 
-class PiSystemInfo:
+class PiSystemInfo(object):
 
-    def __init__(self, logger):
+    def __new__(cls, *args, **kwargs):
+        if not hasattr(cls, 'instance'):
+            cls.instance = super(PiSystemInfo, cls).__new__(cls)
+        return cls.instance
+
+    def __init__(self, logger: logging.Logger):
         self.logger = logger
 
     def __get_shell_cmd_output(self, cmd: str) -> str | None:
@@ -46,19 +51,19 @@ class PiSystemInfo:
         return self.__get_shell_cmd_output(command)
 
     def get_cpu_model_name(self):
-        command = "cat /proc/cpuinfo  | grep 'model name' | cut -d: -f2"
+        command = "cat /proc/cpuinfo | grep 'model name' | cut -d: -f2"
         return self.__get_shell_cmd_output(command)
 
     def get_cpu_hardware_type(self):
-        command = "cat /proc/cpuinfo  | grep 'Hardware' | cut -d: -f2"
+        command = "cat /proc/cpuinfo | grep 'Hardware' | cut -d: -f2"
         return self.__get_shell_cmd_output(command)
 
     def get_cpu_revision(self):
-        command = "cat /proc/cpuinfo  | grep 'Revision' | cut -d: -f2"
+        command = "cat /proc/cpuinfo | grep 'Revision' | cut -d: -f2"
         return self.__get_shell_cmd_output(command)
 
     def get_cpu_serial_number(self):
-        command = "cat /proc/cpuinfo  | grep 'Serial' | cut -d: -f2"
+        command = "cat /proc/cpuinfo | grep 'Serial' | cut -d: -f2"
         return self.__get_shell_cmd_output(command)
 
 
@@ -99,7 +104,7 @@ class PiSystemInfo:
             return None
 
     def get_cpu_usage(self) -> str | None:
-        command = "top -b -n2 | grep 'Cpu(s)'|tail -n 1 | awk '{print $2 + $4 }'"
+        command = "top -b -n2 | grep 'Cpu(s)'| tail -n 1 | awk '{print $2 + $4 }'"
         return self.__get_shell_cmd_output(command)
 
     def get_ram_info(self, unit: str = 'm') -> dict[str | None] | None:
