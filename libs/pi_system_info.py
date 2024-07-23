@@ -1,4 +1,3 @@
-import os
 import time
 import logging
 import subprocess
@@ -6,15 +5,18 @@ import subprocess
 
 class PiSystemInfo(object):
 
+    __instance = None
+
     def __new__(cls, *args, **kwargs):
-        if not hasattr(cls, 'instance'):
-            cls.instance = super(PiSystemInfo, cls).__new__(cls)
-        return cls.instance
+        if cls.__instance is None:
+            cls.__instance = super(PiSystemInfo, cls).__new__(cls)
+        return cls.__instance
 
     def __init__(self, logger: logging.Logger):
         self.logger = logger
 
-    def __get_shell_cmd_output(self, cmd: str) -> str | None:
+    @staticmethod
+    def __get_shell_cmd_output(cmd: str) -> str | None:
         try:
             process = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
             output, error = process.communicate()
@@ -66,7 +68,6 @@ class PiSystemInfo(object):
         command = "cat /proc/cpuinfo | grep 'Serial' | cut -d: -f2"
         return self.__get_shell_cmd_output(command)
 
-
     def get_cpu_core_count(self) -> int | None:
         command = "nproc"
         result = self.__get_shell_cmd_output(command)
@@ -83,7 +84,9 @@ class PiSystemInfo(object):
         return float(result) if result is not None else result
 
     def get_cpu_core_frequency(self, unit: str = 'MHz') -> int | None:
-        ''' Returns CPU frequency info in specified units (Hz, KHz, MHz or GHz)'''
+        """
+            Returns CPU frequency info in specified units (Hz, KHz, MHz or GHz)
+        """
         command = "vcgencmd measure_clock arm | cut -d= -f2"
         result = self.__get_shell_cmd_output(command)
         if result is not None:
@@ -107,19 +110,20 @@ class PiSystemInfo(object):
         command = "top -b -n2 | grep 'Cpu(s)'| tail -n 1 | awk '{print $2 + $4 }'"
         return self.__get_shell_cmd_output(command)
 
-    def get_ram_info(self, unit: str = 'm') -> dict[str | None] | None:
-        ''' Returns RAM info in specified units (b, k, m and g)'''
+    def get_ram_info(self, unit: str = 'm') -> dict[str, str | None] | None:
+        """
+            Returns RAM info in specified units (b, k, m and g)
+        """
         if unit in ['b', 'k', 'm', 'g']:
-            ram_info = dict()
-            ram_info['total'] = self.__get_shell_cmd_output(f"free -{unit} | awk 'NR==2' | awk '{{print $2'}}")
-            ram_info['used'] = self.__get_shell_cmd_output(f"free -{unit} | awk 'NR==2' | awk '{{print $3'}}")
-            ram_info['free'] = self.__get_shell_cmd_output(f"free -{unit} | awk 'NR==2' | awk '{{print $4'}}")
-            ram_info['cache'] = self.__get_shell_cmd_output(f"free -{unit} | awk 'NR==2' | awk '{{print $6'}}")
-            ram_info['available'] = self.__get_shell_cmd_output(f"free -{unit} | awk 'NR==2' | awk '{{print $7'}}")
-            return ram_info
+            res = dict()
+            res['total'] = self.__get_shell_cmd_output(f"free -{unit} | awk 'NR==2' | awk '{{print $2'}}")
+            res['used'] = self.__get_shell_cmd_output(f"free -{unit} | awk 'NR==2' | awk '{{print $3'}}")
+            res['free'] = self.__get_shell_cmd_output(f"free -{unit} | awk 'NR==2' | awk '{{print $4'}}")
+            res['cache'] = self.__get_shell_cmd_output(f"free -{unit} | awk 'NR==2' | awk '{{print $6'}}")
+            res['available'] = self.__get_shell_cmd_output(f"free -{unit} | awk 'NR==2' | awk '{{print $7'}}")
+            return res
         else:
             logger.error(f"Requested unknown ram volume unit: {unit}")
-            return None
 
     def get_disk_usage_info(self) -> list | None:
         command = "df -h"
@@ -132,13 +136,12 @@ class PiSystemInfo(object):
         return [s.split() for s in result.splitlines()[1:]]
 
 
-
 def get_console_logger() -> logging.Logger:
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
     console_handler = logging.StreamHandler()
     console_handler.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    formatter = logging.Formatter(fmt='%(asctime)s - %(levelname)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
     console_handler.setFormatter(formatter)
     logger.addHandler(console_handler)
     return logger
@@ -148,11 +151,12 @@ if __name__ == "__main__":
     logger = get_console_logger()
     pi_sys_info = PiSystemInfo(logger)
     try:
-        logger.info(f"Model : {pi_sys_info.get_model()}")
-        logger.info(f"MAC address : {pi_sys_info.get_mac_address('eth0')}")
-        logger.info(f"IP address : {pi_sys_info.get_ip_address('eth0')}")
-        while(True):
-            logger.info(f"CPU: temperature {pi_sys_info.get_cpu_temperature()} \xb0C, frequency {pi_sys_info.get_cpu_frequency()} MHz, usage {pi_sys_info.get_cpu_usage()}%")
+        logger.info(f"Model: {pi_sys_info.get_model()}")
+        logger.info(f"IP address: {pi_sys_info.get_ip_address('eth0')}")
+        logger.info(f"MAC address: {pi_sys_info.get_mac_address('eth0')}")
+        while True:
+            logger.info(f"CPU: temperature {pi_sys_info.get_cpu_temperature()} \xb0C, "
+                        f"frequency {pi_sys_info.get_cpu_core_frequency()} MHz, usage {pi_sys_info.get_cpu_usage()}%")
             ram_info = pi_sys_info.get_ram_info()
             logger.info(f"RAM: total {ram_info['total']} Mb, used {ram_info['used']} Mb, free {ram_info['free']} Mb")
             time.sleep(2)

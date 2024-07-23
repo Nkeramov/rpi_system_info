@@ -3,6 +3,10 @@ import logging
 from datetime import datetime
 from dotenv import load_dotenv
 
+from flask import Flask, render_template
+from flask_caching import Cache
+
+from libs.pi_system_info import PiSystemInfo
 from libs.logging_utils import get_logger
 
 load_dotenv('.env')
@@ -14,17 +18,11 @@ LOG_DATE_FORMAT = os.getenv("LOG_DATE_FORMAT")
 LOG_FILENAME = os.path.join(LOGS_PATH, os.getenv("LOG_FILENAME"))
 logger = get_logger(LOG_LEVEL, LOG_MSG_FORMAT, LOG_DATE_FORMAT, LOG_FILENAME)
 
-
-from libs.pi_system_info import PiSystemInfo
-
 pi_sys_info = PiSystemInfo(
     logger=logger
 )
 
-from flask import Flask, render_template
-from flask_caching import Cache
-
-config={
+config = {
     'CACHE_TYPE': 'SimpleCache',
     "CACHE_DEFAULT_TIMEOUT": 300
 }
@@ -40,8 +38,8 @@ app.logger.setLevel(logger.level)
 
 
 @app.route('/')
-# cached for 60 seconds
-@cache.cached(timeout=60)
+# cached for 10 seconds
+@cache.cached(timeout=10)
 def index():
     app.logger.info('Request index.html')
     return render_template("index.html", title='Raspberry Pi System Info')
@@ -62,7 +60,7 @@ def shutdown():
 @app.context_processor
 def uptime_since():
     t = datetime.strptime(pi_sys_info.get_uptime_since(), "%Y-%m-%d %H:%M:%S")
-    return dict(uptime_since=t.strftime("%d-%b-%Y, %I : %M : %S"))
+    return dict(uptime_since=t.strftime("%d-%b-%Y, %H : %M : %S"))
 
 
 @app.context_processor
@@ -72,7 +70,7 @@ def uptime_pretty():
 
 @app.context_processor
 def current_time():
-    return dict(current_time=datetime.now().strftime("%d-%b-%Y, %I : %M : %S"))
+    return dict(current_time=datetime.now().strftime("%d-%b-%Y, %H : %M : %S"))
 
 
 @app.context_processor
@@ -128,11 +126,14 @@ def cpu_usage():
 @app.context_processor
 def cpu_temperature():
     temperature = pi_sys_info.get_cpu_temperature()
-    color = 'white'
-    if 40 < temperature < 50:
-        color = 'orange'
-    elif temperature >= 50:
-        color = 'red'
+    # default green color
+    color = '#00FF40'
+    if 45 < temperature < 55:
+        # orange color
+        color = '#FF8C00'
+    elif temperature >= 55:
+        # red color
+        color = '#CC0000'
     return dict(cpu_temperature={'temperature': temperature, 'color': color})
 
 
@@ -176,7 +177,7 @@ def utility_processor():
 if __name__ == "__main__":
     logger.info("Started")
     try:
-        app.run(host="0.0.0.0", port=8443, debug=False)
+        app.run(host="0.0.0.0", port=8080, debug=False)
     except KeyboardInterrupt:
         logger.info("Stopped")
         exit()
