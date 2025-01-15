@@ -221,7 +221,7 @@
                 <img src="static/images/network.png" style="width:32px">
             </div>
             <div>
-                <h5>Network Details</h5>
+                <h5>Ethernet Network Details</h5>
             </div>
         </div>
         <div class="row g-row">
@@ -229,7 +229,7 @@
                 IP address
             </div>
             <div class="nine columns g-row">
-                {{ip_address}}
+                {{ethernet_ip_address}}
             </div>
         </div>
         <div class="row g-row">
@@ -237,7 +237,31 @@
                 MAC address
             </div>
             <div class="nine columns">
-                {{mac_address}}
+                {{ethernet_mac_address}}
+            </div>
+        </div>
+        <div class="row g-header">
+            <div style="float:left; margin-right:15px">
+                <img src="static/images/network.png" style="width:32px">
+            </div>
+            <div>
+                <h5>Wi-Fi Network Details</h5>
+            </div>
+        </div>
+        <div class="row g-row">
+            <div class="three columns g-head">
+                IP address
+            </div>
+            <div class="nine columns g-row">
+                {{wifi_ip_address}}
+            </div>
+        </div>
+        <div class="row g-row">
+            <div class="three columns g-head">
+                MAC address
+            </div>
+            <div class="nine columns">
+                {{wifi_mac_address}}
             </div>
         </div>
         <div class="row g-header">
