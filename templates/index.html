@@ -41,50 +41,50 @@
             </div>
         </div>
         <div class="row g-row">
-            <div class="three columns g-head">
+            <div class="five columns g-head">
                 Host Name
             </div>
-            <div class="nine columns">
+            <div class="seven columns">
                 {{pi_hostname}}
             </div>
         </div>
         <div class="row g-row">
-            <div class="three columns g-head">
+            <div class="five columns g-head">
                 Model
             </div>
-            <div class="nine columns">
+            <div class="seven columns">
                 {{pi_model}}
             </div>
         </div>
         <div class="row g-row">
-            <div class="three columns g-head">
+            <div class="five columns g-head">
                 Operating System
             </div>
-            <div class="nine columns">
+            <div class="seven columns">
                 {{pi_os}}
             </div>
         </div>
         <div class="row g-row">
-            <div class="three columns g-head">
+            <div class="five columns g-head">
                 System Time
             </div>
-            <div class="nine columns">
+            <div class="seven columns">
                 {{current_time}}
             </div>
         </div>
         <div class="row g-row">
-            <div class="three columns g-head">
+            <div class="five columns g-head">
                 Uptime
             </div>
-            <div class="nine columns">
+            <div class="seven columns">
                 {{uptime_pretty}}
             </div>
         </div>
         <div class="row g-row">
-            <div class="three columns g-head">
+            <div class="five columns g-head">
                 Started on
             </div>
-            <div class="nine columns">
+            <div class="seven columns">
                 {{uptime_since}}
             </div>
         </div>
@@ -97,74 +97,106 @@
             </div>
         </div>
         <div class="row g-row">
-            <div class="three columns g-head">
+            <div class="five columns g-head">
+                Architecture
+            </div>
+            <div class="seven columns">
+                {{cpu_architecture}}
+            </div>
+        </div>
+        <div class="row g-row">
+            <div class="five columns g-head">
                 Processor Type
             </div>
-            <div class="nine columns">
+            <div class="seven columns">
                 {{cpu_model_name}}
             </div>
         </div>
         <div class="row g-row">
-            <div class="three columns g-head">
+            <div class="five columns g-head">
                 Hardware Type
             </div>
-            <div class="nine columns">
+            <div class="seven columns">
                 {{cpu_hardware_type}}
             </div>
         </div>
         <div class="row g-row">
-            <div class="three columns g-head">
+            <div class="five columns g-head">
                 Serial Number
             </div>
-            <div class="nine columns">
+            <div class="seven columns">
                 {{cpu_serial_number}}
             </div>
         </div>
         <div class="row g-row">
-            <div class="three columns g-head">
+            <div class="five columns g-head">
                 Revision
             </div>
-            <div class="nine columns">
+            <div class="seven columns">
                 {{cpu_revision}}
             </div>
         </div>
         <div class="row g-row">
-            <div class="three columns g-head">
+            <div class="five columns g-head">
                 Cores
             </div>
-            <div class="nine columns">
+            <div class="seven columns">
                 {{cpu_core_count}}
             </div>
         </div>
         <div class="row g-row">
-            <div class="three columns g-head">
+            <div class="five columns g-head">
                 Core Frequency
             </div>
-            <div class="nine columns">
+            <div class="seven columns">
                 {{cpu_core_frequency}} Mhz
             </div>
         </div>
         <div class="row g-row">
-            <div class="three columns g-head">
+            <div class="five columns g-head">
                 Core Voltage
             </div>
-            <div class="nine columns">
+            <div class="seven columns">
                 {{cpu_core_voltage}} V
             </div>
         </div>
         <div class="row g-row">
-            <div class="three columns g-head">
+            <div class="five columns g-head">
+                L1 Data Cache Size
+            </div>
+            <div class="seven columns">
+                {{cpu_cache_sizes.L1d}} KiB
+            </div>
+        </div>
+        <div class="row g-row">
+            <div class="five columns g-head">
+                L1 Instructions Cache Size
+            </div>
+            <div class="seven columns">
+                {{cpu_cache_sizes.L1i}} KiB
+            </div>
+        </div>
+        <div class="row g-row">
+            <div class="five columns g-head">
+                L2 Cache Size
+            </div>
+            <div class="seven columns">
+                {{cpu_cache_sizes.L2}} KiB
+            </div>
+        </div>
+        <div class="row g-row">
+            <div class="five columns g-head">
                 Temperature
             </div>
-            <div class="nine columns" style="color:{{cpu_temperature.color}}">
+            <div class="seven columns" style="color:{{cpu_temperature.color}}">
                 {{cpu_temperature.temperature}} &#176; C
             </div>
         </div>
         <div class="row g-row">
-            <div class="three columns g-head">
-                CPU Usage
+            <div class="five columns g-head">
+                Usage
             </div>
-            <div class="nine columns">
+            <div class="seven columns">
                 {{cpu_usage}} %
             </div>
         </div>
@@ -177,42 +209,42 @@
            </div>
         </div>
         <div class="row g-row">
-            <div class="three columns g-head">
+            <div class="five columns g-head">
                 Total Memory
             </div>
-            <div class="nine columns g-row">
+            <div class="seven columns g-row">
                 {{ram_info.total}} MB
             </div>
         </div>
         <div class="row g-row">
-            <div class="three columns g-head">
+            <div class="five columns g-head">
                 Used
             </div>
-            <div class="nine columns">
+            <div class="seven columns">
                 {{ram_info.used}} MB
             </div>
         </div>
         <div class="row g-row">
-            <div class="three columns g-head">
+            <div class="five columns g-head">
                 Free
             </div>
-            <div class="nine columns">
+            <div class="seven columns">
                 {{ram_info.free}} MB
             </div>
         </div>
         <div class="row g-row">
-            <div class="three columns g-head">
+            <div class="five columns g-head">
                 Cache
             </div>
-            <div class="nine columns">
+            <div class="seven columns">
                 {{ram_info.cache}} MB
             </div>
         </div>
         <div class="row g-row">
-            <div class="three columns g-head">
+            <div class="five columns g-head">
                 Available
             </div>
-            <div class="nine columns">
+            <div class="seven columns">
                 {{ram_info.available}} MB
             </div>
         </div>
@@ -225,18 +257,18 @@
             </div>
         </div>
         <div class="row g-row">
-            <div class="three columns g-head">
+            <div class="five columns g-head">
                 IP address
             </div>
-            <div class="nine columns g-row">
+            <div class="seven columns g-row">
                 {{ethernet_ip_address}}
             </div>
         </div>
         <div class="row g-row">
-            <div class="three columns g-head">
+            <div class="five columns g-head">
                 MAC address
             </div>
-            <div class="nine columns">
+            <div class="seven columns">
                 {{ethernet_mac_address}}
             </div>
         </div>
@@ -249,18 +281,18 @@
             </div>
         </div>
         <div class="row g-row">
-            <div class="three columns g-head">
+            <div class="five columns g-head">
                 IP address
             </div>
-            <div class="nine columns g-row">
+            <div class="seven columns g-row">
                 {{wifi_ip_address}}
             </div>
         </div>
         <div class="row g-row">
-            <div class="three columns g-head">
+            <div class="five columns g-head">
                 MAC address
             </div>
-            <div class="nine columns">
+            <div class="seven columns">
                 {{wifi_mac_address}}
             </div>
         </div>
