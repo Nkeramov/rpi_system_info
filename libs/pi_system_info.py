@@ -1,3 +1,4 @@
+import re
 import time
 import logging
 import subprocess
@@ -104,7 +105,11 @@ class PiSystemInfo(object):
             The CPU model name, or None if the command fails.
         """
         command = "cat /proc/cpuinfo | grep 'model name' | cut -d: -f2"
-        return self.__get_shell_cmd_output(command)
+        model =  self.__get_shell_cmd_output(command)
+        if not model:
+            command = "lscpu | grep 'Model name' | cut -d: -f2"
+            model = self.__get_shell_cmd_output(command)
+        return model
 
     def get_cpu_hardware_type(self) -> Optional[str]:
         """Retrieves the CPU hardware type from /proc/cpuinfo.
@@ -131,6 +136,15 @@ class PiSystemInfo(object):
             The CPU serial number, or None if the command fails.
         """
         command = "cat /proc/cpuinfo | grep 'Serial' | cut -d: -f2"
+        return self.__get_shell_cmd_output(command)
+
+    def get_cpu_architecture(self) -> Optional[str]:
+        """Retrieves the CPU architecture from lscpu.
+
+        Returns:
+            The CPU architecture, or None if the command fails.
+        """
+        command = "lscpu | grep 'Architecture' | cut -d: -f2"
         return self.__get_shell_cmd_output(command)
 
     def get_cpu_core_count(self) -> Optional[int]:
@@ -192,13 +206,38 @@ class PiSystemInfo(object):
         """Retrieves the CPU usage using 'top'.
 
         Returns:
-            The CPU usage, or None if the command fails.  Note that the output format is dependent on 'top'.
+            The CPU usage, or None if the command fails. Note that the output format is dependent on 'top'.
         """
         command = "top -b -n2 | grep 'Cpu(s)'| tail -n 1 | awk '{print $2 + $4 }'"
         return self.__get_shell_cmd_output(command)
 
+    def get_cpu_cache_sizes(self) -> Optional[str]:
+        """Calls the lscpu command and returns a dictionary containing the sizes of L1d, L1i, L2 caches in KiB.
+
+        Returns:
+            A dictionary {L1d: size, L1i: size, L2: size}, where size is a string, or None if command fails.
+        """
+        command = "lscpu"
+        output = self.__get_shell_cmd_output(command)
+        if output is None:
+            return None
+        cache_types = ["L1d", "L1i", "L2"]
+        cache_sizes = {cache: "" for cache in cache_types}
+        lines = output.splitlines()
+        for line in lines:
+            for cache in cache_types:
+                match = re.match(fr"{cache} cache:\s*(\S+)", line)
+                if match:
+                    cache_sizes[cache] = match.group(1)
+                    continue
+        return cache_sizes
+
     def get_ram_info(self, unit: str = 'm') -> Optional[Dict[str, Optional[str]]]:
-        """Returns RAM info in specified units (b, k, m, g). Uses a safer approach."""
+        """Returns RAM info in specified units (b, k, m, g). Uses a safer approach.
+
+        Return:
+            The RAM info dict with total, used, free, cache and available memory volume in passed unit.
+        """
         if unit not in ['b', 'k', 'm', 'g']:
             logger.error(f"Requested unknown ram volume unit: {unit}")
             return None

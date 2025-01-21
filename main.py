@@ -104,6 +104,11 @@ def current_time(logger=logger):
 
 
 @app.context_processor
+def cpu_architecture(logger=logger):
+    return dict(cpu_architecture=pi_sys_info.get_cpu_architecture())
+
+
+@app.context_processor
 def cpu_model_name(logger=logger):
     return dict(cpu_model_name=pi_sys_info.get_cpu_model_name())
 
@@ -152,6 +157,11 @@ def cpu_temperature(logger=logger):
     elif temperature >= CPU_RED_TEMP_THRESHOLD:
         color = TEXT_RED_COLOR
     return dict(cpu_temperature={'temperature': temperature, 'color': color})
+
+
+@app.context_processor
+def cpu_cache_sizes(logger=logger):
+    return dict(cpu_cache_sizes=pi_sys_info.get_cpu_cache_sizes())
 
 
 @app.context_processor
