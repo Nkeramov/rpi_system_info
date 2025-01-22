@@ -42,21 +42,13 @@
         </div>
         <div class="row g-row">
             <div class="five columns g-head">
-                Host Name
-            </div>
-            <div class="seven columns">
-                {{pi_hostname}}
-            </div>
-        </div>
-        <div class="row g-row">
-            <div class="five columns g-head">
                 Model
             </div>
             <div class="seven columns">
                 {{pi_model}}
             </div>
         </div>
-        <div class="row g-row">
+       <div class="row g-row">
             <div class="five columns g-head">
                 Operating System
             </div>
@@ -64,7 +56,15 @@
                 {{pi_os}}
             </div>
         </div>
-        <div class="row g-row">
+       <div class="row g-row">
+            <div class="five columns g-head">
+                Host Name
+            </div>
+            <div class="seven columns">
+                {{pi_hostname}}
+            </div>
+        </div>
+         <div class="row g-row">
             <div class="five columns g-head">
                 System Time
             </div>
@@ -72,20 +72,20 @@
                 {{current_time}}
             </div>
         </div>
-        <div class="row g-row">
-            <div class="five columns g-head">
-                Uptime
-            </div>
-            <div class="seven columns">
-                {{uptime_pretty}}
-            </div>
-        </div>
-        <div class="row g-row">
+       <div class="row g-row">
             <div class="five columns g-head">
                 Started on
             </div>
             <div class="seven columns">
                 {{uptime_since}}
+            </div>
+        </div>
+       <div class="row g-row">
+            <div class="five columns g-head">
+                Uptime
+            </div>
+            <div class="seven columns">
+                {{uptime_pretty}}
             </div>
         </div>
         <div class="row g-header">
@@ -149,7 +149,7 @@
                 Core Frequency
             </div>
             <div class="seven columns">
-                {{cpu_core_frequency}} Mhz
+                {{cpu_core_frequency}} MHz
             </div>
         </div>
         <div class="row g-row">
@@ -189,7 +189,7 @@
                 Temperature
             </div>
             <div class="seven columns" style="color:{{cpu_temperature.color}}">
-                {{cpu_temperature.temperature}} &#176; C
+                {{cpu_temperature.temperature}} &#176;C
             </div>
         </div>
         <div class="row g-row">
@@ -218,7 +218,7 @@
         </div>
         <div class="row g-row">
             <div class="five columns g-head">
-                Used
+                Used memory
             </div>
             <div class="seven columns">
                 {{ram_info.used}} MB
@@ -226,7 +226,7 @@
         </div>
         <div class="row g-row">
             <div class="five columns g-head">
-                Free
+                Free memory
             </div>
             <div class="seven columns">
                 {{ram_info.free}} MB
@@ -234,7 +234,7 @@
         </div>
         <div class="row g-row">
             <div class="five columns g-head">
-                Cache
+                Cache memory
             </div>
             <div class="seven columns">
                 {{ram_info.cache}} MB
@@ -242,7 +242,7 @@
         </div>
         <div class="row g-row">
             <div class="five columns g-head">
-                Available
+                Available memory
             </div>
             <div class="seven columns">
                 {{ram_info.available}} MB
