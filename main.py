@@ -17,6 +17,7 @@ time_prefix = datetime.now().strftime('%Y-%m-%d')
 load_dotenv('.env')
 
 PORT = os.getenv("PORT", 8080)
+INDEX_PAGE_CACHE_TIMEOUT = int(os.getenv("INDEX_PAGE_CACHE_TIMEOUT", 10))
 
 CPU_ORANGE_TEMP_THRESHOLD = float(os.getenv("CPU_ORANGE_TEMP_THRESHOLD", 50))
 CPU_RED_TEMP_THRESHOLD = float(os.getenv("CPU_RED_TEMP_THRESHOLD", 60))
@@ -54,8 +55,7 @@ app.logger.handlers = logger.handlers
 app.logger.setLevel(logger.level)
 
 @app.route('/')
-# cached for 10 seconds
-@cache.cached(timeout=10)
+@cache.cached(timeout=INDEX_PAGE_CACHE_TIMEOUT)
 def index(logger=logger):
     logger.info('Request index.html')
     return render_template("index.html", title='Raspberry Pi System Info')
