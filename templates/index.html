@@ -3,26 +3,25 @@
     <head>
         <meta charset="utf-8">
         <title>{{title}}</title>
-        <meta name="description" content="System information of Raspberry Pi">
-        <meta name="author" content="Ashok Raja T">
+        <link rel="icon" type="image/png" href="static/images/favicon.png">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="System information of Raspberry Pi">
         <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
         <link rel="stylesheet" href="static/css/normalize.css">
         <link rel="stylesheet" href="static/css/skeleton.css">
-        <link rel="stylesheet" href="static/css/pi.css">
+        <link rel="stylesheet" href="static/css/styles.css">
         <script src="static/js/sort.js"></script>
-        <link rel="icon" type="image/png" href="static/images/favicon.png">
     </head>
     <body>
-        <div class="container" style="max-width:600px">
-            <div class="row" style="padding-top:20px;">
+        <div class="container">
+            <div class="row">
                 <div class="two columns">
-                    <img src="static/images/logo.png" style="width:64px">
+                    <img src="static/images/logo.png" style="width:75px">
                 </div>
-                <div class="nine columns">
-                    <h3 style="margin-top:10px;color:#FF8C00">{{title}}</h3>
+                <div class="nine columns title">
+                    <h3>{{title}}</h3>
                 </div>
-                <div style="float:right">
+                <div class="one column">
                     <div>
                         <a href="restart" onclick="return confirm('Do you wish to re-start your system ?')">
                             <img src="static/images/reboot.png" style="width:24px; margin-top:5px" alt="Restart">
@@ -31,338 +30,339 @@
                     <div>
                         <a href="shutdown" onclick="return confirm('Do you wish to shutdown your system ?')">
                             <img src="static/images/shutdown.png" style="width:24px; margin-top:5px" alt="Shutdown">
-                    </a>
+                        </a>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="row g-header">
-            <div>
-                <h5>Generic Info</h5>
-            </div>
-        </div>
-        <div class="row g-row">
-            <div class="five columns g-head">
-                Model
-            </div>
-            <div class="seven columns">
-                {{pi_model}}
-            </div>
-        </div>
-       <div class="row g-row">
-            <div class="five columns g-head">
-                Operating System
-            </div>
-            <div class="seven columns">
-                {{pi_os}}
-            </div>
-        </div>
-       <div class="row g-row">
-            <div class="five columns g-head">
-                Host Name
-            </div>
-            <div class="seven columns">
-                {{pi_hostname}}
-            </div>
-        </div>
-         <div class="row g-row">
-            <div class="five columns g-head">
-                System Time
-            </div>
-            <div class="seven columns">
-                {{current_time}}
-            </div>
-        </div>
-       <div class="row g-row">
-            <div class="five columns g-head">
-                Started on
-            </div>
-            <div class="seven columns">
-                {{uptime_since}}
-            </div>
-        </div>
-       <div class="row g-row">
-            <div class="five columns g-head">
-                Uptime
-            </div>
-            <div class="seven columns">
-                {{uptime_pretty}}
-            </div>
-        </div>
-        <div class="row g-header">
-            <div style="float:left; margin-right:15px">
-                <img src="static/images/cpu.png" style="width:32px">
-            </div>
-            <div>
-                <h5>CPU Details</h5>
-            </div>
-        </div>
-        <div class="row g-row">
-            <div class="five columns g-head">
-                Architecture
-            </div>
-            <div class="seven columns">
-                {{cpu_architecture}}
-            </div>
-        </div>
-        <div class="row g-row">
-            <div class="five columns g-head">
-                Processor Type
-            </div>
-            <div class="seven columns">
-                {{cpu_model_name}}
-            </div>
-        </div>
-        <div class="row g-row">
-            <div class="five columns g-head">
-                Hardware Type
-            </div>
-            <div class="seven columns">
-                {{cpu_hardware_type}}
-            </div>
-        </div>
-        <div class="row g-row">
-            <div class="five columns g-head">
-                Serial Number
-            </div>
-            <div class="seven columns">
-                {{cpu_serial_number}}
-            </div>
-        </div>
-        <div class="row g-row">
-            <div class="five columns g-head">
-                Revision
-            </div>
-            <div class="seven columns">
-                {{cpu_revision}}
-            </div>
-        </div>
-        <div class="row g-row">
-            <div class="five columns g-head">
-                Cores
-            </div>
-            <div class="seven columns">
-                {{cpu_core_count}}
-            </div>
-        </div>
-        <div class="row g-row">
-            <div class="five columns g-head">
-                Core Frequency
-            </div>
-            <div class="seven columns">
-                {{cpu_core_frequency}} MHz
-            </div>
-        </div>
-        <div class="row g-row">
-            <div class="five columns g-head">
-                Core Voltage
-            </div>
-            <div class="seven columns">
-                {{cpu_core_voltage}} V
-            </div>
-        </div>
-        <div class="row g-row">
-            <div class="five columns g-head">
-                L1 Data Cache Size
-            </div>
-            <div class="seven columns">
-                {{cpu_cache_sizes.L1d}} KiB
-            </div>
-        </div>
-        <div class="row g-row">
-            <div class="five columns g-head">
-                L1 Instructions Cache Size
-            </div>
-            <div class="seven columns">
-                {{cpu_cache_sizes.L1i}} KiB
-            </div>
-        </div>
-        <div class="row g-row">
-            <div class="five columns g-head">
-                L2 Cache Size
-            </div>
-            <div class="seven columns">
-                {{cpu_cache_sizes.L2}} KiB
-            </div>
-        </div>
-        <div class="row g-row">
-            <div class="five columns g-head">
-                Temperature
-            </div>
-            <div class="seven columns" style="color:{{cpu_temperature.color}}">
-                {{cpu_temperature.temperature}} &#176;C
-            </div>
-        </div>
-        <div class="row g-row">
-            <div class="five columns g-head">
-                Usage
-            </div>
-            <div class="seven columns">
-                {{cpu_usage}} %
-            </div>
-        </div>
-        <div class="row g-header">
-            <div style="float:left; margin-right:15px">
-                <img src="static/images/ram.png" style="width:32px">
-           </div>
-           <div>
-                <h5>RAM Details</h5>
-           </div>
-        </div>
-        <div class="row g-row">
-            <div class="five columns g-head">
-                Total Memory
-            </div>
-            <div class="seven columns g-row">
-                {{ram_info.total}} MB
-            </div>
-        </div>
-        <div class="row g-row">
-            <div class="five columns g-head">
-                Used memory
-            </div>
-            <div class="seven columns">
-                {{ram_info.used}} MB
-            </div>
-        </div>
-        <div class="row g-row">
-            <div class="five columns g-head">
-                Free memory
-            </div>
-            <div class="seven columns">
-                {{ram_info.free}} MB
-            </div>
-        </div>
-        <div class="row g-row">
-            <div class="five columns g-head">
-                Cache memory
-            </div>
-            <div class="seven columns">
-                {{ram_info.cache}} MB
-            </div>
-        </div>
-        <div class="row g-row">
-            <div class="five columns g-head">
-                Available memory
-            </div>
-            <div class="seven columns">
-                {{ram_info.available}} MB
-            </div>
-        </div>
-        <div class="row g-header">
-            <div style="float:left; margin-right:15px">
-                <img src="static/images/network.png" style="width:32px">
-            </div>
-            <div>
-                <h5>Ethernet Network Details</h5>
-            </div>
-        </div>
-        <div class="row g-row">
-            <div class="five columns g-head">
-                IP address
-            </div>
-            <div class="seven columns g-row">
-                {{ethernet_ip_address}}
-            </div>
-        </div>
-        <div class="row g-row">
-            <div class="five columns g-head">
-                MAC address
-            </div>
-            <div class="seven columns">
-                {{ethernet_mac_address}}
-            </div>
-        </div>
-        <div class="row g-header">
-            <div style="float:left; margin-right:15px">
-                <img src="static/images/network.png" style="width:32px">
-            </div>
-            <div>
-                <h5>Wi-Fi Network Details</h5>
-            </div>
-        </div>
-        <div class="row g-row">
-            <div class="five columns g-head">
-                IP address
-            </div>
-            <div class="seven columns g-row">
-                {{wifi_ip_address}}
-            </div>
-        </div>
-        <div class="row g-row">
-            <div class="five columns g-head">
-                MAC address
-            </div>
-            <div class="seven columns">
-                {{wifi_mac_address}}
-            </div>
-        </div>
-        <div class="row g-header">
-            <div style="float:left; margin-right:15px">
-                <img src="static/images/storage.png" style="width:32px">
-            </div>
-            <div>
-                <h5>Disk Details <span class="item-count"> ( {{ disk_usage_info | length}} ) </span></h5>
-            </div>
-        </div>
-        <div>
-            <table class="u-full-width sortable">
-                <thead style="color:#C1FFC1">
-                    <tr>
-                        <th>File System</th>
-                        <th>Size</th>
-                        <th>Used</th>
-                        <th>Avail</th>
-                        <th>Used%</th>
-                        <th>Mounted On</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for disk_item in disk_usage_info %}
-                    <tr>
-                        <td>{{disk_item[0]}}</td>
-                        <td>{{disk_item[1]}}</td>
-                        <td>{{disk_item[2]}}</td>
-                        <td>{{disk_item[3]}}</td>
-                        <td>{{disk_item[4]}}</td>
-                        <td>{{disk_item[5]}}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        <div class="row g-header">
-            <div style="float:left; margin-right:15px">
-                <img src="static/images/processes.png" style="width:32px">
-            </div>
+            <div class="row t-header">
                 <div>
-                    <h5>Running Process Details <span class="item-count"> ( total {{ running_process_info | length}} ) </span></h5>
+                    <h5>Generic Info</h5>
+                </div>
+            </div>
+            <div class="row t-row">
+                <div class="five columns t-caption">
+                    Model
+                </div>
+                <div class="seven columns">
+                    {{pi_model}}
+                </div>
+            </div>
+           <div class="row t-row">
+                <div class="five columns t-caption">
+                    Operating System
+                </div>
+                <div class="seven columns">
+                    {{pi_os}}
+                </div>
+            </div>
+           <div class="row t-row">
+                <div class="five columns t-caption">
+                    Host Name
+                </div>
+                <div class="seven columns">
+                    {{pi_hostname}}
+                </div>
+            </div>
+             <div class="row t-row">
+                <div class="five columns t-caption">
+                    System Time
+                </div>
+                <div class="seven columns">
+                    {{current_time}}
+                </div>
+            </div>
+           <div class="row t-row">
+                <div class="five columns t-caption">
+                    Started on
+                </div>
+                <div class="seven columns">
+                    {{uptime_since}}
+                </div>
+            </div>
+           <div class="row t-row">
+                <div class="five columns t-caption">
+                    Uptime
+                </div>
+                <div class="seven columns">
+                    {{uptime_pretty}}
+                </div>
+            </div>
+            <div class="row t-header">
+                <div class="t-header-img">
+                    <img src="static/images/cpu.png" style="width:32px">
+                </div>
+                <div>
+                    <h5>CPU Details</h5>
+                </div>
+            </div>
+            <div class="row t-row">
+                <div class="five columns t-caption">
+                    Architecture
+                </div>
+                <div class="seven columns">
+                    {{cpu_architecture}}
+                </div>
+            </div>
+            <div class="row t-row">
+                <div class="five columns t-caption">
+                    Processor Type
+                </div>
+                <div class="seven columns">
+                    {{cpu_model_name}}
+                </div>
+            </div>
+            <div class="row t-row">
+                <div class="five columns t-caption">
+                    Hardware Type
+                </div>
+                <div class="seven columns">
+                    {{cpu_hardware_type}}
+                </div>
+            </div>
+            <div class="row t-row">
+                <div class="five columns t-caption">
+                    Serial Number
+                </div>
+                <div class="seven columns">
+                    {{cpu_serial_number}}
+                </div>
+            </div>
+            <div class="row t-row">
+                <div class="five columns t-caption">
+                    Revision
+                </div>
+                <div class="seven columns">
+                    {{cpu_revision}}
+                </div>
+            </div>
+            <div class="row t-row">
+                <div class="five columns t-caption">
+                    Cores
+                </div>
+                <div class="seven columns">
+                    {{cpu_core_count}}
+                </div>
+            </div>
+            <div class="row t-row">
+                <div class="five columns t-caption">
+                    Core Frequency
+                </div>
+                <div class="seven columns">
+                    {{cpu_core_frequency}} MHz
+                </div>
+            </div>
+            <div class="row t-row">
+                <div class="five columns t-caption">
+                    Core Voltage
+                </div>
+                <div class="seven columns">
+                    {{cpu_core_voltage}} V
+                </div>
+            </div>
+            <div class="row t-row">
+                <div class="five columns t-caption">
+                    L1 Data Cache Size
+                </div>
+                <div class="seven columns">
+                    {{cpu_cache_sizes.L1d}} KiB
+                </div>
+            </div>
+            <div class="row t-row">
+                <div class="five columns t-caption">
+                    L1 Instructions Cache Size
+                </div>
+                <div class="seven columns">
+                    {{cpu_cache_sizes.L1i}} KiB
+                </div>
+            </div>
+            <div class="row t-row">
+                <div class="five columns t-caption">
+                    L2 Cache Size
+                </div>
+                <div class="seven columns">
+                    {{cpu_cache_sizes.L2}} KiB
+                </div>
+            </div>
+            <div class="row t-row">
+                <div class="five columns t-caption">
+                    Temperature
+                </div>
+                <div class="seven columns" style="color:{{cpu_temperature.color}}">
+                    {{cpu_temperature.temperature}} &#176;C
+                </div>
+            </div>
+            <div class="row t-row">
+                <div class="five columns t-caption">
+                    Usage
+                </div>
+                <div class="seven columns">
+                    {{cpu_usage}} %
+                </div>
+            </div>
+            <div class="row t-header">
+                <div class="t-header-img">
+                    <img src="static/images/ram.png" style="width:32px">
+               </div>
+               <div>
+                    <h5>RAM Details</h5>
+               </div>
+            </div>
+            <div class="row t-row">
+                <div class="five columns t-caption">
+                    Total Memory
+                </div>
+                <div class="seven columns t-row">
+                    {{ram_info.total}} MB
+                </div>
+            </div>
+            <div class="row t-row">
+                <div class="five columns t-caption">
+                    Used memory
+                </div>
+                <div class="seven columns">
+                    {{ram_info.used}} MB
+                </div>
+            </div>
+            <div class="row t-row">
+                <div class="five columns t-caption">
+                    Free memory
+                </div>
+                <div class="seven columns">
+                    {{ram_info.free}} MB
+                </div>
+            </div>
+            <div class="row t-row">
+                <div class="five columns t-caption">
+                    Cache memory
+                </div>
+                <div class="seven columns">
+                    {{ram_info.cache}} MB
+                </div>
+            </div>
+            <div class="row t-row">
+                <div class="five columns t-caption">
+                    Available memory
+                </div>
+                <div class="seven columns">
+                    {{ram_info.available}} MB
+                </div>
+            </div>
+            <div class="row t-header">
+                <div class="t-header-img">
+                    <img src="static/images/network.png" style="width:32px">
+                </div>
+                <div>
+                    <h5>Ethernet Network Details</h5>
+                </div>
+            </div>
+            <div class="row t-row">
+                <div class="five columns t-caption">
+                    IP address
+                </div>
+                <div class="seven columns t-row">
+                    {{ethernet_ip_address}}
+                </div>
+            </div>
+            <div class="row t-row">
+                <div class="five columns t-caption">
+                    MAC address
+                </div>
+                <div class="seven columns">
+                    {{ethernet_mac_address}}
+                </div>
+            </div>
+            <div class="row t-header">
+                <div class="t-header-img">
+                    <img src="static/images/network.png" style="width:32px">
+                </div>
+                <div>
+                    <h5>Wi-Fi Network Details</h5>
+                </div>
+            </div>
+            <div class="row t-row">
+                <div class="five columns t-caption">
+                    IP address
+                </div>
+                <div class="seven columns t-row">
+                    {{wifi_ip_address}}
+                </div>
+            </div>
+            <div class="row t-row">
+                <div class="five columns t-caption">
+                    MAC address
+                </div>
+                <div class="seven columns">
+                    {{wifi_mac_address}}
+                </div>
+            </div>
+            <div class="row t-header">
+                <div class="t-header-img">
+                    <img src="static/images/storage.png" style="width:32px">
+                </div>
+                <div>
+                    <h5>Disk Details <span class="item-count"> ( {{ disk_usage_info | length}} ) </span></h5>
                 </div>
             </div>
             <div>
                 <table class="u-full-width sortable">
-                    <thead style="color:#C1FFC1">
+                    <thead>
                         <tr>
-                            <th>User</th>
-                            <th>ProcId</th>
-                            <th>CPU%</th>
-                            <th>Mem%</th>
-                            <th>Application</th>
-                            <th>Started On</th>
+                            <th>File System</th>
+                            <th>Size</th>
+                            <th>Used</th>
+                            <th>Avail</th>
+                            <th>Used%</th>
+                            <th>Mounted On</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for procinfo in running_process_info %}
+                        {% for disk_item in disk_usage_info %}
                         <tr>
-                            <td>{{procinfo[0]}}</td>
-                            <td>{{procinfo[1]}}</td>
-                            <td>{{procinfo[2]}}</td>
-                            <td>{{procinfo[3]}}</td>
-                            <td>{{procinfo[4]}}</td>
-                            <td nowrap>{{ short_date( procinfo[7] , procinfo[6],  procinfo[8])  }}</td>
+                            <td>{{disk_item[0]}}</td>
+                            <td>{{disk_item[1]}}</td>
+                            <td>{{disk_item[2]}}</td>
+                            <td>{{disk_item[3]}}</td>
+                            <td>{{disk_item[4]}}</td>
+                            <td>{{disk_item[5]}}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
+            </div>
+            <div class="row t-header">
+                <div class="t-header-img">
+                    <img src="static/images/processes.png" style="width:32px">
+                </div>
+                    <div>
+                        <h5>Running Process Details <span class="item-count"> ( total {{ running_process_info | length}} ) </span></h5>
+                    </div>
+                </div>
+                <div>
+                    <table class="u-full-width sortable">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>ProcId</th>
+                                <th>CPU%</th>
+                                <th>Mem%</th>
+                                <th>Application</th>
+                                <th>Started On</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for procinfo in running_process_info %}
+                            <tr>
+                                <td>{{procinfo[0]}}</td>
+                                <td>{{procinfo[1]}}</td>
+                                <td>{{procinfo[2]}}</td>
+                                <td>{{procinfo[3]}}</td>
+                                <td>{{procinfo[4]}}</td>
+                                <td nowrap>{{ short_date( procinfo[7] , procinfo[6],  procinfo[8])  }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </body>
