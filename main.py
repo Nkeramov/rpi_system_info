@@ -172,24 +172,24 @@ def ram_info(logger=logger):
 @app.context_processor
 def ethernet_ip_address(logger=logger):
     address = pi_sys_info.get_ip_address('eth0')
-    return dict(ethernet_ip_address=address if address is not None and len(address.strip()) > 0 else 'Not connected')
+    return dict(ethernet_ip_address=address if address is not None and len(address) > 0 else 'Not connected')
 
 
 @app.context_processor
 def ethernet_mac_address(logger=logger):
-    address = pi_sys_info.get_mac_address('eth0').upper()
-    return dict(ethernet_mac_address=address if address is not None and len(address.strip()) > 0 else 'Unknown')
+    address = pi_sys_info.get_mac_address('eth0')
+    return dict(ethernet_mac_address=address if address is not None and len(address) > 0 else 'Unknown')
 
 @app.context_processor
 def wifi_ip_address(logger=logger):
     address = pi_sys_info.get_ip_address('wlan0')
-    return dict(wifi_ip_address=address if address is not None and len(address.strip()) > 0 else 'Not connected')
+    return dict(wifi_ip_address=address if address is not None and len(address) > 0 else 'Not connected')
 
 
 @app.context_processor
 def wifi_mac_address(logger=logger):
-    address = pi_sys_info.get_mac_address('wlan0').upper()
-    return dict(wifi_mac_address=address if address is not None and len(address.strip()) > 0 else 'Unknown')
+    address = pi_sys_info.get_mac_address('wlan0')
+    return dict(wifi_mac_address=address if address is not None and len(address) > 0 else 'Unknown')
 
 
 @app.context_processor

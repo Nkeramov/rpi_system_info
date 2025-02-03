@@ -17,16 +17,15 @@ class PiSystemInfo(object):
     def __init__(self, logger: logging.Logger):
         self.logger = logger
 
-    @staticmethod
-    def __get_shell_cmd_output(command: str) -> Optional[str]:
+    def __get_shell_cmd_output(self, command: str) -> Optional[str]:
         """Executes a shell command and returns its output. Handles errors."""
         try:
             result = subprocess.run(command, shell=True, capture_output=True, text=True, check=True)
             return result.stdout.strip()
         except subprocess.CalledProcessError as e:
-            logger.error(f"Shell command '{command}' failed: {e}")
+            self.logger.error(f"Shell command '{command}' failed: {e}")
         except FileNotFoundError:
-            logger.error(f"Command not found: {command}")
+            self.logger.error(f"Command not found: {command}")
 
     def get_hostname(self) -> Optional[str]:
         """Retrieves the hostname using the 'hostname' command.
@@ -84,7 +83,8 @@ class PiSystemInfo(object):
             The MAC address, or None if the command fails or the interface is not found.
         """
         command = f"cat /sys/class/net/{interface}/address"
-        return self.__get_shell_cmd_output(command)
+        address = self.__get_shell_cmd_output(command)
+        return address.upper() if address is not None else None
 
     def get_ip_address(self, interface: str = 'eth0') -> Optional[str]:
         """Retrieves the IP address for a specified network interface.
