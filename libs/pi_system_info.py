@@ -98,6 +98,16 @@ class PiSystemInfo(object):
         command = f"ifconfig {interface} | grep 'inet ' | awk '{{print $2}}'"
         return self.__get_shell_cmd_output(command)
 
+    def get_bluetooth_mac_address(self) -> Optional[str]:
+        """Retrieves the MAC address for the Bluetooth interface.
+
+        Returns:
+            The MAC address, or None if the command fails or the interface is not found.
+        """
+        command = f"hcitool dev"
+        address = self.__get_shell_cmd_output(command).split('\n')[1].split()[1]
+        return address.upper() if address is not None else None
+
     def get_cpu_model_name(self) -> Optional[str]:
         """Retrieves the CPU model name from /proc/cpuinfo.
 

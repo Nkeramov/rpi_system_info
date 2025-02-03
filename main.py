@@ -193,6 +193,12 @@ def wifi_mac_address(logger=logger):
 
 
 @app.context_processor
+def bluetooth_mac_address(logger=logger):
+    address = pi_sys_info.get_bluetooth_mac_address()
+    return dict(bluetooth_mac_address=address if address is not None and len(address) > 0 else 'Unknown')
+
+
+@app.context_processor
 def disk_usage_info(logger=logger):
     return dict(disk_usage_info=pi_sys_info.get_disk_usage_info())
 
