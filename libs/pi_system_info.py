@@ -272,19 +272,66 @@ class PiSystemInfo(object):
             return None
 
     def get_disk_usage_info(self) -> Optional[List[List[str]]]:
-        """Return disk usage info in human readable units."""
+        """Returns disk usage info in human readable format.
+
+        Return:
+            The Disk info dict with filesystem, size, used, available, use percent and mounted on fields.
+        """
         command = "df -h"
         output = self.__get_shell_cmd_output(command)
         if output is None:
             return None
         try:
-            return [line.split() for line in output.splitlines()[1:]]
+            lines = output.splitlines()[1:]
+            result = []
+            for line in lines:
+                values = line.split()
+                result.append({
+                    'filesystem': values[0],
+                    'size': values[1],
+                    'used': values[2],
+                    'available': values[3],
+                    'use_percent': values[4],
+                    'mounted_on': values[5]
+                })
+            return result
         except IndexError:
             logger.error(f"Failed to parse 'df' command output: {output}")
             return None
 
     def get_running_process_info(self) -> Optional[List[List[str]]]:
+        """Returns info about running processes in system.
+
+        Return:
+            The Processes info dict with user, process id, cpu and memory use percent, command and started on fields.
+        """
         command = "ps -Ao user,pid,pcpu,pmem,comm,lstart --sort=-pcpu"
+        output = self.__get_shell_cmd_output(command)
+        if output is None:
+            return None
+        try:
+            lines = output.splitlines()[1:]
+            result = []
+            for line in lines:
+                values = line.split()
+                cmd =  " ".join(values[4:-5])
+                datetime_string = " ".join(values[-4:])
+                datetime_object = datetime.strptime(datetime_string, "%b %d %H:%M:%S %Y")
+                result.append({
+                    'user': values[0],
+                    'process_id': values[1],
+                    'cpu_use_percent': values[2],
+                    'memory_use_percent': values[3],
+                    'command': cmd,
+                    'started_on': datetime_object
+                })
+            return result
+        except IndexError:
+            logger.error(f"Failed to parse 'ps' command output: {output}")
+            return None
+
+    def get_available_wifi_networks(self) -> Optional[List[List[str]]]:
+        command = "nmcli dev wifi"
         output = self.__get_shell_cmd_output(command)
         if output is None:
             return None

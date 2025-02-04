@@ -334,12 +334,12 @@
                     <tbody>
                         {% for disk_item in disk_usage_info %}
                         <tr>
-                            <td>{{disk_item[0]}}</td>
-                            <td>{{disk_item[1]}}</td>
-                            <td>{{disk_item[2]}}</td>
-                            <td>{{disk_item[3]}}</td>
-                            <td>{{disk_item[4]}}</td>
-                            <td>{{disk_item[5]}}</td>
+                            <td>{{disk_item.filesystem}}</td>
+                            <td>{{disk_item.size}}</td>
+                            <td>{{disk_item.used}}</td>
+                            <td>{{disk_item.available}}</td>
+                            <td>{{disk_item.use_percent}}</td>
+                            <td>{{disk_item.mounted_on}}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -361,19 +361,19 @@
                                 <th>ProcId</th>
                                 <th>CPU%</th>
                                 <th>Mem%</th>
-                                <th>Application</th>
+                                <th>Command</th>
                                 <th>Started On</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for procinfo in running_process_info %}
                             <tr>
-                                <td>{{procinfo[0]}}</td>
-                                <td>{{procinfo[1]}}</td>
-                                <td>{{procinfo[2]}}</td>
-                                <td>{{procinfo[3]}}</td>
-                                <td>{{procinfo[4]}}</td>
-                                <td nowrap>{{ short_date( procinfo[7] , procinfo[6],  procinfo[8])  }}</td>
+                                <td>{{procinfo.user}}</td>
+                                <td>{{procinfo.process_id}}</td>
+                                <td>{{procinfo.cpu_use_percent}}</td>
+                                <td>{{procinfo.memory_use_percent}}</td>
+                                <td>{{procinfo.command}}</td>
+                                <td>{{procinfo.started_on}}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
