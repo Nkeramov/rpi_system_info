@@ -199,6 +199,11 @@ def bluetooth_mac_address(logger=logger):
 
 
 @app.context_processor
+def available_wifi_networks(logger=logger):
+    return dict(available_wifi_networks=pi_sys_info.get_available_wifi_networks())
+
+
+@app.context_processor
 def disk_usage_info(logger=logger):
     return dict(disk_usage_info=pi_sys_info.get_disk_usage_info())
 

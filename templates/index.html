@@ -249,7 +249,7 @@
             </div>
             <div class="row t-header">
                 <div class="t-header-img">
-                    <img src="static/images/network.png" style="width:32px">
+                    <img src="static/images/ethernet_adapter.png" style="width:32px">
                 </div>
                 <div>
                     <h5>Ethernet Network Details</h5>
@@ -273,7 +273,7 @@
             </div>
             <div class="row t-header">
                 <div class="t-header-img">
-                    <img src="static/images/wifi.png" style="width:32px">
+                    <img src="static/images/wifi_adapter.png" style="width:32px">
                 </div>
                 <div>
                     <h5>Wi-Fi Network Details</h5>
@@ -310,6 +310,40 @@
                 <div class="seven columns">
                     {{bluetooth_mac_address}}
                 </div>
+            </div>
+            <div class="row t-header">
+                <div class="t-header-img">
+                    <img src="static/images/wifi.png" style="width:32px">
+                </div>
+                <div>
+                    <h5>Available WiFi Networks <span class="item-count"> ( {{ available_wifi_networks | length}} ) </span></h5>
+                </div>
+            </div>
+            <div>
+                <table class="u-full-width sortable">
+                    <thead>
+                        <tr>
+                            <th>SSID</th>
+                            <th>Channel</th>
+                            <th>Rate</th>
+                            <th>Signal</th>
+                            <th>Bars</th>
+                            <th>Security</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for wifi_network in available_wifi_networks %}
+                        <tr>
+                            <td>{{wifi_network.ssid}}</td>
+                            <td>{{wifi_network.channel}}</td>
+                            <td>{{wifi_network.rate}}</td>
+                            <td>{{wifi_network.signal}}</td>
+                            <td>{{wifi_network.bars}}</td>
+                            <td>{{wifi_network.security}}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
             <div class="row t-header">
                 <div class="t-header-img">
