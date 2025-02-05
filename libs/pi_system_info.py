@@ -331,14 +331,35 @@ class PiSystemInfo(object):
             return None
 
     def get_available_wifi_networks(self) -> Optional[List[List[str]]]:
+        """Returns info about available WiFi networks.
+
+        Return:
+            The WiFi Networks info dict with ssid, bssid, mode, channel, rate, signal, bars and security fields.
+            WiFi networks in list ordered by SSID.
+        """
         command = "nmcli dev wifi"
         output = self.__get_shell_cmd_output(command)
         if output is None:
             return None
         try:
-            return [line.split() for line in output.splitlines()[1:]]
+            lines = output.splitlines()[1:]
+            result = []
+            for line in lines:
+                values = line.split()
+                k = values.index("Mbit/s")
+                result.append({
+                    'ssid': " ".join(values[1:k-3]),
+                    'bssid': values[0],
+                    'mode': values[k-3],
+                    'channel': values[k-2],
+                    'rate': " ".join(values[k-1:k+1]),
+                    'signal': values[k+1],
+                    'bars': values[k+2],
+                    'security': " ".join(values[k+3:])
+                })
+            return result
         except IndexError:
-            logger.error(f"Failed to parse 'ps' command output: {output}")
+            logger.error(f"Failed to parse 'nmcli' command output: {output}")
             return None
 
 
