@@ -10,10 +10,6 @@ from flask_caching import Cache
 from libs.pi_system_info import PiSystemInfo
 from libs.log_utils import LoggerSingleton
 
-file_path = Path(__file__).resolve()
-script_name = file_path.name
-time_prefix = datetime.now().strftime('%Y-%m-%d')
-
 load_dotenv('.env')
 
 PORT = os.getenv("PORT", 8080)
@@ -30,7 +26,7 @@ TEXT_DATETIME_FORMAT = os.getenv("TEXT_DATETIME_FORMAT", "%d-%b-%Y, %H : %M : %S
 
 logger = LoggerSingleton(
     log_dir=Path(os.getenv("LOGS_PATH", "logs")),
-    log_file=script_name.replace('.py', '.log'),
+    log_file='pi_system_info_server.log',
     level=os.getenv("LOG_LEVEL"),
     msg_format=os.getenv("LOG_MSG_FORMAT"),
     date_format=os.getenv("LOG_DATETIME_FORMAT"),
