@@ -18,12 +18,31 @@ class PiSystemInfo(object):
         self.logger = logger
 
     def __get_shell_cmd_output(self, command: str) -> Optional[str]:
-        """Executes a shell command and returns its output. Handles errors."""
+        """Executes a shell command and returns its standard output.
+
+        This method runs the provided shell command using `subprocess.run`.
+        It captures the standard output and standard error, and checks for
+        execution errors. If the command is successful, the stripped standard
+        output is returned. If the command fails (either due to a non-zero
+        exit code or command not being found), an error is logged using the
+        logger and `None` is returned.
+
+        *Warning*: `shell=True` is used to execute the command with pipes.
+        This can be a security risk if the `command` string is constructed
+        from untrusted input, as it can lead to shell injection vulnerabilities.
+
+        Args:
+            command: The shell command to execute as a string.
+
+        Returns:
+            The stripped standard output of the command as a string if the
+            command executes successfully, otherwise `None`.
+        """
         try:
             result = subprocess.run(command, shell=True, capture_output=True, text=True, check=True)
             return result.stdout.strip()
         except subprocess.CalledProcessError as e:
-            self.logger.error(f"Shell command '{command}' failed: {e}")
+            self.logger.error(f"Shell command '{command_str}' failed (code {e.returncode}): {e.stderr.strip()}")
         except FileNotFoundError:
             self.logger.error(f"Command not found: {command}")
 
@@ -188,7 +207,7 @@ class PiSystemInfo(object):
         return float(result) if result is not None else result
 
     def get_cpu_core_frequency(self, unit: str = 'MHz') -> Optional[int]:
-        """Returns CPU frequency info in specified units (Hz, KHz, MHz or GHz).
+        """Retrieves CPU frequency info in specified units (Hz, KHz, MHz or GHz).
 
         Args:
             unit: The desired unit for the frequency (Hz, KHz, MHz, GHz). Defaults to 'MHz'.
@@ -222,10 +241,10 @@ class PiSystemInfo(object):
         return self.__get_shell_cmd_output(command)
 
     def get_cpu_cache_sizes(self) -> Optional[str]:
-        """Calls the lscpu command and returns a dictionary containing the sizes of L1d, L1i, L2 caches in KiB.
+        """Retrieves CPU cache sizes using the lscpu command.
 
         Returns:
-            A dictionary {L1d: size, L1i: size, L2: size}, where size is a string, or None if command fails.
+            A dictionary {L1d: size, L1i: size, L2: size}, where size is a string representing value in KiB, or None if command fails.
         """
         command = "lscpu"
         output = self.__get_shell_cmd_output(command)
@@ -243,7 +262,7 @@ class PiSystemInfo(object):
         return cache_sizes
 
     def get_ram_info(self, unit: str = 'm') -> Optional[Dict[str, Optional[str]]]:
-        """Returns RAM info in specified units (b, k, m, g). Uses a safer approach.
+        """Retrieves RAM info in specified units (b, k, m, g). Uses a safer approach.
 
         Return:
             The RAM info dict with total, used, free, cache and available memory volume in passed unit.
@@ -272,7 +291,7 @@ class PiSystemInfo(object):
             return None
 
     def get_disk_usage_info(self) -> Optional[List[List[str]]]:
-        """Returns disk usage info in human readable format.
+        """Retrieves disk usage info in human readable format.
 
         Return:
             The Disk info dict with filesystem, size, used, available, use percent and mounted on fields.
@@ -300,7 +319,7 @@ class PiSystemInfo(object):
             return None
 
     def get_running_process_info(self) -> Optional[List[List[str]]]:
-        """Returns info about running processes in system.
+        """Retrieves info about running processes in system.
 
         Return:
             The Processes info dict with user, process id, cpu and memory use percent, command and started on fields.
@@ -331,7 +350,7 @@ class PiSystemInfo(object):
             return None
 
     def get_available_wifi_networks(self) -> Optional[List[List[str]]]:
-        """Returns info about available WiFi networks.
+        """Retrieves info about available WiFi networks.
 
         Return:
             The WiFi Networks info dict with ssid, bssid, mode, channel, rate, signal, bars and security fields.
