@@ -8,7 +8,7 @@ from flask import Flask, render_template
 from flask_caching import Cache
 
 from libs.pi_system_info import PiSystemInfo
-from libs.logging_utils import get_logger
+from libs.log_utils import LoggerSingleton
 
 file_path = Path(__file__).resolve()
 script_name = file_path.name
@@ -28,18 +28,16 @@ TEXT_RED_COLOR = os.getenv("TEXT_RED_COLOR", "#CC0000")
 
 TEXT_DATETIME_FORMAT = os.getenv("TEXT_DATETIME_FORMAT", "%d-%b-%Y, %H : %M : %S")
 
-LOGS_PATH = Path(os.getenv("LOGS_PATH", "./logs"))
-if not LOGS_PATH.exists():
-    LOGS_PATH.mkdir()
-LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
-LOG_MSG_FORMAT = os.getenv("LOG_MSG_FORMAT", "%(asctime)s : %(levelname)s : %(module)s : %(funcName)s : %(lineno)s : %(message)s")
-LOG_DATETIME_FORMAT = os.getenv("LOG_DATETIME_FORMAT", "%H:%M:%S")
-LOG_FILENAME = LOGS_PATH / (time_prefix + '_' + script_name.replace('.py', '.log'))
-logger = get_logger(LOG_LEVEL, LOG_MSG_FORMAT, LOG_DATETIME_FORMAT, LOG_FILENAME)
+logger = LoggerSingleton(
+    log_dir=Path(os.getenv("LOGS_PATH", "logs")),
+    log_file=script_name.replace('.py', '.log'),
+    level=os.getenv("LOG_LEVEL"),
+    msg_format=os.getenv("LOG_MSG_FORMAT"),
+    date_format=os.getenv("LOG_DATETIME_FORMAT"),
+    colored=True
+).get_logger()
 
-pi_sys_info = PiSystemInfo(
-    logger=logger
-)
+pi_sys_info = PiSystemInfo(logger=logger)
 
 config = {
     'CACHE_TYPE': 'SimpleCache',
