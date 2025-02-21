@@ -26,7 +26,7 @@ TEXT_DATETIME_FORMAT = os.getenv("TEXT_DATETIME_FORMAT", "%d-%b-%Y, %H : %M : %S
 
 logger = LoggerSingleton(
     log_dir=Path(os.getenv("LOGS_PATH", "logs")),
-    log_file='pi_system_info_server.log',
+    log_file=os.getenv("LOG_FILENAME"),
     level=os.getenv("LOG_LEVEL"),
     msg_format=os.getenv("LOG_MSG_FORMAT"),
     date_format=os.getenv("LOG_DATETIME_FORMAT"),

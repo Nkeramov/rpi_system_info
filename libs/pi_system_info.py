@@ -5,14 +5,10 @@ import subprocess
 from datetime import datetime
 from typing import List, Dict, Tuple, Optional
 
-class PiSystemInfo(object):
+from .cls_utils import Singleton
+from .log_utils import LoggerSingleton
 
-    __instance = None
-
-    def __new__(cls, *args, **kwargs):
-        if cls.__instance is None:
-            cls.__instance = super(PiSystemInfo, cls).__new__(cls)
-        return cls.__instance
+class PiSystemInfo(metaclass=Singleton):
 
     def __init__(self, logger: logging.Logger):
         self.logger = logger
@@ -270,12 +266,10 @@ class PiSystemInfo(object):
         if unit not in ['b', 'k', 'm', 'g']:
             logger.error(f"Requested unknown ram volume unit: {unit}")
             return None
-
         command = f"free -{unit}"
         output = self.__get_shell_cmd_output(command)
         if output is None:
             return None
-
         try:
             lines = output.splitlines()
             fields = lines[1].split()
@@ -382,29 +376,34 @@ class PiSystemInfo(object):
             return None
 
 
-def get_console_logger() -> logging.Logger:
-    logger = logging.getLogger()
-    logger.setLevel(logging.DEBUG)
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.DEBUG)
-    formatter = logging.Formatter(fmt='%(asctime)s - %(levelname)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
-    console_handler.setFormatter(formatter)
-    logger.addHandler(console_handler)
-    return logger
-
-
 if __name__ == "__main__":
-    logger = get_console_logger()
+    logger = LoggerSingleton(
+        level="DEBUG",
+        msg_format='%(asctime)s - %(levelname)s - %(message)s',
+        date_format='%Y-%m-%d %H:%M:%S',
+        colored=True
+    ).get_logger()
     pi_sys_info = PiSystemInfo(logger)
     try:
         logger.info(f"Model: {pi_sys_info.get_model()}")
-        logger.info(f"IP address: {pi_sys_info.get_ip_address('eth0')}")
-        logger.info(f"MAC address: {pi_sys_info.get_mac_address('eth0')}")
+        logger.info(f"OS: {pi_sys_info.get_os_name()}")
+        for interface in ['eth0', 'wlan0']:
+            mac_address = pi_sys_info.get_mac_address(interface)
+            ip_address = pi_sys_info.get_ip_address(interface)
+            logger.info(f"{interface} interface: MAC address {mac_address}, IP address {ip_address}")
         while True:
-            logger.info(f"CPU: temperature {pi_sys_info.get_cpu_temperature()} \xb0C, "
-                        f"frequency {pi_sys_info.get_cpu_core_frequency()} MHz, usage {pi_sys_info.get_cpu_usage()}%")
-            ram_info = pi_sys_info.get_ram_info()
-            logger.info(f"RAM: total {ram_info['total']} Mb, used {ram_info['used']} Mb, free {ram_info['free']} Mb")
+            try:
+                cpu_temp = pi_sys_info.get_cpu_temperature()
+                cpu_freq = pi_sys_info.get_cpu_core_frequency()
+                cpu_usage = pi_sys_info.get_cpu_usage()
+                ram_info = pi_sys_info.get_ram_info()
+                logger.info(f"CPU: temperature {cpu_temp} \xb0C, frequency {cpu_freq} MHz, usage {cpu_usage}%")
+                logger.info(f"RAM: total {ram_info['total']} Mb, used {ram_info['used']} Mb, free {ram_info['free']} Mb, "
+                            f"cache {ram_info['cache']} Mb, available {ram_info['available']} Mb")
+            except Exception as e:
+                logger.exception("Error during system info retrieval: {e}")
             time.sleep(2)
     except KeyboardInterrupt:
-        logger.info("Stopped...")
+        logger.info("Stopped by user")
+    except Exception as e:
+        logger.exception("Unhandled exception in main loop: {e}")
