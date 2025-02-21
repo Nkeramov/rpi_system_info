@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>{{ action }} in progress</title>
+        <link rel="icon" type="image/png" href="static/images/favicon.png">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="System information of Raspberry Pi">
+        <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="static/css/normalize.css">
+        <link rel="stylesheet" href="static/css/skeleton.css">
+        <link rel="stylesheet" href="static/css/styles.css">
+        <style>
+            .error-code {
+                font-size: 6.0rem;
+                color: #FF8C00;
+                text-align: center;
+            }
+            .error-message {
+                font-size: 3.0rem;
+                color: #00FF40;   
+                text-align: center;         
+            }
+            .redirect-message {
+                font-size: 2.0rem;
+                color: #00FF40;   
+                text-align: center;    
+            }
+            a {
+                text-decoration: none;
+                color: #FFD700
+            }
+            .redirect-message #countdown { 
+                font-weight: bold;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="row">
+                <a href="{{index_url}}">
+                    <div class="two columns">
+                        <img src="static/images/logo.png" style="width:75px">
+                    </div>
+                    <div class="nine columns title">
+                        <h3>{{title}}</h3>
+                    </div>
+                </a>
+            </div>
+            <div class="row">
+                <p class="error-code">Error code: {{error_code}}<p>
+                <p class="error-message">{{error_message}}<p>
+                <p class="redirect-message">You will be redirected to the <a href="{{index_url}}">main page</a> in <span id="countdown">{{ redirect_delay }}</span> seconds...</p>
+            </div>
+
+            <script>
+                var countdownElement = document.getElementById('countdown');
+                var countdownTime = parseInt(countdownElement.textContent);
+
+                function updateCountdown() {
+                    countdownTime--;
+                    countdownElement.textContent = countdownTime;
+    
+                    if (countdownTime <= 0) {
+                        window.location.href = "{{index_url}}";
+                    } else {
+                        setTimeout(updateCountdown, 1000);
+                    }
+                }
+                updateCountdown();
+            </script>
+    
+        </div>
+    </body>
+</html>

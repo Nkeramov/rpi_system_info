@@ -15,12 +15,14 @@
     <body>
         <div class="container">
             <div class="row">
-                <div class="two columns">
-                    <img src="static/images/logo.png" style="width:75px">
-                </div>
-                <div class="nine columns title">
-                    <h3>{{title}}</h3>
-                </div>
+                <a href="{{index_url}}">
+                    <div class="two columns">
+                        <img src="static/images/logo.png" style="width:75px">
+                    </div>
+                    <div class="nine columns title">
+                        <h3>{{title}}</h3>
+                    </div>
+                </a>
                 <div class="one column">
                     <div>
                         <a href="restart" onclick="return confirm('Do you wish to re-start your system ?')">
@@ -265,6 +267,14 @@
             </div>
             <div class="row t-row">
                 <div class="five columns t-caption">
+                    Network mask
+                </div>
+                <div class="seven columns t-row">
+                    {{ethernet_network_mask}}
+                </div>
+            </div>
+            <div class="row t-row">
+                <div class="five columns t-caption">
                     MAC address
                 </div>
                 <div class="seven columns">
@@ -285,6 +295,14 @@
                 </div>
                 <div class="seven columns t-row">
                     {{wifi_ip_address}}
+                </div>
+            </div>
+            <div class="row t-row">
+                <div class="five columns t-caption">
+                    Network mask
+                </div>
+                <div class="seven columns t-row">
+                    {{wifi_network_mask}}
                 </div>
             </div>
             <div class="row t-row">

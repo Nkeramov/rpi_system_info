@@ -101,17 +101,30 @@ class PiSystemInfo(metaclass=Singleton):
         address = self.__get_shell_cmd_output(command)
         return address.upper() if address is not None else None
 
-    def get_ip_address(self, interface: str = 'eth0') -> Optional[str]:
-        """Retrieves the IP address for a specified network interface.
+    def get_ip_info(self, interface: str = 'eth0') -> Optional[Dict[str, Optional[str]]]:
+        """Retrieves the IP information for a specified network interface.
 
         Args:
             interface: The network interface name (default: 'eth0').
 
         Returns:
-            The IP address, or None if the command fails or the interface is not found.
+            The IP info dict with IP address, network mask, broadcast IP address,
+            or None if the command fails or the interface is not connected.
         """
-        command = f"ifconfig {interface} | grep 'inet ' | awk '{{print $2}}'"
-        return self.__get_shell_cmd_output(command)
+        command = f"ifconfig {interface} | grep 'inet '"
+        output = self.__get_shell_cmd_output(command)
+        if output is None:
+            return None
+        try:
+            fields = output.split()
+            return {
+                'ip': fields[1],
+                'mask': fields[3],
+                'broascast': fields[5],
+            }
+        except (IndexError, ValueError):
+            logger.error(f"Failed to parse 'ifconfig' command output: {output}")
+            return None
 
     def get_bluetooth_mac_address(self) -> Optional[str]:
         """Retrieves the MAC address for the Bluetooth interface.
@@ -389,7 +402,7 @@ if __name__ == "__main__":
         logger.info(f"OS: {pi_sys_info.get_os_name()}")
         for interface in ['eth0', 'wlan0']:
             mac_address = pi_sys_info.get_mac_address(interface)
-            ip_address = pi_sys_info.get_ip_address(interface)
+            ip_address = pi_sys_info.get_ip_info(interface)['ip']
             logger.info(f"{interface} interface: MAC address {mac_address}, IP address {ip_address}")
         while True:
             try:

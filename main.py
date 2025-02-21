@@ -53,7 +53,7 @@ app.logger.setLevel(logger.level)
 @cache.cached(timeout=INDEX_PAGE_CACHE_TIMEOUT)
 def index(logger=logger):
     logger.info('Request index.html')
-    return render_template("index.html", title='Raspberry Pi System Info')
+    return render_template("index.html", title='Raspberry Pi System Info', index_url=url_for('index'))
 
 
 @app.route('/restart')
@@ -61,7 +61,7 @@ def restart(logger=logger):
     flash("Rebooting... please wait.<br>This will take approx. one minute.", 'info')
     logger.info('Restart initiated from web interface')
     subprocess.Popen(["sudo", "reboot"])
-    return render_template('system_action_pending.html',  title='Raspberry Pi System Info', action="Restart")
+    return render_template('system_action_pending.html',  title='Raspberry Pi System Info', index_url=url_for('index'), action="Restart")
 
 
 @app.route('/shutdown')
@@ -69,7 +69,17 @@ def shutdown(logger=logger):
     flash("Shutting down.<br>When the LEDs on the board stop flashing, it should be safe to unplug your Raspberry Pi.", 'info')
     logger.info('Shutdown initiated from web interface')
     subprocess.Popen(["sudo", "halt"])
-    return render_template('system_action_pending.html',  title='Raspberry Pi System Info', action="Shutdown")
+    return render_template('system_action_pending.html',  title='Raspberry Pi System Info',  index_url=url_for('index'), action="Shutdown")
+
+
+@app.errorhandler(404)
+def page_not_found_error(error):
+    return render_template('error.html',  title='Raspberry Pi System Info', error_code="404", error_message="Page not found", redirect_delay=5, index_url=url_for('index')), 404
+
+
+@app.errorhandler(500)
+def internal_server_error(error):
+    return render_template('error.html',  title='Raspberry Pi System Info', error_code="500", error_message="Internal server error", redirect_delay=5, index_url=url_for('index')), 500
 
 
 @app.context_processor
@@ -169,9 +179,15 @@ def ram_info(logger=logger):
 
 
 @app.context_processor
-def ethernet_ip_address(logger=logger):
-    address = pi_sys_info.get_ip_address('eth0')
-    return dict(ethernet_ip_address=address if address is not None and len(address) > 0 else 'Not connected')
+def ethernet_ip_info(logger=logger):
+    ip_info = pi_sys_info.get_ip_info('eth0')
+    default_str = 'Not connected'
+    address = ip_info.get('ip', '')
+    mask = ip_info.get('mask', '')
+    return dict(
+        ethernet_ip_address=address if len(address) > 0 else default_str,
+        ethernet_network_mask=mask if len(mask) > 0 else default_str
+    )
 
 
 @app.context_processor
@@ -179,10 +195,17 @@ def ethernet_mac_address(logger=logger):
     address = pi_sys_info.get_mac_address('eth0')
     return dict(ethernet_mac_address=address if address is not None and len(address) > 0 else 'Unknown')
 
+
 @app.context_processor
 def wifi_ip_address(logger=logger):
-    address = pi_sys_info.get_ip_address('wlan0')
-    return dict(wifi_ip_address=address if address is not None and len(address) > 0 else 'Not connected')
+    ip_info = pi_sys_info.get_ip_info('wlan0')
+    default_str = 'Not connected'
+    address = ip_info.get('ip', '')
+    mask = ip_info.get('mask', '')
+    return dict(
+        wifi_ip_address=address if len(address) > 0 else default_str,
+        wifi_network_mask=mask if len(mask) > 0 else default_str
+    )
 
 
 @app.context_processor
