@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>{{ action }} in progress</title>
+        <link rel="icon" type="image/png" href="static/images/favicon.png">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="System information of Raspberry Pi">
+        <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="static/css/normalize.css">
+        <link rel="stylesheet" href="static/css/skeleton.css">
+        <link rel="stylesheet" href="static/css/styles.css">
+        <style>
+            .flashes {
+                margin-top: 75px;
+            }
+            .alert {
+                padding: 10px;
+                margin-bottom: 15px;
+                border: 2px solid transparent;
+                border-radius: 7px;
+            }
+            .alert-info {
+                color: #FF8C00;
+                border-color: #FF8C00;
+            }
+            li {
+                list-style-type: none;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="row">
+                <div class="two columns">
+                    <img src="static/images/logo.png" style="width:75px">
+                </div>
+                <div class="ten columns title">
+                    <h3>{{title}}</h3>
+                </div>
+            </div>
+            <div class="row">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <ul class="flashes">
+                            {% for category, message in messages %}
+                                <li class="alert alert-{{ category }}">{{ message|safe }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                {% endwith %}
+                <p>Please wait while the system is {{ action|lower }}ing.</p>
+                <p>This page will not automatically refresh. You will need to manually reconnect to the system after a restart.</p>
+            </div>
+        </div>
+    </body>
+</html>

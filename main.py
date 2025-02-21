@@ -1,10 +1,10 @@
 import os
-import logging
+import subprocess
 from pathlib import Path
 from datetime import datetime
 from dotenv import load_dotenv
 
-from flask import Flask, render_template
+from flask import Flask, render_template, redirect, url_for, flash
 from flask_caching import Cache
 
 from libs.pi_system_info import PiSystemInfo
@@ -36,8 +36,9 @@ logger = LoggerSingleton(
 pi_sys_info = PiSystemInfo(logger=logger)
 
 config = {
-    'CACHE_TYPE': 'SimpleCache',
-    "CACHE_DEFAULT_TIMEOUT": 300
+    "CACHE_TYPE": "SimpleCache",
+    "CACHE_DEFAULT_TIMEOUT": 300,
+    "SECRET_KEY": "pi_system'info"
 }
 
 app = Flask(__name__)
@@ -57,14 +58,18 @@ def index(logger=logger):
 
 @app.route('/restart')
 def restart(logger=logger):
-    logger.info('Restart')
-    os.system('sudo reboot now')
+    flash("Rebooting... please wait.<br>This will take approx. one minute.", 'info')
+    logger.info('Restart initiated from web interface')
+    subprocess.Popen(["sudo", "reboot"])
+    return render_template('system_action_pending.html',  title='Raspberry Pi System Info', action="Restart")
 
 
 @app.route('/shutdown')
 def shutdown(logger=logger):
-    logger.info('Shutdown')
-    os.system('sudo stutdown now')
+    flash("Shutting down.<br>When the LEDs on the board stop flashing, it should be safe to unplug your Raspberry Pi.", 'info')
+    logger.info('Shutdown initiated from web interface')
+    subprocess.Popen(["sudo", "halt"])
+    return render_template('system_action_pending.html',  title='Raspberry Pi System Info', action="Shutdown")
 
 
 @app.context_processor
