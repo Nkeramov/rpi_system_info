@@ -3,6 +3,7 @@ import time
 import logging
 import subprocess
 from datetime import datetime
+from functools import cached_property
 from typing import List, Dict, Tuple, Optional
 
 from .cls_utils import Singleton
@@ -42,7 +43,8 @@ class PiSystemInfo(metaclass=Singleton):
         except FileNotFoundError:
             self.logger.error(f"Command not found: {command}")
 
-    def get_hostname(self) -> Optional[str]:
+    @cached_property
+    def hostname(self) -> Optional[str]:
         """Retrieves the hostname using the 'hostname' command.
 
         Returns:
@@ -51,7 +53,8 @@ class PiSystemInfo(metaclass=Singleton):
         command = "hostname"
         return self.__get_shell_cmd_output(command)
 
-    def get_model(self) -> Optional[str]:
+    @cached_property
+    def model(self) -> Optional[str]:
         """Retrieves the system model from /sys/firmware/devicetree/base/model.
 
         Returns:
@@ -60,7 +63,8 @@ class PiSystemInfo(metaclass=Singleton):
         command = "cat /sys/firmware/devicetree/base/model"
         return self.__get_shell_cmd_output(command)
 
-    def get_os_name(self) -> Optional[str]:
+    @cached_property
+    def os_name(self) -> Optional[str]:
         """Retrieves the pretty OS name from /etc/*-release.
 
         Returns:
@@ -69,74 +73,8 @@ class PiSystemInfo(metaclass=Singleton):
         command = "cat /etc/*-release | grep PRETTY_NAME | cut -d= -f2"
         return self.__get_shell_cmd_output(command).strip('"')
 
-    def get_uptime_since(self) -> Optional[datetime]:
-        """Retrieves the system uptime since boot, in YYYY-MM-DD HH:MM:SS format using 'uptime -s'.
-
-        Returns:
-            The uptime since boot, or None if the command fails.
-        """
-        command = "uptime -s"
-        uptime_str = self.__get_shell_cmd_output(command)
-        return datetime.strptime(uptime_str, "%Y-%m-%d %H:%M:%S")
-
-    def get_uptime_pretty(self) -> Optional[str]:
-        """Retrieves the system uptime in a human-readable format using 'uptime -p'.
-
-        Returns:
-            The pretty uptime, or None if the command fails.
-        """
-        command = "uptime -p"
-        return self.__get_shell_cmd_output(command)
-
-    def get_mac_address(self, interface='eth0') -> Optional[str]:
-        """Retrieves the MAC address for a specified network interface.
-
-        Args:
-            interface: The network interface name (default: 'eth0').
-
-        Returns:
-            The MAC address, or None if the command fails or the interface is not found.
-        """
-        command = f"cat /sys/class/net/{interface}/address"
-        address = self.__get_shell_cmd_output(command)
-        return address.upper() if address is not None else None
-
-    def get_ip_info(self, interface: str = 'eth0') -> Optional[Dict[str, Optional[str]]]:
-        """Retrieves the IP information for a specified network interface.
-
-        Args:
-            interface: The network interface name (default: 'eth0').
-
-        Returns:
-            The IP info dict with IP address, network mask, broadcast IP address,
-            or None if the command fails or the interface is not connected.
-        """
-        command = f"ifconfig {interface} | grep 'inet '"
-        output = self.__get_shell_cmd_output(command)
-        if output is None:
-            return None
-        try:
-            fields = output.split()
-            return {
-                'ip': fields[1],
-                'mask': fields[3],
-                'broascast': fields[5],
-            }
-        except (IndexError, ValueError):
-            logger.error(f"Failed to parse 'ifconfig' command output: {output}")
-            return None
-
-    def get_bluetooth_mac_address(self) -> Optional[str]:
-        """Retrieves the MAC address for the Bluetooth interface.
-
-        Returns:
-            The MAC address, or None if the command fails or the interface is not found.
-        """
-        command = f"hcitool dev"
-        address = self.__get_shell_cmd_output(command).split('\n')[1].split()[1]
-        return address.upper() if address is not None else None
-
-    def get_cpu_model_name(self) -> Optional[str]:
+    @cached_property
+    def cpu_model_name(self) -> Optional[str]:
         """Retrieves the CPU model name from /proc/cpuinfo.
 
         Returns:
@@ -149,7 +87,8 @@ class PiSystemInfo(metaclass=Singleton):
             model = self.__get_shell_cmd_output(command)
         return model
 
-    def get_cpu_hardware_type(self) -> Optional[str]:
+    @cached_property
+    def cpu_hardware_type(self) -> Optional[str]:
         """Retrieves the CPU hardware type from /proc/cpuinfo.
 
         Returns:
@@ -158,7 +97,8 @@ class PiSystemInfo(metaclass=Singleton):
         command = "cat /proc/cpuinfo | grep 'Hardware' | cut -d: -f2"
         return self.__get_shell_cmd_output(command)
 
-    def get_cpu_revision(self) -> Optional[str]:
+    @cached_property
+    def cpu_revision(self) -> Optional[str]:
         """Retrieves the CPU revision from /proc/cpuinfo.
 
         Returns:
@@ -167,7 +107,8 @@ class PiSystemInfo(metaclass=Singleton):
         command = "cat /proc/cpuinfo | grep 'Revision' | cut -d: -f2"
         return self.__get_shell_cmd_output(command)
 
-    def get_cpu_serial_number(self) -> Optional[str]:
+    @cached_property
+    def cpu_serial_number(self) -> Optional[str]:
         """Retrieves the CPU serial number from /proc/cpuinfo.
 
         Returns:
@@ -176,7 +117,8 @@ class PiSystemInfo(metaclass=Singleton):
         command = "cat /proc/cpuinfo | grep 'Serial' | cut -d: -f2"
         return self.__get_shell_cmd_output(command)
 
-    def get_cpu_architecture(self) -> Optional[str]:
+    @cached_property
+    def cpu_architecture(self) -> Optional[str]:
         """Retrieves the CPU architecture from lscpu.
 
         Returns:
@@ -185,7 +127,8 @@ class PiSystemInfo(metaclass=Singleton):
         command = "lscpu | grep 'Architecture' | cut -d: -f2"
         return self.__get_shell_cmd_output(command)
 
-    def get_cpu_core_count(self) -> Optional[int]:
+    @cached_property
+    def cpu_core_count(self) -> Optional[int]:
         """Retrieves the number of CPU cores using 'nproc'.
 
         Returns:
@@ -194,6 +137,28 @@ class PiSystemInfo(metaclass=Singleton):
         command = "nproc"
         result = self.__get_shell_cmd_output(command)
         return int(result) if result is not None else result
+
+    @cached_property
+    def cpu_cache_sizes(self) -> Optional[str]:
+        """Retrieves CPU cache sizes using the lscpu command.
+
+        Returns:
+            A dictionary {L1d: size, L1i: size, L2: size}, where size is a string representing value in KiB, or None if command fails.
+        """
+        command = "lscpu"
+        output = self.__get_shell_cmd_output(command)
+        if output is None:
+            return None
+        cache_types = ["L1d", "L1i", "L2"]
+        cache_sizes = {cache: "" for cache in cache_types}
+        lines = output.splitlines()
+        for line in lines:
+            for cache in cache_types:
+                match = re.match(fr"{cache} cache:\s*(\S+)", line)
+                if match:
+                    cache_sizes[cache] = match.group(1)
+                    continue
+        return cache_sizes
 
     def get_cpu_core_voltage(self) -> Optional[float]:
         """Retrieves the CPU core voltage using 'vcgencmd'.
@@ -249,27 +214,6 @@ class PiSystemInfo(metaclass=Singleton):
         command = "top -b -n2 | grep 'Cpu(s)'| tail -n 1 | awk '{print $2 + $4 }'"
         return self.__get_shell_cmd_output(command)
 
-    def get_cpu_cache_sizes(self) -> Optional[str]:
-        """Retrieves CPU cache sizes using the lscpu command.
-
-        Returns:
-            A dictionary {L1d: size, L1i: size, L2: size}, where size is a string representing value in KiB, or None if command fails.
-        """
-        command = "lscpu"
-        output = self.__get_shell_cmd_output(command)
-        if output is None:
-            return None
-        cache_types = ["L1d", "L1i", "L2"]
-        cache_sizes = {cache: "" for cache in cache_types}
-        lines = output.splitlines()
-        for line in lines:
-            for cache in cache_types:
-                match = re.match(fr"{cache} cache:\s*(\S+)", line)
-                if match:
-                    cache_sizes[cache] = match.group(1)
-                    continue
-        return cache_sizes
-
     def get_ram_info(self, unit: str = 'm') -> Optional[Dict[str, Optional[str]]]:
         """Retrieves RAM info in specified units (b, k, m, g). Uses a safer approach.
 
@@ -295,6 +239,86 @@ class PiSystemInfo(metaclass=Singleton):
             }
         except (IndexError, ValueError):
             logger.error(f"Failed to parse 'free' command output: {output}")
+            return None
+
+    def get_mac_address(self, interface='eth0') -> Optional[str]:
+        """Retrieves the MAC address for a specified network interface.
+
+        Args:
+            interface: The network interface name (default: 'eth0').
+
+        Returns:
+            The MAC address, or None if the command fails or the interface is not found.
+        """
+        command = f"cat /sys/class/net/{interface}/address"
+        address = self.__get_shell_cmd_output(command)
+        return address.upper() if address is not None else None
+
+    def get_ip_info(self, interface: str = 'eth0') -> Optional[Dict[str, Optional[str]]]:
+        """Retrieves the IP information for a specified network interface.
+
+        Args:
+            interface: The network interface name (default: 'eth0').
+
+        Returns:
+            The IP info dict with IP address, network mask, broadcast IP address,
+            or None if the command fails or the interface is not connected.
+        """
+        command = f"ifconfig {interface} | grep 'inet '"
+        output = self.__get_shell_cmd_output(command)
+        if output is None:
+            return None
+        try:
+            fields = output.split()
+            return {
+                'ip': fields[1],
+                'mask': fields[3],
+                'broascast': fields[5],
+            }
+        except (IndexError, ValueError):
+            logger.error(f"Failed to parse 'ifconfig' command output: {output}")
+            return None
+
+    def get_bluetooth_mac_address(self) -> Optional[str]:
+        """Retrieves the MAC address for the Bluetooth interface.
+
+        Returns:
+            The MAC address, or None if the command fails or the interface is not found.
+        """
+        command = f"hcitool dev"
+        address = self.__get_shell_cmd_output(command).split('\n')[1].split()[1]
+        return address.upper() if address is not None else None
+
+    def get_available_wifi_networks(self) -> Optional[List[List[str]]]:
+        """Retrieves info about available WiFi networks.
+
+        Return:
+            The WiFi Networks info dict with ssid, bssid, mode, channel, rate, signal, bars and security fields.
+            WiFi networks in list ordered by SSID.
+        """
+        command = "nmcli dev wifi"
+        output = self.__get_shell_cmd_output(command)
+        if output is None:
+            return None
+        try:
+            lines = output.splitlines()[1:]
+            result = []
+            for line in lines:
+                values = line.split()
+                k = values.index("Mbit/s")
+                result.append({
+                    'ssid': " ".join(values[1:k-3]),
+                    'bssid': values[0],
+                    'mode': values[k-3],
+                    'channel': values[k-2],
+                    'rate': " ".join(values[k-1:k+1]),
+                    'signal': values[k+1],
+                    'bars': values[k+2],
+                    'security': " ".join(values[k+3:])
+                })
+            return result
+        except IndexError:
+            logger.error(f"Failed to parse 'nmcli' command output: {output}")
             return None
 
     def get_disk_usage_info(self) -> Optional[List[List[str]]]:
@@ -356,37 +380,24 @@ class PiSystemInfo(metaclass=Singleton):
             logger.error(f"Failed to parse 'ps' command output: {output}")
             return None
 
-    def get_available_wifi_networks(self) -> Optional[List[List[str]]]:
-        """Retrieves info about available WiFi networks.
+    def get_uptime_since(self) -> Optional[datetime]:
+        """Retrieves the system uptime since boot, in YYYY-MM-DD HH:MM:SS format using 'uptime -s'.
 
-        Return:
-            The WiFi Networks info dict with ssid, bssid, mode, channel, rate, signal, bars and security fields.
-            WiFi networks in list ordered by SSID.
+        Returns:
+            The uptime since boot, or None if the command fails.
         """
-        command = "nmcli dev wifi"
-        output = self.__get_shell_cmd_output(command)
-        if output is None:
-            return None
-        try:
-            lines = output.splitlines()[1:]
-            result = []
-            for line in lines:
-                values = line.split()
-                k = values.index("Mbit/s")
-                result.append({
-                    'ssid': " ".join(values[1:k-3]),
-                    'bssid': values[0],
-                    'mode': values[k-3],
-                    'channel': values[k-2],
-                    'rate': " ".join(values[k-1:k+1]),
-                    'signal': values[k+1],
-                    'bars': values[k+2],
-                    'security': " ".join(values[k+3:])
-                })
-            return result
-        except IndexError:
-            logger.error(f"Failed to parse 'nmcli' command output: {output}")
-            return None
+        command = "uptime -s"
+        uptime_str = self.__get_shell_cmd_output(command)
+        return datetime.strptime(uptime_str, "%Y-%m-%d %H:%M:%S")
+
+    def get_uptime_pretty(self) -> Optional[str]:
+        """Retrieves the system uptime in a human-readable format using 'uptime -p'.
+
+        Returns:
+            The pretty uptime, or None if the command fails.
+        """
+        command = "uptime -p"
+        return self.__get_shell_cmd_output(command)
 
 
 if __name__ == "__main__":
