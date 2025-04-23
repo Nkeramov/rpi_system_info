@@ -2,6 +2,10 @@
 
 This project is a simple web server that displays system information about your Raspberry Pi.
 
+<div align="center">
+    <img src="title.png">
+</div>
+
 The information includes the board model, hostname, OS details, CPU (type, architecture, revision, serial number, number of cores, frequency, voltage, temperature, usage), RAM (total, used, free, cache, available), network interfaces (ip, mac), mounted disks and processes running in the system. 
 
 Information about disks and processes is displayed in tables. You can sort the tables by clicking on the column in the header

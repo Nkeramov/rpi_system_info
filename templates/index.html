@@ -384,14 +384,14 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for disk_item in disk_usage_info %}
+                        {% for disk in disk_usage_info %}
                         <tr>
-                            <td>{{disk_item.filesystem}}</td>
-                            <td>{{disk_item.size}}</td>
-                            <td>{{disk_item.used}}</td>
-                            <td>{{disk_item.available}}</td>
-                            <td>{{disk_item.use_percent}}</td>
-                            <td>{{disk_item.mounted_on}}</td>
+                            <td>{{disk.filesystem}}</td>
+                            <td>{{disk.size}}</td>
+                            <td>{{disk.used}}</td>
+                            <td>{{disk.available}}</td>
+                            <td>{{disk.use_percent}}</td>
+                            <td>{{disk.mounted_on}}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -418,14 +418,14 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for procinfo in running_process_info %}
+                            {% for process in running_process_info %}
                             <tr>
-                                <td>{{procinfo.user}}</td>
-                                <td>{{procinfo.process_id}}</td>
-                                <td>{{procinfo.cpu_use_percent}}</td>
-                                <td>{{procinfo.memory_use_percent}}</td>
-                                <td>{{procinfo.command}}</td>
-                                <td>{{procinfo.started_on}}</td>
+                                <td>{{process.user}}</td>
+                                <td>{{process.pid}}</td>
+                                <td>{{process.cpu_percent}}</td>
+                                <td>{{process.mem_percent}}</td>
+                                <td>{{process.command}}</td>
+                                <td>{{process.started_on}}</td>
                             </tr>
                             {% endfor %}
                         </tbody>

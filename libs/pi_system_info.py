@@ -9,6 +9,7 @@ from typing import List, Dict, Tuple, Optional
 from .cls_utils import Singleton
 from .log_utils import LoggerSingleton
 
+
 class PiSystemInfo(metaclass=Singleton):
 
     def __init__(self, logger: logging.Logger):
@@ -39,7 +40,7 @@ class PiSystemInfo(metaclass=Singleton):
             result = subprocess.run(command, shell=True, capture_output=True, text=True, check=True)
             return result.stdout.strip()
         except subprocess.CalledProcessError as e:
-            self.logger.error(f"Shell command '{command_str}' failed (code {e.returncode}): {e.stderr.strip()}")
+            self.logger.error(f"Shell command '{command}' failed (code {e.returncode}): {e.stderr.strip()}")
         except FileNotFoundError:
             self.logger.error(f"Command not found: {command}")
 
@@ -203,7 +204,7 @@ class PiSystemInfo(metaclass=Singleton):
                 case 'GHz':
                     return frequency // 10**9
                 case _:
-                    logger.error(f"Requested unknown cpu frequency unit: {unit}")
+                    self.logger.error(f"Requested unknown cpu frequency unit: {unit}")
 
     def get_cpu_usage(self) -> Optional[str]:
         """Retrieves the CPU usage using 'top'.
@@ -217,11 +218,11 @@ class PiSystemInfo(metaclass=Singleton):
     def get_ram_info(self, unit: str = 'm') -> Optional[Dict[str, Optional[str]]]:
         """Retrieves RAM info in specified units (b, k, m, g). Uses a safer approach.
 
-        Return:
+        Returns:
             The RAM info dict with total, used, free, cache and available memory volume in passed unit.
         """
         if unit not in ['b', 'k', 'm', 'g']:
-            logger.error(f"Requested unknown ram volume unit: {unit}")
+            self.logger.error(f"Requested unknown ram volume unit: {unit}")
             return None
         command = f"free -{unit}"
         output = self.__get_shell_cmd_output(command)
@@ -237,11 +238,11 @@ class PiSystemInfo(metaclass=Singleton):
                 'cache': fields[5],
                 'available': fields[6],
             }
-        except (IndexError, ValueError):
-            logger.error(f"Failed to parse 'free' command output: {output}")
-            return None
+        except (IndexError, ValueError) as e:
+            self.logger.error(f"Failed to parse 'free' command output: {output} ({e})")
+        return None
 
-    def get_mac_address(self, interface='eth0') -> Optional[str]:
+    def get_mac_address(self, interface: str='eth0') -> Optional[str]:
         """Retrieves the MAC address for a specified network interface.
 
         Args:
@@ -275,9 +276,9 @@ class PiSystemInfo(metaclass=Singleton):
                 'mask': fields[3],
                 'broascast': fields[5],
             }
-        except (IndexError, ValueError):
-            logger.error(f"Failed to parse 'ifconfig' command output: {output}")
-            return None
+        except (IndexError, ValueError) as e:
+            self.logger.error(f"Failed to parse 'ifconfig' command output: {output} ({e})")
+        return None
 
     def get_bluetooth_mac_address(self) -> Optional[str]:
         """Retrieves the MAC address for the Bluetooth interface.
@@ -290,11 +291,11 @@ class PiSystemInfo(metaclass=Singleton):
         return address.upper() if address is not None else None
 
     def get_available_wifi_networks(self) -> Optional[List[List[str]]]:
-        """Retrieves info about available WiFi networks.
+        """Retrieves info about available Wi-Fi networks.
 
-        Return:
-            The WiFi Networks info dict with ssid, bssid, mode, channel, rate, signal, bars and security fields.
-            WiFi networks in list ordered by SSID.
+        Returns:
+            The Wi-Fi Networks info dict with ssid, bssid, mode, channel, rate, signal, bars and security fields.
+            Wi-Fi networks in list ordered by SSID.
         """
         command = "nmcli dev wifi"
         output = self.__get_shell_cmd_output(command)
@@ -302,11 +303,14 @@ class PiSystemInfo(metaclass=Singleton):
             return None
         try:
             lines = output.splitlines()[1:]
-            result = []
+            if not lines:
+                self.logger.warning("No Wi-Fi netwworks information available")
+                return None
+            networks = []
             for line in lines:
                 values = line.split()
                 k = values.index("Mbit/s")
-                result.append({
+                networks.append({
                     'ssid': " ".join(values[1:k-3]),
                     'bssid': values[0],
                     'mode': values[k-3],
@@ -316,69 +320,78 @@ class PiSystemInfo(metaclass=Singleton):
                     'bars': values[k+2],
                     'security': " ".join(values[k+3:])
                 })
-            return result
-        except IndexError:
-            logger.error(f"Failed to parse 'nmcli' command output: {output}")
-            return None
+            return networks
+        except Exception as e:
+            self.logger.error(f"Unexpected error getting Wi-Fi networks info: {e}")
+        return None
 
     def get_disk_usage_info(self) -> Optional[List[List[str]]]:
         """Retrieves disk usage info in human readable format.
 
-        Return:
-            The Disk info dict with filesystem, size, used, available, use percent and mounted on fields.
+        Returns:
+            List of dictionaries with disk info or None if error occurs.
+            Each dict contains: filesystem, size, used, available, use_percent, mounted_on
         """
-        command = "df -h"
+        command = "df -h --output=source,size,used,avail,pcent,target | head -n 1; df -h | tail -n +2 | sort -k6"
         output = self.__get_shell_cmd_output(command)
         if output is None:
             return None
         try:
             lines = output.splitlines()[1:]
-            result = []
+            if not lines:
+                self.logger.warning("No disk usage information available")
+                return None
+            headers = ["filesystem", "size", "used", "available", "use_percent", "mounted_on"]
+            disks = []
             for line in lines:
                 values = line.split()
-                result.append({
-                    'filesystem': values[0],
-                    'size': values[1],
-                    'used': values[2],
-                    'available': values[3],
-                    'use_percent': values[4],
-                    'mounted_on': values[5]
-                })
-            return result
-        except IndexError:
-            logger.error(f"Failed to parse 'df' command output: {output}")
-            return None
+                values = line.split(maxsplit=5)
+                if len(values) != 6:
+                    continue
+                disk_info = dict(zip(headers, values))
+                disk_info["use_percent"] = disk_info["use_percent"].replace("%", "")
+                disks.append(disk_info)
+            return disks
+        except Exception as e:
+            self.logger.error(f"Unexpected error getting disk info: {e}")
+        return None
 
     def get_running_process_info(self) -> Optional[List[List[str]]]:
         """Retrieves info about running processes in system.
 
-        Return:
-            The Processes info dict with user, process id, cpu and memory use percent, command and started on fields.
+        Returns:
+            List of process dictionaries or None if error occurs.
+            Each dict contains: user, pid, cpu%, mem%, command, start_time
         """
-        command = "ps -Ao user,pid,pcpu,pmem,comm,lstart --sort=-pcpu"
+        command = "ps -eo user,pid,pcpu,pmem,comm,lstart --sort=-pcpu"
         output = self.__get_shell_cmd_output(command)
         if output is None:
             return None
         try:
             lines = output.splitlines()[1:]
-            result = []
+            if not lines:
+                self.logger.warning("No processes information available")
+                return None
+            processes = []
             for line in lines:
-                values = line.split()
-                cmd =  " ".join(values[4:-5])
-                datetime_string = " ".join(values[-4:])
-                datetime_object = datetime.strptime(datetime_string, "%b %d %H:%M:%S %Y")
-                result.append({
-                    'user': values[0],
-                    'process_id': values[1],
-                    'cpu_use_percent': values[2],
-                    'memory_use_percent': values[3],
-                    'command': cmd,
-                    'started_on': datetime_object
-                })
-            return result
-        except IndexError:
-            logger.error(f"Failed to parse 'ps' command output: {output}")
-            return None
+                try:
+                    parts = line.split()
+                    process_info = {
+                        'user': parts[0],
+                        'pid': parts[1],
+                        'cpu_percent': float(parts[2]),
+                        'mem_percent': float(parts[3]),
+                        'command': " ".join(parts[4:-5]),
+                        'started_on': datetime.strptime(" ".join(parts[-5:]), "%a %b %d %H:%M:%S %Y")
+                    }
+                    processes.append(process_info)
+                except (ValueError, IndexError) as e:
+                    self.logger.warning(f"Skipping malformed process line: {line} ({e})")
+                    continue
+            return processes
+        except Exception as e:
+            self.logger.error(f"Unexpected error getting process info: {e}")
+        return None
 
     def get_uptime_since(self) -> Optional[datetime]:
         """Retrieves the system uptime since boot, in YYYY-MM-DD HH:MM:SS format using 'uptime -s'.
@@ -425,9 +438,9 @@ if __name__ == "__main__":
                 logger.info(f"RAM: total {ram_info['total']} Mb, used {ram_info['used']} Mb, free {ram_info['free']} Mb, "
                             f"cache {ram_info['cache']} Mb, available {ram_info['available']} Mb")
             except Exception as e:
-                logger.exception("Error during system info retrieval: {e}")
+                logger.error("Error during system info retrieval: {e}")
             time.sleep(2)
     except KeyboardInterrupt:
         logger.info("Stopped by user")
     except Exception as e:
-        logger.exception("Unhandled exception in main loop: {e}")
+        logger.error("Unhandled exception in main loop: {e}")

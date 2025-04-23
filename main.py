@@ -14,6 +14,7 @@ load_dotenv('.env')
 
 PORT = os.getenv("PORT", 8080)
 INDEX_PAGE_CACHE_TIMEOUT = int(os.getenv("INDEX_PAGE_CACHE_TIMEOUT", 10))
+INDEX_PAGE_TITLE = os.getenv("INDEX_PAGE_TITLE", 'Raspberry Pi System Info')
 
 CPU_ORANGE_TEMP_THRESHOLD = float(os.getenv("CPU_ORANGE_TEMP_THRESHOLD", 50))
 CPU_RED_TEMP_THRESHOLD = float(os.getenv("CPU_RED_TEMP_THRESHOLD", 60))
@@ -53,7 +54,7 @@ app.logger.setLevel(logger.level)
 @cache.cached(timeout=INDEX_PAGE_CACHE_TIMEOUT)
 def index(logger=logger):
     logger.info('Request index.html')
-    return render_template("index.html", title='Raspberry Pi System Info', index_url=url_for('index'))
+    return render_template("index.html", title=INDEX_PAGE_TITLE, index_url=url_for('index'))
 
 
 @app.route('/restart')
@@ -61,7 +62,7 @@ def restart(logger=logger):
     flash("Rebooting... please wait.<br>This will take approx. one minute.", 'info')
     logger.info('Restart initiated from web interface')
     subprocess.Popen(["sudo", "reboot"])
-    return render_template('system_action_pending.html',  title='Raspberry Pi System Info', index_url=url_for('index'), action="Restart")
+    return render_template('system_action_pending.html',  title=INDEX_PAGE_TITLE, index_url=url_for('index'), action="Restart")
 
 
 @app.route('/shutdown')
@@ -69,17 +70,19 @@ def shutdown(logger=logger):
     flash("Shutting down.<br>When the LEDs on the board stop flashing, it should be safe to unplug your Raspberry Pi.", 'info')
     logger.info('Shutdown initiated from web interface')
     subprocess.Popen(["sudo", "halt"])
-    return render_template('system_action_pending.html',  title='Raspberry Pi System Info',  index_url=url_for('index'), action="Shutdown")
+    return render_template('system_action_pending.html',  title=INDEX_PAGE_TITLE,  index_url=url_for('index'), action="Shutdown")
 
 
 @app.errorhandler(404)
 def page_not_found_error(error):
-    return render_template('error.html',  title='Raspberry Pi System Info', error_code="404", error_message="Page not found", redirect_delay=5, index_url=url_for('index')), 404
+    return render_template('error.html',  title=INDEX_PAGE_TITLE, error_code="404",
+        error_message="Page not found", redirect_delay=5, index_url=url_for('index')), 404
 
 
 @app.errorhandler(500)
 def internal_server_error(error):
-    return render_template('error.html',  title='Raspberry Pi System Info', error_code="500", error_message="Internal server error", redirect_delay=5, index_url=url_for('index')), 500
+    return render_template('error.html',  title=INDEX_PAGE_TITLE, error_code="500",
+        error_message="Internal server error", redirect_delay=5, index_url=url_for('index')), 500
 
 
 @app.context_processor
