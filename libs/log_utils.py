@@ -6,7 +6,7 @@ from logging import Logger
 from colorama import Fore, Style
 from typing import Optional, Dict, Any
 
-from .cls_utils import Singleton
+from cls_utils import Singleton
 
 
 class CustomColoredFormatter(logging.Formatter):
@@ -64,7 +64,7 @@ class LoggerSingleton(metaclass=Singleton):
 
     def __init__(self,
                  log_dir: Optional[Path] = None, log_file: Optional[str] = None, level: str = 'INFO',
-                 msg_format: str = DEFAULT_FORMAT, date_format: str = DEFAULT_DATE_FORMAT,
+                 msg_format: Optional[str] = DEFAULT_FORMAT, date_format: Optional[str] = DEFAULT_DATE_FORMAT,
                  colored: bool = False, max_size_mb: int = 10, keep: int = 10, **kwargs: Any):
         if not hasattr(self, '_initialized') or self.__allow_reinitialization:
             self._initialize_logger(log_dir=log_dir, log_file=log_file, level=level, msg_format=msg_format,
