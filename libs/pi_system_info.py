@@ -6,8 +6,8 @@ from datetime import datetime
 from functools import cached_property
 from typing import List, Dict, Tuple, Optional
 
-from .cls_utils import Singleton
-from .log_utils import LoggerSingleton
+from cls_utils import Singleton
+from log_utils import LoggerSingleton
 
 
 class PiSystemInfo(metaclass=Singleton):
@@ -416,14 +416,12 @@ class PiSystemInfo(metaclass=Singleton):
 if __name__ == "__main__":
     logger = LoggerSingleton(
         level="DEBUG",
-        msg_format='%(asctime)s - %(levelname)s - %(message)s',
-        date_format='%Y-%m-%d %H:%M:%S',
         colored=True
     ).get_logger()
     pi_sys_info = PiSystemInfo(logger)
     try:
-        logger.info(f"Model: {pi_sys_info.get_model()}")
-        logger.info(f"OS: {pi_sys_info.get_os_name()}")
+        logger.info(f"Model: {pi_sys_info.model}")
+        logger.info(f"OS: {pi_sys_info.os_name}")
         for interface in ['eth0', 'wlan0']:
             mac_address = pi_sys_info.get_mac_address(interface)
             ip_address = pi_sys_info.get_ip_info(interface)['ip']
@@ -443,4 +441,4 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         logger.info("Stopped by user")
     except Exception as e:
-        logger.error("Unhandled exception in main loop: {e}")
+        logger.error(f"Unhandled exception in main loop: {e}")
