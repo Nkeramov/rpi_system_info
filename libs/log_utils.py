@@ -6,7 +6,7 @@ from logging import Logger
 from colorama import Fore, Style
 from typing import Optional, Dict, Any
 
-from cls_utils import Singleton
+from .cls_utils import Singleton
 
 
 class CustomColoredFormatter(logging.Formatter):

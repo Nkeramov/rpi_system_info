@@ -6,8 +6,8 @@ from datetime import datetime
 from functools import cached_property
 from typing import List, Dict, Tuple, Optional
 
-from cls_utils import Singleton
-from log_utils import LoggerSingleton
+from .cls_utils import Singleton
+from .log_utils import LoggerSingleton
 
 
 class PiSystemInfo(metaclass=Singleton):
@@ -169,7 +169,12 @@ class PiSystemInfo(metaclass=Singleton):
         """
         command = "vcgencmd measure_volts| cut -d= -f2"
         result = self.__get_shell_cmd_output(command)
-        return float(result[:-1]) if result is not None else result
+        try:
+            if result is not None:
+                return float(result[:-1])
+        except (IndexError, ValueError) as e:
+            self.logger.error(f"Error while converting CPU voltage to float, voltage value: {result}")
+        return None
 
     def get_cpu_temperature(self) -> Optional[float]:
         """Retrieves the CPU temperature using 'vcgencmd'.
@@ -179,7 +184,12 @@ class PiSystemInfo(metaclass=Singleton):
         """
         command = "vcgencmd measure_temp | cut -d= -f2 | cut -d\\' -f1"
         result = self.__get_shell_cmd_output(command)
-        return float(result) if result is not None else result
+        try:
+            if result is not None:
+                return float(result)
+        except ValueError as e:
+            self.logger.error(f"Error while converting CPU temperature to float, temperature value: {result}")
+        return None
 
     def get_cpu_core_frequency(self, unit: str = 'MHz') -> Optional[int]:
         """Retrieves CPU frequency info in specified units (Hz, KHz, MHz or GHz).
@@ -193,18 +203,21 @@ class PiSystemInfo(metaclass=Singleton):
         command = "vcgencmd measure_clock arm | cut -d= -f2"
         result = self.__get_shell_cmd_output(command)
         if result is not None:
-            frequency = int(result)
-            match unit:
-                case 'Hz':
-                    return frequency
-                case 'KHz':
-                    return frequency // 10**3
-                case 'MHz':
-                    return frequency // 10**6
-                case 'GHz':
-                    return frequency // 10**9
-                case _:
-                    self.logger.error(f"Requested unknown cpu frequency unit: {unit}")
+            try:
+                frequency = int(result)
+                match unit:
+                    case 'Hz':
+                        return frequency
+                    case 'KHz':
+                        return frequency // 10**3
+                    case 'MHz':
+                        return frequency // 10**6
+                    case 'GHz':
+                        return frequency // 10**9
+                    case _:
+                        self.logger.error(f"Requested unknown CPU frequency unit: {unit}")
+            except ValueError as e:
+                self.logger.error(f"Error while converting CPU frequency to int, frequency value: {result}")
 
     def get_cpu_usage(self) -> Optional[str]:
         """Retrieves the CPU usage using 'top'.
@@ -287,8 +300,15 @@ class PiSystemInfo(metaclass=Singleton):
             The MAC address, or None if the command fails or the interface is not found.
         """
         command = f"hcitool dev"
-        address = self.__get_shell_cmd_output(command).split('\n')[1].split()[1]
-        return address.upper() if address is not None else None
+        address = self.__get_shell_cmd_output(command)
+        if address is None:
+            return None
+        try:
+                address = address.split('\n')[1].split()[1]
+                return address.upper()
+        except (IndexError, ValueError) as e:
+            self.logger.error(f"Failed to parse 'hcitool dev' command output: {address} ({e})")
+        return None
 
     def get_available_wifi_networks(self) -> Optional[List[List[str]]]:
         """Retrieves info about available Wi-Fi networks.

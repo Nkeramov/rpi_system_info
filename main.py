@@ -157,7 +157,8 @@ def cpu_cache_sizes(logger=logger):
 
 @app.context_processor
 def cpu_core_voltage(logger=logger):
-    return dict(cpu_core_voltage=f"{pi_sys_info.get_cpu_core_voltage(): .3f}")
+    voltage = pi_sys_info.get_cpu_core_voltage()
+    return dict(cpu_core_voltage=f"{voltage: .3f}" if voltage is not None else None)
 
 
 @app.context_processor
@@ -169,10 +170,11 @@ def cpu_usage(logger=logger):
 def cpu_temperature(logger=logger):
     temperature = pi_sys_info.get_cpu_temperature()
     color = TEXT_GREEN_COLOR
-    if CPU_ORANGE_TEMP_THRESHOLD < temperature < CPU_RED_TEMP_THRESHOLD:
-        color = TEXT_ORANGE_COLOR
-    elif temperature >= CPU_RED_TEMP_THRESHOLD:
-        color = TEXT_RED_COLOR
+    if temperature is not None:
+        if CPU_ORANGE_TEMP_THRESHOLD < temperature < CPU_RED_TEMP_THRESHOLD:
+            color = TEXT_ORANGE_COLOR
+        elif temperature >= CPU_RED_TEMP_THRESHOLD:
+            color = TEXT_RED_COLOR
     return dict(cpu_temperature={'temperature': temperature, 'color': color})
 
 
@@ -184,13 +186,16 @@ def ram_info(logger=logger):
 @app.context_processor
 def ethernet_ip_info(logger=logger):
     ip_info = pi_sys_info.get_ip_info('eth0')
-    default_str = 'Not connected'
-    address = ip_info.get('ip', '')
-    mask = ip_info.get('mask', '')
-    return dict(
-        ethernet_ip_address=address if len(address) > 0 else default_str,
-        ethernet_network_mask=mask if len(mask) > 0 else default_str
-    )
+    if ip_info is not None:
+        default_str = 'Not connected'
+        address = ip_info.get('ip', '')
+        mask = ip_info.get('mask', '')
+        return dict(
+            ethernet_ip_address=address if len(address) > 0 else default_str,
+            ethernet_network_mask=mask if len(mask) > 0 else default_str
+        )
+    else:
+        return dict(ethernet_ip_address=None, ethernet_network_mask=None)
 
 
 @app.context_processor
@@ -202,13 +207,17 @@ def ethernet_mac_address(logger=logger):
 @app.context_processor
 def wifi_ip_address(logger=logger):
     ip_info = pi_sys_info.get_ip_info('wlan0')
-    default_str = 'Not connected'
-    address = ip_info.get('ip', '')
-    mask = ip_info.get('mask', '')
-    return dict(
-        wifi_ip_address=address if len(address) > 0 else default_str,
-        wifi_network_mask=mask if len(mask) > 0 else default_str
-    )
+    if ip_info is not None:
+        default_str = 'Not connected'
+        address = ip_info.get('ip', '')
+        mask = ip_info.get('mask', '')
+        return dict(
+            wifi_ip_address=address if len(address) > 0 else default_str,
+            wifi_network_mask=mask if len(mask) > 0 else default_str
+        )
+    else:
+        return dict(wifi_ip_address=None, wifi_network_mask=None)
+
 
 
 @app.context_processor
