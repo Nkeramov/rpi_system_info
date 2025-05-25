@@ -264,9 +264,13 @@ class PiSystemInfo(metaclass=Singleton):
         Returns:
             The MAC address, or None if the command fails or the interface is not found.
         """
-        command = f"cat /sys/class/net/{interface}/address"
-        address = self.__get_shell_cmd_output(command)
-        return address.upper() if address is not None else None
+        if interface in os.listdir("/sys/class/net"):
+            command = f"cat /sys/class/net/{interface}/address"
+            address = self.__get_shell_cmd_output(command)
+            return address.upper()
+        else:
+            self.logger.error(f"Incorrect network interface: {interface}")
+        return None
 
     def get_ip_info(self, interface: str = 'eth0') -> Optional[Dict[str, Optional[str]]]:
         """Retrieves the IP information for a specified network interface.
@@ -278,19 +282,22 @@ class PiSystemInfo(metaclass=Singleton):
             The IP info dict with IP address, network mask, broadcast IP address,
             or None if the command fails or the interface is not connected.
         """
-        command = f"ifconfig {interface} | grep 'inet '"
-        output = self.__get_shell_cmd_output(command)
-        if output is None:
-            return None
-        try:
-            fields = output.split()
-            return {
-                'ip': fields[1],
-                'mask': fields[3],
-                'broascast': fields[5],
-            }
-        except (IndexError, ValueError) as e:
-            self.logger.error(f"Failed to parse 'ifconfig' command output: {output} ({e})")
+        if interface in os.listdir("/sys/class/net"):
+            command = f"ifconfig {interface} | grep 'inet '"
+            output = self.__get_shell_cmd_output(command)
+            if output is None:
+                return None
+            try:
+                fields = output.split()
+                return {
+                    'ip': fields[1],
+                    'mask': fields[3],
+                    'broadscast': fields[5],
+                }
+            except (IndexError, ValueError) as e:
+                self.logger.error(f"Failed to parse 'ifconfig' command output: {output} ({e})")
+        else:
+            self.logger.error(f"Incorrect network interface: {interface}")
         return None
 
     def get_bluetooth_mac_address(self) -> Optional[str]:
