@@ -3,6 +3,7 @@ import re
 import time
 import logging
 import subprocess
+from enum import Enum
 from datetime import datetime
 from functools import cached_property
 from typing import List, Dict, Tuple, Optional
@@ -12,6 +13,7 @@ from .log_utils import LoggerSingleton
 
 
 class PiInfo(metaclass=Singleton):
+    _NET_PATH = "/sys/class/net"
 
     def __init__(self, logger: logging.Logger):
         self.logger = logger
@@ -265,12 +267,15 @@ class PiInfo(metaclass=Singleton):
         Returns:
             The MAC address, or None if the command fails or the interface is not found.
         """
-        if interface in os.listdir("/sys/class/net"):
-            command = f"cat /sys/class/net/{interface}/address"
-            address = self.__get_shell_cmd_output(command)
-            return address.upper()
-        else:
-            self.logger.error(f"Incorrect network interface: {interface}")
+        try:
+            if interface in os.listdir(self._NET_PATH):
+                command = f"cat /sys/class/net/{interface}/address"
+                address = self.__get_shell_cmd_output(command)
+                return address.upper()
+            else:
+                self.logger.error(f"Incorrect network interface: {interface}")
+        except FileNotFoundError:
+            self.logger.error(f"Can not load network interface info from {self._NET_PATH}")
         return None
 
     def get_ip_info(self, interface: str = 'eth0') -> Optional[Dict[str, Optional[str]]]:
@@ -283,22 +288,25 @@ class PiInfo(metaclass=Singleton):
             The IP info dict with IP address, network mask, broadcast IP address,
             or None if the command fails or the interface is not connected.
         """
-        if interface in os.listdir("/sys/class/net"):
-            command = f"ifconfig {interface} | grep 'inet '"
-            output = self.__get_shell_cmd_output(command)
-            if output is None:
-                return None
-            try:
-                fields = output.split()
-                return {
-                    'ip': fields[1],
-                    'mask': fields[3],
-                    'broadscast': fields[5],
-                }
-            except (IndexError, ValueError) as e:
-                self.logger.error(f"Failed to parse 'ifconfig' command output: {output} ({e})")
-        else:
-            self.logger.error(f"Incorrect network interface: {interface}")
+        try:
+            if interface in os.listdir(self._NET_PATH):
+                command = f"ifconfig {interface} | grep 'inet '"
+                output = self.__get_shell_cmd_output(command)
+                if output is None:
+                    return None
+                try:
+                    fields = output.split()
+                    return {
+                        'ip': fields[1],
+                        'mask': fields[3],
+                        'broadscast': fields[5],
+                    }
+                except (IndexError, ValueError) as e:
+                    self.logger.error(f"Failed to parse 'ifconfig' command output: {output} ({e})")
+            else:
+                self.logger.error(f"Incorrect network interface: {interface}")
+        except FileNotFoundError:
+            self.logger.error(f"Can not load network interface info from {self._NET_PATH}")
         return None
 
     def get_bluetooth_mac_address(self) -> Optional[str]:
@@ -332,7 +340,7 @@ class PiInfo(metaclass=Singleton):
         try:
             lines = output.splitlines()[1:]
             if not lines:
-                self.logger.warning("No Wi-Fi netwworks information available")
+                self.logger.warning("No Wi-Fi networks information available")
                 return None
             networks = []
             for line in lines:
