@@ -17,3 +17,9 @@ Information about disks and processes is presented in the form of tables. You ca
 The web server is based on Flask framework. By default the application will run on port 8080. It can be changed in env file.
 
 Gunicorn is used to launch. Use run.sh to run project.
+
+## Ref
+
+- [Raspberry Pi hardware](https://www.raspberrypi.com/documentation/computers/raspberry-pi.html)
+- [Raspberry Pi revision codes](https://www.raspberrypi.com/documentation/computers/raspberry-pi.html#raspberry-pi-revision-codes)
+- [Rasperry Pi OS](https://www.raspberrypi.com/documentation/computers/os.html)
