@@ -86,88 +86,24 @@ def internal_server_error(error):
 
 
 @app.context_processor
-def pi_model_name(logger=logger):
-    return dict(pi_model_name=pi_info.model_name)
+def generic_board_info(logger=logger):
+    return dict(generic_board_info=
+        {
+            'model_name': pi_info.model_name,
+            'revision': pi_info.revision,
+            'serial_number': pi_info.serial_number,
+            'manufacturer': pi_info.manufacturer,
+            'os': pi_info.os_name,
+            'hostname': pi_info.hostname,
+            'system_time': datetime.now().strftime(TEXT_DATETIME_FORMAT),
+            'uptime_since': pi_info.get_uptime_since().strftime(TEXT_DATETIME_FORMAT),
+            'uptime_pretty': pi_info.get_uptime_pretty()
+        }
+    )
 
 
 @app.context_processor
-def pi_revision(logger=logger):
-    return dict(pi_revision=pi_info.revision)
-
-
-@app.context_processor
-def pi_serial_number(logger=logger):
-    return dict(pi_serial_number=pi_info.serial_number)
-
-
-@app.context_processor
-def pi_manufacturer(logger=logger):
-    return dict(pi_manufacturer=pi_info.manufacturer)
-
-
-@app.context_processor
-def pi_os(logger=logger):
-    return dict(pi_os=pi_info.os_name)
-
-
-@app.context_processor
-def pi_hostname(logger=logger):
-    return dict(pi_hostname=pi_info.hostname)
-
-
-@app.context_processor
-def uptime_since(logger=logger):
-    return dict(uptime_since=pi_info.get_uptime_since().strftime(TEXT_DATETIME_FORMAT))
-
-
-@app.context_processor
-def uptime_pretty(logger=logger):
-    return dict(uptime_pretty=pi_info.get_uptime_pretty())
-
-
-@app.context_processor
-def current_time(logger=logger):
-    return dict(current_time=datetime.now().strftime(TEXT_DATETIME_FORMAT))
-
-
-@app.context_processor
-def cpu_model(logger=logger):
-    return dict(cpu_model=pi_info.cpu_model)
-
-
-@app.context_processor
-def cpu_architecture(logger=logger):
-    return dict(cpu_architecture=pi_info.cpu_architecture)
-
-
-@app.context_processor
-def cpu_cores_count(logger=logger):
-    return dict(cpu_cores_count=pi_info.cpu_cores_count)
-
-
-@app.context_processor
-def cpu_core_frequency(logger=logger):
-    return dict(cpu_core_frequency=pi_info.get_cpu_core_frequency())
-
-
-@app.context_processor
-def cpu_cache_sizes(logger=logger):
-    return dict(cpu_cache_sizes=pi_info.cpu_cache_sizes)
-
-
-@app.context_processor
-def cpu_core_voltage(logger=logger):
-    voltage = pi_info.get_cpu_core_voltage()
-    return dict(cpu_core_voltage=f"{voltage: .3f}" if voltage is not None else None)
-
-
-@app.context_processor
-def cpu_usage(logger=logger):
-    return dict(cpu_usage=pi_info.get_cpu_usage())
-
-
-@app.context_processor
-def cpu_temperature(logger=logger):
+def cpu_details(logger=logger):
     temperature = pi_info.get_cpu_temperature()
     color = TEXT_GREEN_COLOR
     if temperature is not None:
@@ -175,21 +111,29 @@ def cpu_temperature(logger=logger):
             color = TEXT_ORANGE_COLOR
         elif temperature >= CPU_RED_TEMP_THRESHOLD:
             color = TEXT_RED_COLOR
-    return dict(cpu_temperature={'temperature': temperature, 'color': color})
+    voltage = pi_info.get_cpu_core_voltage()
+    return dict(cpu_details=
+        {
+            'model': pi_info.cpu_model,
+            'architecture': pi_info.cpu_architecture,
+            'cores_count': pi_info.cpu_cores_count,
+            'core_frequency': pi_info.get_cpu_core_frequency(),
+            'core_voltage': f"{voltage: .3f}" if voltage is not None else None,
+            'cache_sizes': pi_info.cpu_cache_sizes,
+            'usage': pi_info.get_cpu_usage(),
+            'temperature_value': temperature,
+            'temperature_color': color,
+        }
+    )
 
 
 @app.context_processor
-def memory_size(logger=logger):
-    return dict(memory_size=pi_info.memory_size)
+def ram_details(logger=logger):
+    return dict(ram_details=pi_info.get_ram_info())
 
 
 @app.context_processor
-def ram_info(logger=logger):
-    return dict(ram_info=pi_info.get_ram_info())
-
-
-@app.context_processor
-def ethernet_ip_info(logger=logger):
+def ethernet_ip_details(logger=logger):
     ip_info = pi_info.get_ip_info('eth0')
     if ip_info is not None:
         default_str = 'Not connected'
@@ -210,7 +154,7 @@ def ethernet_mac_address(logger=logger):
 
 
 @app.context_processor
-def wifi_ip_address(logger=logger):
+def wifi_ip_details(logger=logger):
     ip_info = pi_info.get_ip_info('wlan0')
     if ip_info is not None:
         default_str = 'Not connected'
@@ -222,7 +166,6 @@ def wifi_ip_address(logger=logger):
         )
     else:
         return dict(wifi_ip_address=None, wifi_network_mask=None)
-
 
 
 @app.context_processor
@@ -243,18 +186,18 @@ def available_wifi_networks(logger=logger):
 
 
 @app.context_processor
-def disk_usage_info(logger=logger):
-    return dict(disk_usage_info=pi_info.get_disk_usage_info())
+def disks_details(logger=logger):
+    return dict(disks_details=pi_info.get_disks_info())
 
 
 @app.context_processor
-def running_process_info(logger=logger):
-    return dict(running_process_info=pi_info.get_running_process_info())
+def processes_details(logger=logger):
+    return dict(processes_details=pi_info.get_processes_info())
 
 
 @app.context_processor
 def utility_processor(logger=logger):
-    def short_date(a,b,c):
+    def short_date(a, b, c):
         return u'{0}{1}, {2}'.format(a, b,c)
     return dict(short_date=short_date)
 

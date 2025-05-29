@@ -46,7 +46,7 @@
                     Model
                 </div>
                 <div class="seven columns">
-                    {{pi_model_name}}
+                    {{generic_board_info.model_name}}
                 </div>
             </div>
             <div class="row t-row">
@@ -54,7 +54,7 @@
                     Revision
                 </div>
                 <div class="seven columns">
-                    {{pi_revision}}
+                    {{generic_board_info.revision}}
                 </div>
             </div>
             <div class="row t-row">
@@ -62,7 +62,7 @@
                     Serial Number
                 </div>
                 <div class="seven columns">
-                    {{pi_serial_number}}
+                    {{generic_board_info.serial_number}}
                 </div>
             </div>
             <div class="row t-row">
@@ -70,7 +70,7 @@
                     Manufacturer
                 </div>
                 <div class="seven columns">
-                    {{pi_manufacturer}}
+                    {{generic_board_info.manufacturer}}
                 </div>
             </div>
             <div class="row t-row">
@@ -78,7 +78,7 @@
                     Operating System
                 </div>
                 <div class="seven columns">
-                    {{pi_os}}
+                    {{generic_board_info.os}}
                 </div>
             </div>
             <div class="row t-row">
@@ -86,7 +86,7 @@
                     Host Name
                 </div>
                 <div class="seven columns">
-                    {{pi_hostname}}
+                    {{generic_board_info.hostname}}
                 </div>
              </div>
              <div class="row t-row">
@@ -94,7 +94,7 @@
                     System Time
                 </div>
                 <div class="seven columns">
-                    {{current_time}}
+                    {{generic_board_info.system_time}}
                 </div>
             </div>
             <div class="row t-row">
@@ -102,7 +102,7 @@
                     Started on
                 </div>
                 <div class="seven columns">
-                    {{uptime_since}}
+                    {{generic_board_info.uptime_since}}
                 </div>
             </div>
             <div class="row t-row">
@@ -110,7 +110,7 @@
                     Uptime
                 </div>
                 <div class="seven columns">
-                    {{uptime_pretty}}
+                    {{generic_board_info.uptime_pretty}}
                 </div>
             </div>
             <div class="row t-header">
@@ -126,7 +126,7 @@
                     Model
                 </div>
                 <div class="seven columns">
-                    {{cpu_model}}
+                    {{cpu_details.model}}
                 </div>
             </div>
             <div class="row t-row">
@@ -134,7 +134,7 @@
                     Architecture
                 </div>
                 <div class="seven columns">
-                    {{cpu_architecture}}
+                    {{cpu_details.architecture}}
                 </div>
             </div>
             <div class="row t-row">
@@ -142,7 +142,7 @@
                     Cores Count
                 </div>
                 <div class="seven columns">
-                    {{cpu_cores_count}}
+                    {{cpu_details.cores_count}}
                 </div>
             </div>
             <div class="row t-row">
@@ -150,7 +150,7 @@
                     Core Frequency
                 </div>
                 <div class="seven columns">
-                    {{cpu_core_frequency}} MHz
+                    {{cpu_details.core_frequency}} MHz
                 </div>
             </div>
             <div class="row t-row">
@@ -158,15 +158,15 @@
                     Core Voltage
                 </div>
                 <div class="seven columns">
-                    {{cpu_core_voltage}} V
+                    {{cpu_details.core_voltage}} V
                 </div>
             </div>
             <div class="row t-row">
                 <div class="five columns t-caption">
                     Temperature
                 </div>
-                <div class="seven columns" style="color:{{cpu_temperature.color}}">
-                    {{cpu_temperature.temperature}} &#176;C
+                <div class="seven columns" style="color:{{cpu_details.temperature_color}}">
+                    {{cpu_details.temperature_value}} &#176;C
                 </div>
             </div>
             <div class="row t-row">
@@ -174,7 +174,7 @@
                     Usage
                 </div>
                 <div class="seven columns">
-                    {{cpu_usage}} %
+                    {{cpu_details.usage}} %
                 </div>
             </div>
             <div class="row t-row">
@@ -182,7 +182,7 @@
                     L1 Data Cache Size
                 </div>
                 <div class="seven columns">
-                    {{cpu_cache_sizes.L1d}} KiB
+                    {{cpu_details.cache_sizes.L1d}} KiB
                 </div>
             </div>
             <div class="row t-row">
@@ -190,7 +190,7 @@
                     L1 Instructions Cache Size
                 </div>
                 <div class="seven columns">
-                    {{cpu_cache_sizes.L1i}} KiB
+                    {{cpu_details.cache_sizes.L1i}} KiB
                 </div>
             </div>
             <div class="row t-row">
@@ -198,7 +198,7 @@
                     L2 Cache Size
                 </div>
                 <div class="seven columns">
-                    {{cpu_cache_sizes.L2}} KiB
+                    {{cpu_details.cache_sizes.L2}} KiB
                 </div>
             </div>
             <div class="row t-header">
@@ -211,10 +211,10 @@
             </div>
             <div class="row t-row">
                 <div class="five columns t-caption">
-                    Memory size
+                    Memory Size
                 </div>
                 <div class="seven columns t-row">
-                    {{memory_size}} MB
+                    {{ram_details.size}} MB
                 </div>
             </div>
             <div class="row t-row">
@@ -222,39 +222,39 @@
                     Total Memory
                 </div>
                 <div class="seven columns t-row">
-                    {{ram_info.total}} MB
+                    {{ram_details.total}} MB
                 </div>
             </div>
             <div class="row t-row">
                 <div class="five columns t-caption">
-                    Used memory
+                    Used Memory
                 </div>
                 <div class="seven columns">
-                    {{ram_info.used}} MB
+                    {{ram_details.used}} MB
                 </div>
             </div>
             <div class="row t-row">
                 <div class="five columns t-caption">
-                    Free memory
+                    Free Memory
                 </div>
                 <div class="seven columns">
-                    {{ram_info.free}} MB
+                    {{ram_details.free}} MB
                 </div>
             </div>
             <div class="row t-row">
                 <div class="five columns t-caption">
-                    Cache memory
+                    Cache Memory
                 </div>
                 <div class="seven columns">
-                    {{ram_info.cache}} MB
+                    {{ram_details.cache}} MB
                 </div>
             </div>
             <div class="row t-row">
                 <div class="five columns t-caption">
-                    Available memory
+                    Available Memory
                 </div>
                 <div class="seven columns">
-                    {{ram_info.available}} MB
+                    {{ram_details.available}} MB
                 </div>
             </div>
             <div class="row t-header">
@@ -376,7 +376,7 @@
                     <img src="static/images/storage.png" style="width:32px">
                 </div>
                 <div>
-                    <h5>Disk Details <span class="item-count"> ( {{ disk_usage_info | length}} ) </span></h5>
+                    <h5>Disks Details <span class="item-count"> ( {{ disks_details | length}} ) </span></h5>
                 </div>
             </div>
             <div>
@@ -392,7 +392,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for disk in disk_usage_info %}
+                        {% for disk in disks_details %}
                         <tr>
                             <td>{{disk.filesystem}}</td>
                             <td>{{disk.size}}</td>
@@ -410,7 +410,7 @@
                     <img src="static/images/processes.png" style="width:32px">
                 </div>
                     <div>
-                        <h5>Running Process Details <span class="item-count"> ( total {{ running_process_info | length}} ) </span></h5>
+                        <h5>Running Processes Details <span class="item-count"> ( total {{ processes_details | length}} ) </span></h5>
                     </div>
                 </div>
                 <div>
@@ -426,7 +426,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for process in running_process_info %}
+                            {% for process in processes_details %}
                             <tr>
                                 <td>{{process.user}}</td>
                                 <td>{{process.pid}}</td>

@@ -332,6 +332,7 @@ class PiInfo(metaclass=Singleton):
             lines = output.splitlines()
             fields = lines[1].split()
             return {
+                'size': self.memory_size,
                 'total': fields[1],
                 'used': fields[2],
                 'free': fields[3],
@@ -445,8 +446,8 @@ class PiInfo(metaclass=Singleton):
             self.logger.error(f"Unexpected error getting Wi-Fi networks info: {e}")
         return None
 
-    def get_disk_usage_info(self) -> Optional[List[List[str]]]:
-        """Retrieves disk usage info in human readable format.
+    def get_disks_info(self) -> Optional[List[List[str]]]:
+        """Retrieves disk info in human readable format.
 
         Returns:
             List of dictionaries with disk info or None if error occurs.
@@ -476,7 +477,7 @@ class PiInfo(metaclass=Singleton):
             self.logger.error(f"Unexpected error getting disk info: {e}")
         return None
 
-    def get_running_process_info(self) -> Optional[List[List[str]]]:
+    def get_processes_info(self) -> Optional[List[List[str]]]:
         """Retrieves info about running processes in system.
 
         Returns:
