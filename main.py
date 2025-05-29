@@ -123,6 +123,9 @@ def cpu_details(logger=logger):
             'usage': pi_info.get_cpu_usage(),
             'temperature_value': temperature,
             'temperature_color': color,
+            'overvoltage_allowed': 'Yes' if pi_info.overvoltage_allowed else 'No',
+            'otp_programming_allowed': 'Yes' if pi_info.otp_programming_allowed else 'No',
+            'otp_reading_allowed': 'Yes' if pi_info.otp_reading_allowed else 'No'
         }
     )
 

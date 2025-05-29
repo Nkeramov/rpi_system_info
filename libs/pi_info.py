@@ -55,9 +55,9 @@ class PiInfo(metaclass=Singleton):
     manufacturer: str = field(init=False)
     cpu_model: str = field(init=False)
     memory_size: int = field(init=False)
-    overvoltage: bool = field(init=False, default=False)
-    otp_program: bool = field(init=False, default=False)
-    otp_read: bool = field(init=False, default=False)
+    overvoltage_allowed: bool = field(init=False, default=False)
+    otp_programming_allowed: bool = field(init=False, default=False)
+    otp_reading_allowed: bool = field(init=False, default=False)
 
     def __post_init__(self):
         self.logger.debug("Fetching board revision code...")
@@ -72,12 +72,12 @@ class PiInfo(metaclass=Singleton):
         object.__setattr__(self, 'manufacturer', decoded_data['manufacturer'])
         object.__setattr__(self, 'cpu_model', decoded_data['cpu_model'])
         object.__setattr__(self, 'memory_size', decoded_data['memory_size'])
-        if 'overvoltage' in decoded_data:
-            object.__setattr__(self, 'overvoltage', decoded_data['overvoltage'])
-        if 'overvoltage' in decoded_data:
-            object.__setattr__(self, 'otp_program', decoded_data['otp_program'])
-        if 'overvoltage' in decoded_data:
-            object.__setattr__(self, 'otp_read', decoded_data['otp_read'])
+        if 'overvoltage_allowed' in decoded_data:
+            object.__setattr__(self, 'overvoltage_allowed', decoded_data['overvoltage_allowed'])
+        if 'otp_programming_allowed' in decoded_data:
+            object.__setattr__(self, 'otp_programming_allowed', decoded_data['otp_programming_allowed'])
+        if 'otp_reading_allowed' in decoded_data:
+            object.__setattr__(self, 'otp_reading_allowed', decoded_data['otp_reading_allowed'])
         self.logger.info(f"Board info fully initialized")
 
     def __str__(self) -> str:
@@ -123,9 +123,9 @@ class PiInfo(metaclass=Singleton):
                 'memory_size': memory_sizes[(code & 0x700000) >> 20],
                 'cpu_model': cpu_models[(code & 0xF000) >> 12],
                 'manufacturer': manufacturers[(code & 0xF0000) >> 16],
-                'overvoltage': bool((code & 0x80000000) >> 31),
-                'otp_program': bool((code & 0x40000000) >> 30),
-                'otp_read': bool((code & 0x20000000) >> 29),
+                'overvoltage_allowed': bool((code & 0x80000000) >> 31),
+                'otp_programming_allowed': bool((code & 0x40000000) >> 30),
+                'otp_reading_allowed': bool((code & 0x20000000) >> 29),
             }
         else:
             return {
