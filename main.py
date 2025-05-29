@@ -86,18 +86,33 @@ def internal_server_error(error):
 
 
 @app.context_processor
-def pi_hostname(logger=logger):
-    return dict(pi_hostname=pi_info.hostname)
+def pi_model_name(logger=logger):
+    return dict(pi_model_name=pi_info.model_name)
 
 
 @app.context_processor
-def pi_model(logger=logger):
-    return dict(pi_model=pi_info.model)
+def pi_revision(logger=logger):
+    return dict(pi_revision=pi_info.revision)
+
+
+@app.context_processor
+def pi_serial_number(logger=logger):
+    return dict(pi_serial_number=pi_info.serial_number)
+
+
+@app.context_processor
+def pi_manufacturer(logger=logger):
+    return dict(pi_manufacturer=pi_info.manufacturer)
 
 
 @app.context_processor
 def pi_os(logger=logger):
     return dict(pi_os=pi_info.os_name)
+
+
+@app.context_processor
+def pi_hostname(logger=logger):
+    return dict(pi_hostname=pi_info.hostname)
 
 
 @app.context_processor
@@ -116,33 +131,18 @@ def current_time(logger=logger):
 
 
 @app.context_processor
+def cpu_model(logger=logger):
+    return dict(cpu_model=pi_info.cpu_model)
+
+
+@app.context_processor
 def cpu_architecture(logger=logger):
     return dict(cpu_architecture=pi_info.cpu_architecture)
 
 
 @app.context_processor
-def cpu_model_name(logger=logger):
-    return dict(cpu_model_name=pi_info.cpu_model_name)
-
-
-@app.context_processor
-def cpu_hardware_type(logger=logger):
-    return dict(cpu_hardware_type=pi_info.cpu_hardware_type)
-
-
-@app.context_processor
-def cpu_serial_number(logger=logger):
-    return dict(cpu_serial_number=pi_info.cpu_serial_number)
-
-
-@app.context_processor
-def cpu_revision(logger=logger):
-    return dict(cpu_revision=pi_info.cpu_revision)
-
-
-@app.context_processor
-def cpu_core_count(logger=logger):
-    return dict(cpu_core_count=pi_info.cpu_core_count)
+def cpu_cores_count(logger=logger):
+    return dict(cpu_cores_count=pi_info.cpu_cores_count)
 
 
 @app.context_processor
@@ -176,6 +176,11 @@ def cpu_temperature(logger=logger):
         elif temperature >= CPU_RED_TEMP_THRESHOLD:
             color = TEXT_RED_COLOR
     return dict(cpu_temperature={'temperature': temperature, 'color': color})
+
+
+@app.context_processor
+def memory_size(logger=logger):
+    return dict(memory_size=pi_info.memory_size)
 
 
 @app.context_processor

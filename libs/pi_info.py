@@ -5,6 +5,7 @@ import logging
 import subprocess
 from enum import Enum
 from datetime import datetime
+from dataclasses import dataclass, field
 from functools import cached_property
 from typing import List, Dict, Tuple, Optional
 
@@ -12,11 +13,128 @@ from .cls_utils import Singleton
 from .log_utils import LoggerSingleton
 
 
+
+class ModelType(Enum):
+    UNKNOWN = -100
+
+    RPI_A = 0
+    RPI_B = 1
+    RPI_A_PLUS = 2
+    RPI_B_PLUS = 3
+    RPI_2B = 4
+    RPI_ALPHA = 5
+    RPI_CM1 = 6
+    # 0x7 pass
+    RPI_3B = 8
+    RPI_ZERO = 9
+    RPI_CM3 = 0xA
+    # 0xb pass
+    RPI_ZERO_W = 0xC
+    RPI_3B_PLUS = 0xD
+    RPI_3A_PLUS = 0xE
+    # 0x0f: Internal use only
+    RPI_CM3_PLUS = 0x10
+    RPI_4B = 0x11
+    RPI_Zero2W = 0x12
+    RPI_400 = 0x13
+    RPI_CM4 = 0x14
+    RPI_CM4S = 0x15
+    # 0x16: Internal use only
+    RPI_5 = 0x17
+    RPI_CM5 = 0x18
+    RPI_CM5_LITE = 0x19
+
+
+@dataclass(frozen=True)
 class PiInfo(metaclass=Singleton):
     _NET_PATH = "/sys/class/net"
+    logger: logging.Logger = field(repr=False)
+    revision_code: str = field(init=False)
+    revision: str = field(init=False)
+    model_type: ModelType = field(init=False)
+    manufacturer: str = field(init=False)
+    cpu_model: str = field(init=False)
+    memory_size: int = field(init=False)
+    overvoltage: bool = field(init=False, default=False)
+    otp_program: bool = field(init=False, default=False)
+    otp_read: bool = field(init=False, default=False)
 
-    def __init__(self, logger: logging.Logger):
-        self.logger = logger
+    def __post_init__(self):
+        self.logger.debug("Fetching board revision code...")
+        command = "cat /proc/cpuinfo | grep 'Revision' | cut -d: -f2"
+        fetched_revision_code = self.__get_shell_cmd_output(command)
+        self.logger.debug(f"Board revision code: {fetched_revision_code}")
+        object.__setattr__(self, 'revision_code', fetched_revision_code)
+        self.logger.debug("Parsing board revision code string...")
+        decoded_data = PiInfo.decode_revision_code(fetched_revision_code)
+        object.__setattr__(self, 'model_type', decoded_data['model_type'])
+        object.__setattr__(self, 'revision', decoded_data['revision'])
+        object.__setattr__(self, 'manufacturer', decoded_data['manufacturer'])
+        object.__setattr__(self, 'cpu_model', decoded_data['cpu_model'])
+        object.__setattr__(self, 'memory_size', decoded_data['memory_size'])
+        if 'overvoltage' in decoded_data:
+            object.__setattr__(self, 'overvoltage', decoded_data['overvoltage'])
+        if 'overvoltage' in decoded_data:
+            object.__setattr__(self, 'otp_program', decoded_data['otp_program'])
+        if 'overvoltage' in decoded_data:
+            object.__setattr__(self, 'otp_read', decoded_data['otp_read'])
+        self.logger.info(f"Board info fully initialized")
+
+    def __str__(self) -> str:
+        return (f"Model: {self.model_name}, "
+                f"Revision: {self.revision}, "
+                f"Serial number: {self.serial_number}, "
+                f"Manufacturer: {self.manufacturer}, "
+                f"CPU model: {self.cpu_model}, "
+                f"Memory size: {self.memory_size}Mb")
+
+    @staticmethod
+    def decode_revision_code(revision_code: str) -> dict:
+        old_boards_revisions_decoder = {
+            0x0000: (ModelType.UNKNOWN, "0.0", 0, "UNKNOWN", "UNKNOWN"),
+            0x0002: (ModelType.RPI_B, "1.0", 256, "BCM2835", "EGOMAN"),
+            0x0003: (ModelType.RPI_B, "1.0", 256, "BCM2835", "EGOMAN"),
+            0x0004: (ModelType.RPI_B, "2.0", 256, "BCM2835", "SONY_UK"),
+            0x0005: (ModelType.RPI_B, "2.0", 256, "BCM2835", "QISDA"),
+            0x0006: (ModelType.RPI_B, "2.0", 256, "BCM2835", "EGOMAN"),
+            0x0007: (ModelType.RPI_A, "2.0", 256, "BCM2835", "EGOMAN"),
+            0x0008: (ModelType.RPI_A, "2.0", 256, "BCM2835", "SONY_UK"),
+            0x0009: (ModelType.RPI_A, "2.0", 256, "BCM2835", "QISDA"),
+            0x000D: (ModelType.RPI_B, "2.0", 512, "BCM2835", "EGOMAN"),
+            0x000E: (ModelType.RPI_B, "2.0", 512, "BCM2835", "SONY_UK"),
+            0x000F: (ModelType.RPI_B, "2.0", 512, "BCM2835", "EGOMAN"),
+            0x0010: (ModelType.RPI_B_PLUS, "1.2", 512, "BCM2835", "SONY_UK"),
+            0x0011: (ModelType.RPI_CM1, "1.0", 512, "BCM2835", "SONY_UK"),
+            0x0012: (ModelType.RPI_A_PLUS, "1.1", 256, "BCM2835", "SONY_UK"),
+            0x0013: (ModelType.RPI_B_PLUS, "1.2", 512, "BCM2835", "EMBEST"),
+            0x0014: (ModelType.RPI_CM1, "1.0", 512, "BCM2835", "EMBEST"),
+            0x0015: (ModelType.RPI_A_PLUS, "1.1", 512, "BCM2835", "EMBEST")
+        }
+        memory_sizes = [256, 512, 1024, 2048, 4096, 8192, 16384]
+        cpu_models = ["BCM2835", "BCM2836", "BCM2837", "BCM2711", "BCM2712"]
+        manufacturers = ["Sony UK", "Egoman", "Embest", "Sony Japan", "Embest", "Stadium"]
+
+        code = int(revision_code, 16)
+        flag = (code & 0x800000) >> 23
+        if flag:
+            return {
+                'model_type': ModelType((code & 0xFF0) >> 4),
+                'revision':  f"1.{code & 0xF}",
+                'memory_size': memory_sizes[(code & 0x700000) >> 20],
+                'cpu_model': cpu_models[(code & 0xF000) >> 12],
+                'manufacturer': manufacturers[(code & 0xF0000) >> 16],
+                'overvoltage': bool((code & 0x80000000) >> 31),
+                'otp_program': bool((code & 0x40000000) >> 30),
+                'otp_read': bool((code & 0x20000000) >> 29),
+            }
+        else:
+            return {
+                'model_type': old_boards_revisions_decoder[code][0],
+                'revision': old_boards_revisions_decoder[code][1],
+                'memory_size': old_boards_revisions_decoder[code][2],
+                'cpu_model': old_boards_revisions_decoder[code][3],
+                'manufacturer': old_boards_revisions_decoder[code][4]
+            }
 
     def __get_shell_cmd_output(self, command: str) -> Optional[str]:
         """Executes a shell command and returns its standard output.
@@ -48,75 +166,21 @@ class PiInfo(metaclass=Singleton):
             self.logger.error(f"Command not found: {command}")
 
     @cached_property
-    def hostname(self) -> Optional[str]:
-        """Retrieves the hostname using the 'hostname' command.
+    def model_name(self) -> Optional[str]:
+        """Retrieves the board model name from /sys/firmware/devicetree/base/model.
 
         Returns:
-            The hostname, or None if the command fails.
-        """
-        command = "hostname"
-        return self.__get_shell_cmd_output(command)
-
-    @cached_property
-    def model(self) -> Optional[str]:
-        """Retrieves the system model from /sys/firmware/devicetree/base/model.
-
-        Returns:
-            The system model, or None if the command fails or the file is not found.
+            The board model name, or None if the command fails or the file is not found.
         """
         command = "cat /sys/firmware/devicetree/base/model"
         return self.__get_shell_cmd_output(command)
 
     @cached_property
-    def os_name(self) -> Optional[str]:
-        """Retrieves the pretty OS name from /etc/*-release.
+    def serial_number(self) -> Optional[str]:
+        """Retrieves the board serial number from /proc/cpuinfo.
 
         Returns:
-            The pretty OS name, or None if the command fails.  Removes surrounding quotes.
-        """
-        command = "cat /etc/*-release | grep PRETTY_NAME | cut -d= -f2"
-        return self.__get_shell_cmd_output(command).strip('"')
-
-    @cached_property
-    def cpu_model_name(self) -> Optional[str]:
-        """Retrieves the CPU model name from /proc/cpuinfo.
-
-        Returns:
-            The CPU model name, or None if the command fails.
-        """
-        command = "cat /proc/cpuinfo | grep 'model name' | cut -d: -f2"
-        model =  self.__get_shell_cmd_output(command)
-        if not model:
-            command = "lscpu | grep 'Model name' | cut -d: -f2"
-            model = self.__get_shell_cmd_output(command)
-        return model
-
-    @cached_property
-    def cpu_hardware_type(self) -> Optional[str]:
-        """Retrieves the CPU hardware type from /proc/cpuinfo.
-
-        Returns:
-            The CPU hardware type, or None if the command fails.
-        """
-        command = "cat /proc/cpuinfo | grep 'Hardware' | cut -d: -f2"
-        return self.__get_shell_cmd_output(command)
-
-    @cached_property
-    def cpu_revision(self) -> Optional[str]:
-        """Retrieves the CPU revision from /proc/cpuinfo.
-
-        Returns:
-            The CPU revision, or None if the command fails.
-        """
-        command = "cat /proc/cpuinfo | grep 'Revision' | cut -d: -f2"
-        return self.__get_shell_cmd_output(command)
-
-    @cached_property
-    def cpu_serial_number(self) -> Optional[str]:
-        """Retrieves the CPU serial number from /proc/cpuinfo.
-
-        Returns:
-            The CPU serial number, or None if the command fails.
+            The board serial number, or None if the command fails.
         """
         command = "cat /proc/cpuinfo | grep 'Serial' | cut -d: -f2"
         return self.__get_shell_cmd_output(command)
@@ -132,7 +196,7 @@ class PiInfo(metaclass=Singleton):
         return self.__get_shell_cmd_output(command)
 
     @cached_property
-    def cpu_core_count(self) -> Optional[int]:
+    def cpu_cores_count(self) -> Optional[int]:
         """Retrieves the number of CPU cores using 'nproc'.
 
         Returns:
@@ -163,6 +227,26 @@ class PiInfo(metaclass=Singleton):
                     cache_sizes[cache] = match.group(1)
                     continue
         return cache_sizes
+
+    @cached_property
+    def hostname(self) -> Optional[str]:
+        """Retrieves the hostname using the 'hostname' command.
+
+        Returns:
+            The hostname, or None if the command fails.
+        """
+        command = "hostname"
+        return self.__get_shell_cmd_output(command)
+
+    @cached_property
+    def os_name(self) -> Optional[str]:
+        """Retrieves the pretty OS name from /etc/*-release.
+
+        Returns:
+            The pretty OS name, or None if the command fails.  Removes surrounding quotes.
+        """
+        command = "cat /etc/*-release | grep PRETTY_NAME | cut -d= -f2"
+        return self.__get_shell_cmd_output(command).strip('"')
 
     def get_cpu_core_voltage(self) -> Optional[float]:
         """Retrieves the CPU core voltage using 'vcgencmd'.
@@ -449,12 +533,15 @@ class PiInfo(metaclass=Singleton):
         return self.__get_shell_cmd_output(command)
 
 
-if __name__ == "__main__":
+def main():
     logger = LoggerSingleton(
         level="DEBUG",
         colored=True
     ).get_logger()
     pi_info = PiInfo(logger)
+    print(pi_info)
+
+    return
     try:
         logger.info(f"Model: {pi_info.model}")
         logger.info(f"OS: {pi_info.os_name}")
@@ -478,3 +565,8 @@ if __name__ == "__main__":
         logger.info("Stopped by user")
     except Exception as e:
         logger.error(f"Unhandled exception in main loop: {e}")
+
+
+
+if __name__ == "__main__":
+    main()

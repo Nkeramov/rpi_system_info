@@ -38,7 +38,7 @@
             </div>
             <div class="row t-header">
                 <div>
-                    <h5>Generic Info</h5>
+                    <h5>Generic Board Info</h5>
                 </div>
             </div>
             <div class="row t-row">
@@ -46,10 +46,34 @@
                     Model
                 </div>
                 <div class="seven columns">
-                    {{pi_model}}
+                    {{pi_model_name}}
                 </div>
             </div>
-           <div class="row t-row">
+            <div class="row t-row">
+                <div class="five columns t-caption">
+                    Revision
+                </div>
+                <div class="seven columns">
+                    {{pi_revision}}
+                </div>
+            </div>
+            <div class="row t-row">
+                <div class="five columns t-caption">
+                    Serial Number
+                </div>
+                <div class="seven columns">
+                    {{pi_serial_number}}
+                </div>
+            </div>
+            <div class="row t-row">
+                <div class="five columns t-caption">
+                    Manufacturer
+                </div>
+                <div class="seven columns">
+                    {{pi_manufacturer}}
+                </div>
+            </div>
+            <div class="row t-row">
                 <div class="five columns t-caption">
                     Operating System
                 </div>
@@ -57,14 +81,14 @@
                     {{pi_os}}
                 </div>
             </div>
-           <div class="row t-row">
+            <div class="row t-row">
                 <div class="five columns t-caption">
                     Host Name
                 </div>
                 <div class="seven columns">
                     {{pi_hostname}}
                 </div>
-            </div>
+             </div>
              <div class="row t-row">
                 <div class="five columns t-caption">
                     System Time
@@ -73,7 +97,7 @@
                     {{current_time}}
                 </div>
             </div>
-           <div class="row t-row">
+            <div class="row t-row">
                 <div class="five columns t-caption">
                     Started on
                 </div>
@@ -81,7 +105,7 @@
                     {{uptime_since}}
                 </div>
             </div>
-           <div class="row t-row">
+            <div class="row t-row">
                 <div class="five columns t-caption">
                     Uptime
                 </div>
@@ -99,6 +123,14 @@
             </div>
             <div class="row t-row">
                 <div class="five columns t-caption">
+                    Model
+                </div>
+                <div class="seven columns">
+                    {{cpu_model}}
+                </div>
+            </div>
+            <div class="row t-row">
+                <div class="five columns t-caption">
                     Architecture
                 </div>
                 <div class="seven columns">
@@ -107,42 +139,10 @@
             </div>
             <div class="row t-row">
                 <div class="five columns t-caption">
-                    Processor Type
+                    Cores Count
                 </div>
                 <div class="seven columns">
-                    {{cpu_model_name}}
-                </div>
-            </div>
-            <div class="row t-row">
-                <div class="five columns t-caption">
-                    Hardware Type
-                </div>
-                <div class="seven columns">
-                    {{cpu_hardware_type}}
-                </div>
-            </div>
-            <div class="row t-row">
-                <div class="five columns t-caption">
-                    Serial Number
-                </div>
-                <div class="seven columns">
-                    {{cpu_serial_number}}
-                </div>
-            </div>
-            <div class="row t-row">
-                <div class="five columns t-caption">
-                    Revision
-                </div>
-                <div class="seven columns">
-                    {{cpu_revision}}
-                </div>
-            </div>
-            <div class="row t-row">
-                <div class="five columns t-caption">
-                    Cores
-                </div>
-                <div class="seven columns">
-                    {{cpu_core_count}}
+                    {{cpu_cores_count}}
                 </div>
             </div>
             <div class="row t-row">
@@ -159,6 +159,22 @@
                 </div>
                 <div class="seven columns">
                     {{cpu_core_voltage}} V
+                </div>
+            </div>
+            <div class="row t-row">
+                <div class="five columns t-caption">
+                    Temperature
+                </div>
+                <div class="seven columns" style="color:{{cpu_temperature.color}}">
+                    {{cpu_temperature.temperature}} &#176;C
+                </div>
+            </div>
+            <div class="row t-row">
+                <div class="five columns t-caption">
+                    Usage
+                </div>
+                <div class="seven columns">
+                    {{cpu_usage}} %
                 </div>
             </div>
             <div class="row t-row">
@@ -185,22 +201,6 @@
                     {{cpu_cache_sizes.L2}} KiB
                 </div>
             </div>
-            <div class="row t-row">
-                <div class="five columns t-caption">
-                    Temperature
-                </div>
-                <div class="seven columns" style="color:{{cpu_temperature.color}}">
-                    {{cpu_temperature.temperature}} &#176;C
-                </div>
-            </div>
-            <div class="row t-row">
-                <div class="five columns t-caption">
-                    Usage
-                </div>
-                <div class="seven columns">
-                    {{cpu_usage}} %
-                </div>
-            </div>
             <div class="row t-header">
                 <div class="t-header-img">
                     <img src="static/images/ram.png" style="width:32px">
@@ -208,6 +208,14 @@
                <div>
                     <h5>RAM Details</h5>
                </div>
+            </div>
+            <div class="row t-row">
+                <div class="five columns t-caption">
+                    Memory size
+                </div>
+                <div class="seven columns t-row">
+                    {{memory_size}} MB
+                </div>
             </div>
             <div class="row t-row">
                 <div class="five columns t-caption">
