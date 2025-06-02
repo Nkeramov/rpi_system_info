@@ -20,7 +20,34 @@ Information about disks and processes is presented in the form of tables. You ca
 
 The web server is based on Flask framework. By default the application will run on port 8080. It can be changed in env file.
 
-Gunicorn is used to launch. Use run.sh to run project.
+Gunicorn is used to launch.
+
+
+## Usage
+
+Install the requirements. To keep things simple, we will use the Python virtual environment.
+
+```bash
+        python -m venv .venv
+        source .venv/bin/activate           # for linux and mac
+        ./env/Scripts/activate              # for windows
+        pip install -r requirements.txt
+```
+
+
+Copy the env.example to .env and make your edits.
+
+```bash
+        cp env.example .env
+```
+
+Make run.sh executable and use it to run project.
+
+```bash
+        chmod +x run.sh
+        ./run.sh
+```
+
 
 ## Ref
 
