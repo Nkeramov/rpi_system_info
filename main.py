@@ -7,12 +7,18 @@ from dotenv import load_dotenv
 from flask import Flask, render_template, redirect, url_for, flash
 from flask_caching import Cache
 
+from werkzeug.exceptions import NotFound, InternalServerError
+
+from logging import Logger
+
 from libs.pi_info import PiInfo
 from libs.log_utils import LoggerSingleton
 
+from typing import Any, Optional
+
 load_dotenv('.env')
 
-PORT = os.getenv("PORT", 8080)
+PORT = int(os.getenv("PORT", 8080))
 INDEX_PAGE_CACHE_TIMEOUT = int(os.getenv("INDEX_PAGE_CACHE_TIMEOUT", 10))
 INDEX_PAGE_TITLE = os.getenv("INDEX_PAGE_TITLE", 'Raspberry Pi System Info')
 
@@ -52,13 +58,13 @@ app.logger.setLevel(logger.level)
 
 @app.route('/')
 @cache.cached(timeout=INDEX_PAGE_CACHE_TIMEOUT)
-def index(logger=logger):
+def index(logger: Logger = logger) -> str:
     logger.info('Request index.html')
     return render_template("index.html", title=INDEX_PAGE_TITLE, index_url=url_for('index'))
 
 
 @app.route('/restart')
-def restart(logger=logger):
+def restart(logger: Logger = logger) -> str:
     flash("Rebooting... please wait.<br>This will take approx. one minute.", 'info')
     logger.info('Restart initiated from web interface')
     subprocess.Popen(["sudo", "reboot"])
@@ -66,7 +72,7 @@ def restart(logger=logger):
 
 
 @app.route('/shutdown')
-def shutdown(logger=logger):
+def shutdown(logger: Logger = logger) -> str:
     flash("Shutting down.<br>When the LEDs on the board stop flashing, it should be safe to unplug your Raspberry Pi.", 'info')
     logger.info('Shutdown initiated from web interface')
     subprocess.Popen(["sudo", "halt"])
@@ -74,19 +80,20 @@ def shutdown(logger=logger):
 
 
 @app.errorhandler(404)
-def page_not_found_error(error):
+def page_not_found_error(error: NotFound) -> tuple[str, int]:
     return render_template('error.html',  title=INDEX_PAGE_TITLE, error_code="404",
         error_message="Page not found", redirect_delay=5, index_url=url_for('index')), 404
 
 
 @app.errorhandler(500)
-def internal_server_error(error):
+def internal_server_error(error: InternalServerError) -> tuple[str, int]:
     return render_template('error.html',  title=INDEX_PAGE_TITLE, error_code="500",
         error_message="Internal server error", redirect_delay=5, index_url=url_for('index')), 500
 
 
 @app.context_processor
-def generic_board_info(logger=logger):
+def generic_board_info(logger: Logger = logger) -> dict[str, dict[str, Optional[str]]]:
+    uptime = pi_info.get_uptime_since()
     return dict(generic_board_info=
         {
             'model_name': pi_info.model_name,
@@ -96,14 +103,14 @@ def generic_board_info(logger=logger):
             'os': pi_info.os_name,
             'hostname': pi_info.hostname,
             'system_time': datetime.now().strftime(TEXT_DATETIME_FORMAT),
-            'uptime_since': pi_info.get_uptime_since().strftime(TEXT_DATETIME_FORMAT),
+            'uptime_since': uptime.strftime(TEXT_DATETIME_FORMAT) if uptime else '',
             'uptime_pretty': pi_info.get_uptime_pretty()
         }
     )
 
 
 @app.context_processor
-def cpu_details(logger=logger):
+def cpu_details(logger: Logger = logger) -> dict[str, dict[str, Any]]:
     temperature = pi_info.get_cpu_temperature()
     color = TEXT_GREEN_COLOR
     if temperature is not None:
@@ -131,78 +138,67 @@ def cpu_details(logger=logger):
 
 
 @app.context_processor
-def ram_details(logger=logger):
+def ram_details(logger: Logger = logger) -> dict[str, dict[str, str]]:
     return dict(ram_details=pi_info.get_ram_info())
 
 
+def process_ip_info(ip_info: Optional[dict[str, str]]) -> tuple[str, str]:
+    ip, mask = '', ''
+    if ip_info:
+        default_str = 'Not connected'
+        ip = ip_info.get('ip') or default_str
+        mask = ip_info.get('mask') or default_str
+    return ip, mask
+
+
 @app.context_processor
-def ethernet_ip_details(logger=logger):
+def ethernet_ip_details(logger: Logger = logger) -> dict[str, str]:
     ip_info = pi_info.get_ip_info('eth0')
-    if ip_info is not None:
-        default_str = 'Not connected'
-        address = ip_info.get('ip', '')
-        mask = ip_info.get('mask', '')
-        return dict(
-            ethernet_ip_address=address if len(address) > 0 else default_str,
-            ethernet_network_mask=mask if len(mask) > 0 else default_str
-        )
-    else:
-        return dict(ethernet_ip_address=None, ethernet_network_mask=None)
+    ip, mask = process_ip_info(ip_info)
+    return dict(ethernet_ip_address=ip, ethernet_network_mask=mask)
 
 
 @app.context_processor
-def ethernet_mac_address(logger=logger):
+def ethernet_mac_address(logger: Logger = logger) -> dict[str, str]:
     address = pi_info.get_mac_address('eth0')
-    return dict(ethernet_mac_address=address if address is not None and len(address) > 0 else 'Unknown')
+    return dict(ethernet_mac_address=address or 'Unknown')
 
 
 @app.context_processor
-def wifi_ip_details(logger=logger):
+def wifi_ip_details(logger: Logger = logger) -> dict[str, str]:
     ip_info = pi_info.get_ip_info('wlan0')
-    if ip_info is not None:
-        default_str = 'Not connected'
-        address = ip_info.get('ip', '')
-        mask = ip_info.get('mask', '')
-        return dict(
-            wifi_ip_address=address if len(address) > 0 else default_str,
-            wifi_network_mask=mask if len(mask) > 0 else default_str
-        )
-    else:
-        return dict(wifi_ip_address=None, wifi_network_mask=None)
+    ip, mask = process_ip_info(ip_info)
+    return dict(wifi_ip_address=ip, wifi_network_mask=mask)
 
 
 @app.context_processor
-def wifi_mac_address(logger=logger):
+def wifi_mac_address(logger: Logger = logger) -> dict[str, str]:
     address = pi_info.get_mac_address('wlan0')
-    return dict(wifi_mac_address=address if address is not None and len(address) > 0 else 'Unknown')
+    return dict(wifi_mac_address=address or 'Unknown')
 
 
 @app.context_processor
-def bluetooth_mac_address(logger=logger):
+def bluetooth_mac_address(logger: Logger = logger) -> dict[str, str]:
     address = pi_info.get_bluetooth_mac_address()
-    return dict(bluetooth_mac_address=address if address is not None and len(address) > 0 else 'Unknown')
+    return dict(bluetooth_mac_address=address or 'Unknown')
 
 
 @app.context_processor
-def available_wifi_networks(logger=logger):
+def available_wifi_networks(logger: Logger = logger) -> dict[str, list[dict[str, str]]]:
     return dict(available_wifi_networks=pi_info.get_available_wifi_networks())
 
 
 @app.context_processor
-def disks_details(logger=logger):
+def disks_details(logger: Logger = logger) -> dict[str, list[dict[str, str]]]:
     return dict(disks_details=pi_info.get_disks_info())
 
 
 @app.context_processor
-def processes_details(logger=logger):
-    return dict(processes_details=pi_info.get_processes_info())
-
-
-@app.context_processor
-def utility_processor(logger=logger):
-    def short_date(a, b, c):
-        return u'{0}{1}, {2}'.format(a, b,c)
-    return dict(short_date=short_date)
+def processes_details(logger: Logger = logger) -> dict[str, list[dict[str, Any]]]:
+    processes_details = pi_info.get_processes_info()
+    for process in processes_details:
+        process['started_on'] = process['started_on'].strftime(TEXT_DATETIME_FORMAT)
+    return dict(processes_details=processes_details)
 
 
 if __name__ == "__main__":

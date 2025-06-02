@@ -2,7 +2,7 @@ import logging
 import logging.handlers
 import threading
 from pathlib import Path
-from logging import Logger
+from logging import Logger, LogRecord
 from colorama import Fore, Style
 from typing import Optional, Dict, Any
 
@@ -46,7 +46,7 @@ class CustomColoredFormatter(logging.Formatter):
                  if k.upper() in ('DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL')}
             )
 
-    def format(self, record):
+    def format(self, record: LogRecord) -> str:
         """Format the specified record with color"""
         log_fmt = self.fmt
         if  record.levelno in self.LEVEL_COLORS:
@@ -56,26 +56,27 @@ class CustomColoredFormatter(logging.Formatter):
 
 class LoggerSingleton(metaclass=Singleton):
     """Thread-safe singleton logger with file and stream handlers"""
-    __logger: Optional[Logger] = None
+    __logger: Logger = logging.getLogger('SuperLogger')
     __allow_reinitialization: bool = False
 
     DEFAULT_FORMAT = '%(asctime)s | %(levelname)s | %(module)s | %(funcName)s | %(lineno)s | %(message)s'
     DEFAULT_DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
 
     def __init__(self,
-                 log_dir: Optional[Path] = None, log_file: Optional[str] = None, level: str = 'INFO',
-                 msg_format: Optional[str] = DEFAULT_FORMAT, date_format: Optional[str] = DEFAULT_DATE_FORMAT,
+                 log_dir: Optional[Path] = None, log_file: Optional[str] = None, level: Optional[str] = None,
+                 msg_format: Optional[str] = None, date_format: Optional[str] = None,
                  colored: bool = False, max_size_mb: int = 10, keep: int = 10, **kwargs: Any):
         if not hasattr(self, '_initialized') or self.__allow_reinitialization:
-            self._initialize_logger(log_dir=log_dir, log_file=log_file, level=level, msg_format=msg_format,
-                                    date_format=date_format, colored=colored, max_size_mb=max_size_mb, keep=keep,
-                                    **kwargs)
+            self._initialize_logger(log_dir=log_dir, log_file=log_file, level=level or "INFO",
+                                    msg_format=msg_format or self.DEFAULT_FORMAT, 
+                                    date_format = date_format or self.DEFAULT_DATE_FORMAT,
+                                    colored=colored, max_size_mb=max_size_mb, keep=keep, **kwargs)
             self._initialized = True
 
     def _initialize_logger(self, log_dir: Optional[Path], log_file: Optional[str], level: str, msg_format: str,
                            date_format: str, colored: bool, max_size_mb: int, keep: int, **kwargs: Any) -> None:
         """Initialize logger with configured handlers"""
-        self.__class__.__logger = logging.getLogger('SuperLogger')
+#        self.__class__.__logger = 
         self.__class__.__logger.setLevel(level)
 
         # Clear existing handlers to avoid duplicates
@@ -136,6 +137,6 @@ class LoggerSingleton(metaclass=Singleton):
     @classmethod
     def update_config(cls, **kwargs: Any) -> None:
         """Update logger configuration"""
-        with cls._class_lock:
+        with cls._lock:
             if cls.__logger is not None:
                 cls()._initialize_logger(**kwargs)

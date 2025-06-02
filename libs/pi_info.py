@@ -1,3 +1,4 @@
+
 import os
 import re
 import time
@@ -7,7 +8,7 @@ from enum import Enum
 from datetime import datetime
 from dataclasses import dataclass, field
 from functools import cached_property
-from typing import List, Dict, Tuple, Optional
+from typing import Any, Optional
 
 from .cls_utils import Singleton
 from .log_utils import LoggerSingleton
@@ -59,7 +60,7 @@ class PiInfo(metaclass=Singleton):
     otp_programming_allowed: bool = field(init=False, default=False)
     otp_reading_allowed: bool = field(init=False, default=False)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         self.logger.debug("Fetching board revision code...")
         command = "cat /proc/cpuinfo | grep 'Revision' | cut -d: -f2"
         fetched_revision_code = self.__get_shell_cmd_output(command)
@@ -89,7 +90,7 @@ class PiInfo(metaclass=Singleton):
                 f"Memory size: {self.memory_size}Mb")
 
     @staticmethod
-    def decode_revision_code(revision_code: str) -> dict:
+    def decode_revision_code(revision_code: str) -> dict[str, Any]:
         old_boards_revisions_decoder = {
             0x0000: (ModelType.UNKNOWN, "0.0", 0, "UNKNOWN", "UNKNOWN"),
             0x0002: (ModelType.RPI_B, "1.0", 256, "BCM2835", "EGOMAN"),
@@ -136,7 +137,7 @@ class PiInfo(metaclass=Singleton):
                 'manufacturer': old_boards_revisions_decoder[code][4]
             }
 
-    def __get_shell_cmd_output(self, command: str) -> Optional[str]:
+    def __get_shell_cmd_output(self, command: str) -> str:
         """Executes a shell command and returns its standard output.
 
         This method runs the provided shell command using `subprocess.run`.
@@ -164,9 +165,10 @@ class PiInfo(metaclass=Singleton):
             self.logger.error(f"Shell command '{command}' failed (code {e.returncode}): {e.stderr.strip()}")
         except FileNotFoundError:
             self.logger.error(f"Command not found: {command}")
+        return ''
 
     @cached_property
-    def model_name(self) -> Optional[str]:
+    def model_name(self) -> str:
         """Retrieves the board model name from /sys/firmware/devicetree/base/model.
 
         Returns:
@@ -176,7 +178,7 @@ class PiInfo(metaclass=Singleton):
         return self.__get_shell_cmd_output(command)
 
     @cached_property
-    def serial_number(self) -> Optional[str]:
+    def serial_number(self) -> str:
         """Retrieves the board serial number from /proc/cpuinfo.
 
         Returns:
@@ -186,7 +188,7 @@ class PiInfo(metaclass=Singleton):
         return self.__get_shell_cmd_output(command)
 
     @cached_property
-    def cpu_architecture(self) -> Optional[str]:
+    def cpu_architecture(self) -> str:
         """Retrieves the CPU architecture from lscpu.
 
         Returns:
@@ -196,18 +198,22 @@ class PiInfo(metaclass=Singleton):
         return self.__get_shell_cmd_output(command)
 
     @cached_property
-    def cpu_cores_count(self) -> Optional[int]:
+    def cpu_cores_count(self) -> int:
         """Retrieves the number of CPU cores using 'nproc'.
 
         Returns:
-            The number of CPU cores, or None if the command fails.
+            The number of CPU cores, or 0 if the command fails.
         """
         command = "nproc"
         result = self.__get_shell_cmd_output(command)
-        return int(result) if result is not None else result
+        try:
+            return int(result)
+        except ValueError as e:
+            self.logger.error(f"Error while converting number of cores to int: {result}")
+        return 0
 
     @cached_property
-    def cpu_cache_sizes(self) -> Optional[str]:
+    def cpu_cache_sizes(self) -> dict[str, str]:
         """Retrieves CPU cache sizes using the lscpu command.
 
         Returns:
@@ -215,21 +221,20 @@ class PiInfo(metaclass=Singleton):
         """
         command = "lscpu"
         output = self.__get_shell_cmd_output(command)
-        if output is None:
-            return None
         cache_types = ["L1d", "L1i", "L2"]
         cache_sizes = {cache: "" for cache in cache_types}
-        lines = output.splitlines()
-        for line in lines:
-            for cache in cache_types:
-                match = re.match(fr"{cache} cache:\s*(\S+)", line)
-                if match:
-                    cache_sizes[cache] = match.group(1)
-                    continue
+        if output:
+            lines = output.splitlines()
+            for line in lines:
+                for cache in cache_types:
+                    match = re.match(fr"{cache} cache:\s*(\S+)", line)
+                    if match:
+                        cache_sizes[cache] = match.group(1)
+                        continue
         return cache_sizes
 
     @cached_property
-    def hostname(self) -> Optional[str]:
+    def hostname(self) -> str:
         """Retrieves the hostname using the 'hostname' command.
 
         Returns:
@@ -239,7 +244,7 @@ class PiInfo(metaclass=Singleton):
         return self.__get_shell_cmd_output(command)
 
     @cached_property
-    def os_name(self) -> Optional[str]:
+    def os_name(self) -> str:
         """Retrieves the pretty OS name from /etc/*-release.
 
         Returns:
@@ -278,18 +283,18 @@ class PiInfo(metaclass=Singleton):
             self.logger.error(f"Error while converting CPU temperature to float, temperature value: {result}")
         return None
 
-    def get_cpu_core_frequency(self, unit: str = 'MHz') -> Optional[int]:
+    def get_cpu_core_frequency(self, unit: str = 'MHz') -> int:
         """Retrieves CPU frequency info in specified units (Hz, KHz, MHz or GHz).
 
         Args:
             unit: The desired unit for the frequency (Hz, KHz, MHz, GHz). Defaults to 'MHz'.
 
         Returns:
-            The CPU core frequency in the specified unit, or None if the command fails or the unit is invalid.
+            The CPU core frequency in the specified unit, or 0 if the command fails or the unit is invalid.
         """
         command = "vcgencmd measure_clock arm | cut -d= -f2"
         result = self.__get_shell_cmd_output(command)
-        if result is not None:
+        if result:
             try:
                 frequency = int(result)
                 match unit:
@@ -305,8 +310,9 @@ class PiInfo(metaclass=Singleton):
                         self.logger.error(f"Requested unknown CPU frequency unit: {unit}")
             except ValueError as e:
                 self.logger.error(f"Error while converting CPU frequency to int, frequency value: {result}")
+        return 0
 
-    def get_cpu_usage(self) -> Optional[str]:
+    def get_cpu_usage(self) -> str:
         """Retrieves the CPU usage using 'top'.
 
         Returns:
@@ -315,33 +321,32 @@ class PiInfo(metaclass=Singleton):
         command = "top -b -n2 | grep 'Cpu(s)'| tail -n 1 | awk '{print $2 + $4 }'"
         return self.__get_shell_cmd_output(command)
 
-    def get_ram_info(self, unit: str = 'm') -> Optional[Dict[str, Optional[str]]]:
+    def get_ram_info(self, unit: str = 'm') -> dict[str, str]:
         """Retrieves RAM info in specified units (b, k, m, g). Uses a safer approach.
 
         Returns:
             The RAM info dict with total, used, free, cache and available memory volume in passed unit.
         """
+        ram_fields = ['total', 'used', 'free', 'cache', 'available']
+        ram_info = {field: "" for field in ram_fields}
+        ram_info['size'] = str(self.memory_size)
         if unit not in ['b', 'k', 'm', 'g']:
             self.logger.error(f"Requested unknown RAM volume unit: {unit}")
-            return None
+            return ram_info
         command = f"free -{unit}"
         output = self.__get_shell_cmd_output(command)
-        if output is None:
-            return None
-        try:
-            lines = output.splitlines()
-            fields = lines[1].split()
-            return {
-                'size': self.memory_size,
-                'total': fields[1],
-                'used': fields[2],
-                'free': fields[3],
-                'cache': fields[5],
-                'available': fields[6],
-            }
-        except (IndexError, ValueError) as e:
-            self.logger.error(f"Failed to parse 'free' command output: {output} ({e})")
-        return None
+        if output:
+            try:
+                lines = output.splitlines()
+                fields = lines[1].split()
+                ram_info['total'] = fields[1]
+                ram_info['used'] = fields[2]
+                ram_info['free'] = fields[3]
+                ram_info['cache'] = fields[5]
+                ram_info['available'] = fields[6]
+            except (IndexError, ValueError) as e:
+                self.logger.error(f"Failed to parse 'free' command output: {output} ({e})")
+        return ram_info
 
     def get_mac_address(self, interface: str='eth0') -> Optional[str]:
         """Retrieves the MAC address for a specified network interface.
@@ -363,7 +368,7 @@ class PiInfo(metaclass=Singleton):
             self.logger.error(f"Can not load network interface info from {self._NET_PATH}")
         return None
 
-    def get_ip_info(self, interface: str = 'eth0') -> Optional[Dict[str, Optional[str]]]:
+    def get_ip_info(self, interface: str = 'eth0') -> Optional[dict[str, str]]:
         """Retrieves the IP information for a specified network interface.
 
         Args:
@@ -377,17 +382,16 @@ class PiInfo(metaclass=Singleton):
             if interface in os.listdir(self._NET_PATH):
                 command = f"ifconfig {interface} | grep 'inet '"
                 output = self.__get_shell_cmd_output(command)
-                if output is None:
-                    return None
-                try:
-                    fields = output.split()
-                    return {
-                        'ip': fields[1],
-                        'mask': fields[3],
-                        'broadscast': fields[5],
-                    }
-                except (IndexError, ValueError) as e:
-                    self.logger.error(f"Failed to parse 'ifconfig' command output: {output} ({e})")
+                if output:
+                    try:
+                        fields = output.split()
+                        return {
+                            'ip': fields[1],
+                            'mask': fields[3],
+                            'broadscast': fields[5],
+                        }
+                    except (IndexError, ValueError) as e:
+                        self.logger.error(f"Failed to parse 'ifconfig' command output: {output} ({e})")
             else:
                 self.logger.error(f"Incorrect network interface: {interface}")
         except FileNotFoundError:
@@ -402,117 +406,113 @@ class PiInfo(metaclass=Singleton):
         """
         command = f"hcitool dev"
         address = self.__get_shell_cmd_output(command)
-        if address is None:
-            return None
-        try:
+        if address:
+            try:
                 address = address.split('\n')[1].split()[1]
                 return address.upper()
-        except (IndexError, ValueError) as e:
-            self.logger.error(f"Failed to parse 'hcitool dev' command output: {address} ({e})")
+            except (IndexError, ValueError) as e:
+                self.logger.error(f"Failed to parse 'hcitool dev' command output: {address} ({e})")
         return None
 
-    def get_available_wifi_networks(self) -> Optional[List[List[str]]]:
+    def get_available_wifi_networks(self) -> list[dict[str, str]]:
         """Retrieves info about available Wi-Fi networks.
 
         Returns:
             The Wi-Fi Networks info dict with ssid, bssid, mode, channel, rate, signal, bars and security fields.
             Wi-Fi networks in list ordered by SSID.
         """
+        networks: list[dict[str, str]] = []
         command = "nmcli dev wifi"
         output = self.__get_shell_cmd_output(command)
-        if output is None:
-            return None
-        try:
-            lines = output.splitlines()[1:]
-            if not lines:
-                self.logger.warning("No Wi-Fi networks information available")
-                return None
-            networks = []
-            for line in lines:
-                values = line.split()
-                k = values.index("Mbit/s")
-                networks.append({
-                    'ssid': " ".join(values[1:k-3]),
-                    'bssid': values[0],
-                    'mode': values[k-3],
-                    'channel': values[k-2],
-                    'rate': " ".join(values[k-1:k+1]),
-                    'signal': values[k+1],
-                    'bars': values[k+2],
-                    'security': " ".join(values[k+3:])
-                })
-            return networks
-        except Exception as e:
-            self.logger.error(f"Unexpected error getting Wi-Fi networks info: {e}")
-        return None
+        if output:
+            try:
+                lines = output.splitlines()[1:]
+                if not lines:
+                    self.logger.warning("No Wi-Fi networks information available")
+                    return networks
+                for line in lines:
+                    values = line.split()
+                    k = values.index("Mbit/s")
+                    networks.append({
+                        'ssid': " ".join(values[1:k-3]),
+                        'bssid': values[0],
+                        'mode': values[k-3],
+                        'channel': values[k-2],
+                        'rate': " ".join(values[k-1:k+1]),
+                        'signal': values[k+1],
+                        'bars': values[k+2],
+                        'security': " ".join(values[k+3:])
+                    })
+                return networks
+            except Exception as e:
+                self.logger.error(f"Unexpected error getting Wi-Fi networks info: {e}")
+        return networks
 
-    def get_disks_info(self) -> Optional[List[List[str]]]:
+    def get_disks_info(self) -> list[dict[str, str]]:
         """Retrieves disk info in human readable format.
 
         Returns:
             List of dictionaries with disk info or None if error occurs.
             Each dict contains: filesystem, size, used, available, use_percent, mounted_on
         """
+        headers = ["filesystem", "size", "used", "available", "use_percent", "mounted_on"]
+        disks: list[dict[str, str]] = []
         command = "df -h --output=source,size,used,avail,pcent,target | head -n 1; df -h | tail -n +2 | sort -k6"
         output = self.__get_shell_cmd_output(command)
-        if output is None:
-            return None
-        try:
-            lines = output.splitlines()[1:]
-            if not lines:
-                self.logger.warning("No disk usage information available")
-                return None
-            headers = ["filesystem", "size", "used", "available", "use_percent", "mounted_on"]
-            disks = []
-            for line in lines:
-                values = line.split()
-                values = line.split(maxsplit=5)
-                if len(values) != 6:
-                    continue
-                disk_info = dict(zip(headers, values))
-                disk_info["use_percent"] = disk_info["use_percent"].replace("%", "")
-                disks.append(disk_info)
-            return disks
-        except Exception as e:
-            self.logger.error(f"Unexpected error getting disk info: {e}")
-        return None
+        if output:
+            try:
+                lines = output.splitlines()[1:]
+                if not lines:
+                    self.logger.warning("No disk usage information available")
+                    return disks
+                for line in lines:
+                    values = line.split()
+                    values = line.split(maxsplit=5)
+                    if len(values) != 6:
+                        continue
+                    disk_info = dict(zip(headers, values))
+                    disk_info["use_percent"] = disk_info["use_percent"].replace("%", "")
+                    disks.append(disk_info)
+                return disks
+            except Exception as e:
+                self.logger.error(f"Unexpected error getting disk info: {e}")
+        return disks
 
-    def get_processes_info(self) -> Optional[List[List[str]]]:
+    def get_processes_info(self) -> list[dict[str, Any]]:
         """Retrieves info about running processes in system.
 
         Returns:
             List of process dictionaries or None if error occurs.
             Each dict contains: user, pid, cpu%, mem%, command, start_time
         """
+        processes: list[dict[str, Any]] = []
         command = "ps -eo user,pid,pcpu,pmem,comm,lstart --sort=-pcpu"
         output = self.__get_shell_cmd_output(command)
-        if output is None:
-            return None
-        try:
-            lines = output.splitlines()[1:]
-            if not lines:
-                self.logger.warning("No processes information available")
-                return None
-            processes = []
-            for line in lines:
-                try:
-                    parts = line.split()
-                    process_info = {
-                        'user': parts[0],
-                        'pid': parts[1],
-                        'cpu_percent': float(parts[2]),
-                        'mem_percent': float(parts[3]),
-                        'command': " ".join(parts[4:-5]),
-                        'started_on': datetime.strptime(" ".join(parts[-5:]), "%a %b %d %H:%M:%S %Y")
-                    }
-                    processes.append(process_info)
-                except (ValueError, IndexError) as e:
-                    self.logger.warning(f"Skipping malformed process line: {line} ({e})")
-                    continue
-            return processes
-        except Exception as e:
-            self.logger.error(f"Unexpected error getting process info: {e}")
-        return None
+        if output:
+            try:
+                lines = output.splitlines()[1:]
+                if not lines:
+                    self.logger.warning("No processes information available")
+                    return processes
+                for line in lines:
+                    try:
+                        parts = line.split()
+                        process_info = {
+                            'user': parts[0],
+                            'pid': parts[1],
+                            'cpu_percent': float(parts[2]),
+                            'mem_percent': float(parts[3]),
+                            'command': " ".join(parts[4:-5]),
+                            'started_on': datetime.strptime(" ".join(parts[-5:]), "%a %b %d %H:%M:%S %Y")
+                        }
+                        processes.append(process_info)
+                    except (ValueError, IndexError) as e:
+                        self.logger.warning(f"Skipping malformed process line: {line} ({e})")
+                        continue
+                return processes
+            except Exception as e:
+                self.logger.error(f"Unexpected error getting process info: {e}")
+        return processes
 
     def get_uptime_since(self) -> Optional[datetime]:
         """Retrieves the system uptime since boot, in YYYY-MM-DD HH:MM:SS format using 'uptime -s'.
@@ -524,7 +524,7 @@ class PiInfo(metaclass=Singleton):
         uptime_str = self.__get_shell_cmd_output(command)
         return datetime.strptime(uptime_str, "%Y-%m-%d %H:%M:%S")
 
-    def get_uptime_pretty(self) -> Optional[str]:
+    def get_uptime_pretty(self) -> str:
         """Retrieves the system uptime in a human-readable format using 'uptime -p'.
 
         Returns:
@@ -534,7 +534,7 @@ class PiInfo(metaclass=Singleton):
         return self.__get_shell_cmd_output(command)
 
 
-def main():
+def main() -> None:
     logger = LoggerSingleton(
         level="DEBUG",
         colored=True
