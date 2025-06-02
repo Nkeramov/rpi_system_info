@@ -1,4 +1,4 @@
-# Raspberry Pi system info
+# Raspberry Pi System Info
 
 [![license](https://img.shields.io/npm/l/pirev.svg?style=flat)](https://opensource.org/licenses/MIT)
 
@@ -23,3 +23,4 @@ Gunicorn is used to launch. Use run.sh to run project.
 - [Raspberry Pi hardware](https://www.raspberrypi.com/documentation/computers/raspberry-pi.html)
 - [Raspberry Pi revision codes](https://www.raspberrypi.com/documentation/computers/raspberry-pi.html#raspberry-pi-revision-codes)
 - [Rasperry Pi OS](https://www.raspberrypi.com/documentation/computers/os.html)
+- [How to Benchmark a Raspberry Pi Using Vcgencmd](https://www.tomshardware.com/how-to/raspberry-pi-benchmark-vcgencmd)
