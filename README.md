@@ -22,8 +22,7 @@ The web server is based on Flask framework. By default the application will run 
 
 Gunicorn is used to launch.
 
-
-## Usage
+## Prerequisites
 
 Install the requirements. To keep things simple, we will use the Python virtual environment.
 
@@ -34,13 +33,6 @@ Install the requirements. To keep things simple, we will use the Python virtual 
         pip install -r requirements.txt
 ```
 
-
-Copy the env.example to .env and make your edits.
-
-```bash
-        cp env.example .env
-```
-
 Make run.sh executable and use it to run project.
 
 ```bash
@@ -48,6 +40,26 @@ Make run.sh executable and use it to run project.
         ./run.sh
 ```
 
+## Configuration
+
+The configuration file is located in the `.env` file. You can copy the `env.example` to `.env` and make your edits.
+
+```bash
+        cp env.example .env
+```
+
+## Contributing
+
+We welcome contributions! If you want to contribute, please follow these steps:
+
+1. Fork the repository.
+2. Create a new branch for your feature or bug fix.
+3. Make your changes and commit them.
+4. Push to your fork and create a pull request.
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ## Ref
 
