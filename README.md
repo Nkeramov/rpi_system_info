@@ -1,6 +1,10 @@
 # Raspberry Pi System Info
 
-[![license](https://img.shields.io/npm/l/pirev.svg?style=flat)](https://opensource.org/licenses/MIT)
+[![Raspberry Pi](https://img.shields.io/badge/Raspberry%20Pi-A22846.svg?logo=Raspberry-Pi)](https://www.raspberrypi.com/)
+![Python](https://img.shields.io/badge/python-3.11-blue.svg)
+[![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](https://mypy-lang.org/)
+[![license](https://img.shields.io/badge/licence-MIT-green.svg)](https://opensource.org/licenses/MIT)
+
 
 This project is a simple web server that displays system information about your Raspberry Pi.
 
