@@ -8,7 +8,7 @@ from enum import Enum
 from datetime import datetime
 from dataclasses import dataclass, field
 from functools import cached_property
-from typing import Any, Optional
+from typing import Any, Literal, Optional
 
 from .cls_utils import Singleton
 from .log_utils import LoggerSingleton
@@ -136,6 +136,35 @@ class PiInfo(metaclass=Singleton):
                 'cpu_model': old_boards_revisions_decoder[code][3],
                 'manufacturer': old_boards_revisions_decoder[code][4]
             }
+
+    @staticmethod
+    def float_to_int_if_zero_fraction(x: float) -> float | int:
+        """Converts a real number to an integer if its fractional part is zero.
+            Otherwise, returns the passed value.
+        """
+        if isinstance(x, float):
+            if x.is_integer():
+                return int(x)
+            else:
+                return x
+        else:
+            raise TypeError("Floating point number expected")
+
+    @staticmethod
+    def convert_frequency(frequency: float, unit: Literal['Hz', 'Kz', 'Mz', 'Gz'] = 'MHz') -> float | int:
+        result = 0
+        match unit:
+            case 'Hz':
+                result = frequency
+            case 'KHz':
+                result = frequency / 10**3
+            case 'MHz':
+                result = frequency / 10**6
+            case 'GHz':
+                result = frequency / 10**9
+            case _:
+                self.logger.error(f"Requested unknown CPU frequency unit: {unit}")
+        return PiInfo.float_to_int_if_zero_fraction(result)
 
     def __get_shell_cmd_output(self, command: str) -> str:
         """Executes a shell command and returns its standard output.
@@ -283,34 +312,32 @@ class PiInfo(metaclass=Singleton):
             self.logger.error(f"Error while converting CPU temperature to float, temperature value: {result}")
         return None
 
-    def get_cpu_core_frequency(self, unit: str = 'MHz') -> int:
-        """Retrieves CPU frequency info in specified units (Hz, KHz, MHz or GHz).
+    def get_cpu_core_frequencies(self, unit: Literal['Hz', 'Kz', 'Mz', 'Gz'] = 'MHz') -> dict[str, int | float]:
+        """Retrieves min, max and current CPU core frequencies in specified units (Hz, KHz, MHz or GHz).
+        If for some frequency type the command failss, then 0 will return for it.
 
         Args:
-            unit: The desired unit for the frequency (Hz, KHz, MHz, GHz). Defaults to 'MHz'.
+            unit: The desired unit for the core frequency (Hz, KHz, MHz, GHz). Defaults to 'MHz'.
 
         Returns:
-            The CPU core frequency in the specified unit, or 0 if the command fails or the unit is invalid.
+            Dict with CPU core frequencies values in the specified unit.
         """
-        command = "vcgencmd measure_clock arm | cut -d= -f2"
-        result = self.__get_shell_cmd_output(command)
-        if result:
-            try:
-                frequency = int(result)
-                match unit:
-                    case 'Hz':
-                        return frequency
-                    case 'KHz':
-                        return frequency // 10**3
-                    case 'MHz':
-                        return frequency // 10**6
-                    case 'GHz':
-                        return frequency // 10**9
-                    case _:
-                        self.logger.error(f"Requested unknown CPU frequency unit: {unit}")
-            except ValueError as e:
-                self.logger.error(f"Error while converting CPU frequency to int, frequency value: {result}")
-        return 0
+        core_frequencies = {
+            'min': 0,
+            'max': 0,
+            'cur': 0
+        }
+        for ft in core_frequencies:
+            command = f"cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_{ft}_freq"
+            result = self.__get_shell_cmd_output(command)
+            if result:
+                try:
+                    frequency = float(result) * 1000
+                    core_frequencies[ft] = PiInfo.convert_frequency(frequency, unit)
+                except ValueError as e:
+                    self.logger.error(f"Error while converting CPU frequency to float, frequency value: {result}")
+        self.logger.info(core_frequencies)
+        return core_frequencies
 
     def get_cpu_usage(self) -> str:
         """Retrieves the CPU usage using 'top'.
