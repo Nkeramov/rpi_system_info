@@ -125,7 +125,7 @@
                     <h5>CPU Details</h5>
                 </div>
             </div>
-            <div class="toggle-content">
+            <div class="toggle-content collapsed">
                 <div class="row t-row">
                     <div class="five columns t-caption">
                         Model
@@ -239,7 +239,7 @@
                     <h5>RAM Details</h5>
                </div>
             </div>
-            <div class="toggle-content">
+            <div class="toggle-content collapsed">
                 <div class="row t-row">
                     <div class="five columns t-caption">
                         Memory Size
@@ -297,7 +297,7 @@
                     <h5>Ethernet Network Details</h5>
                 </div>
             </div>
-            <div class="toggle-content">
+            <div class="toggle-content collapsed">
                 <div class="row t-row">
                     <div class="five columns t-caption">
                         IP address
@@ -331,7 +331,7 @@
                     <h5>Wi-Fi Network Details</h5>
                 </div>
             </div>
-            <div class="toggle-content">
+            <div class="toggle-content collapsed">
                 <div class="row t-row">
                     <div class="five columns t-caption">
                         IP address
@@ -359,31 +359,13 @@
             </div>
             <div class="row t-header toggle-header">
                 <div class="t-header-img">
-                    <img src="static/images/bluetooth.png" style="width:32px">
-                </div>
-                <div>
-                    <h5>Bluetooth Network Details</h5>
-                </div>
-            </div>
-            <div class="toggle-content">
-                <div class="row t-row">
-                    <div class="five columns t-caption">
-                        MAC address
-                    </div>
-                    <div class="seven columns">
-                        {{bluetooth_mac_address}}
-                    </div>
-                </div>
-            </div>
-            <div class="row t-header toggle-header">
-                <div class="t-header-img">
                     <img src="static/images/wifi.png" style="width:32px">
                 </div>
                 <div>
                     <h5>Available WiFi Networks <span class="item-count"> ( {{ available_wifi_networks | length}} ) </span></h5>
                 </div>
             </div>
-            <div class="toggle-content">
+            <div class="toggle-content collapsed">
                 <div>
                     <table class="u-full-width sortable">
                         <thead>
@@ -413,13 +395,31 @@
             </div>
             <div class="row t-header toggle-header">
                 <div class="t-header-img">
+                    <img src="static/images/bluetooth.png" style="width:32px">
+                </div>
+                <div>
+                    <h5>Bluetooth Details</h5>
+                </div>
+            </div>
+            <div class="toggle-content collapsed">
+                <div class="row t-row">
+                    <div class="five columns t-caption">
+                        MAC address
+                    </div>
+                    <div class="seven columns">
+                        {{bluetooth_mac_address}}
+                    </div>
+                </div>
+            </div>
+            <div class="row t-header toggle-header">
+                <div class="t-header-img">
                     <img src="static/images/storage.png" style="width:32px">
                 </div>
                 <div>
                     <h5>Disks Details <span class="item-count"> ( {{ disks_details | length}} ) </span></h5>
                 </div>
             </div>
-            <div class="toggle-content">
+            <div class="toggle-content collapsed">
                 <table class="u-full-width sortable">
                     <thead>
                         <tr>
@@ -453,7 +453,7 @@
                     <h5>Running Processes Details <span class="item-count"> ( total {{ processes_details | length}} ) </span></h5>
                 </div>
             </div>
-            <div class="toggle-content">
+            <div class="toggle-content collapsed">
                 <table class="u-full-width sortable">
                     <thead>
                         <tr>
