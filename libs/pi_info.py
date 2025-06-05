@@ -46,6 +46,10 @@ class ModelType(Enum):
     RPI_CM5_LITE = 0x19
 
 
+class IncorrectFrequencyUnitError(Exception):
+    """Raise when frequncy unit not in ['Hz', 'KHz', 'MHz', 'GHz']"""
+
+
 @dataclass(frozen=True)
 class PiInfo(metaclass=Singleton):
     _NET_PATH = "/sys/class/net"
@@ -151,8 +155,8 @@ class PiInfo(metaclass=Singleton):
             raise TypeError("Floating point number expected")
 
     @staticmethod
-    def convert_frequency(frequency: float, unit: Literal['Hz', 'Kz', 'Mz', 'Gz'] = 'MHz') -> float | int:
-        result = 0
+    def convert_frequency(frequency: float, unit: Literal['Hz', 'KHz', 'MHz', 'GHz'] = 'MHz') -> float | int:
+        result = 0.0
         match unit:
             case 'Hz':
                 result = frequency
@@ -163,7 +167,7 @@ class PiInfo(metaclass=Singleton):
             case 'GHz':
                 result = frequency / 10**9
             case _:
-                self.logger.error(f"Requested unknown CPU frequency unit: {unit}")
+                raise IncorrectFrequencyUnitError(f"Requested unknown CPU frequency unit: {unit}")
         return PiInfo.float_to_int_if_zero_fraction(result)
 
     def __get_shell_cmd_output(self, command: str) -> str:
@@ -312,7 +316,7 @@ class PiInfo(metaclass=Singleton):
             self.logger.error(f"Error while converting CPU temperature to float, temperature value: {result}")
         return None
 
-    def get_cpu_core_frequencies(self, unit: Literal['Hz', 'Kz', 'Mz', 'Gz'] = 'MHz') -> dict[str, int | float]:
+    def get_cpu_core_frequencies(self, unit: Literal['Hz', 'KHz', 'MHz', 'GHz'] = 'MHz') -> dict[str, int | float]:
         """Retrieves min, max and current CPU core frequencies in specified units (Hz, KHz, MHz or GHz).
         If for some frequency type the command failss, then 0 will return for it.
 
@@ -323,9 +327,9 @@ class PiInfo(metaclass=Singleton):
             Dict with CPU core frequencies values in the specified unit.
         """
         core_frequencies = {
-            'min': 0,
-            'max': 0,
-            'cur': 0
+            'min': 0.0,
+            'max': 0.0,
+            'cur': 0.0
         }
         for ft in core_frequencies:
             command = f"cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_{ft}_freq"
@@ -336,6 +340,8 @@ class PiInfo(metaclass=Singleton):
                     core_frequencies[ft] = PiInfo.convert_frequency(frequency, unit)
                 except ValueError as e:
                     self.logger.error(f"Error while converting CPU frequency to float, frequency value: {result}")
+                except Exception as e:
+                    self.logger.error(f"CPU frequency processing error: {e}")
         self.logger.info(core_frequencies)
         return core_frequencies
 
