@@ -342,7 +342,6 @@ class PiInfo(metaclass=Singleton):
                     self.logger.error(f"Error while converting CPU frequency to float, frequency value: {result}")
                 except Exception as e:
                     self.logger.error(f"CPU frequency processing error: {e}")
-        self.logger.info(core_frequencies)
         return core_frequencies
 
     def get_cpu_usage(self) -> str:
