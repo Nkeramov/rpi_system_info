@@ -22,7 +22,7 @@ The web server is based on Flask framework. By default the application will run 
 
 Gunicorn is used to launch.
 
-## Prerequisites
+## Setting up project
 
 Install the requirements. To keep things simple, we will use the Python virtual environment.
 
@@ -63,7 +63,9 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ## Ref
 
+- [Getting started](https://www.raspberrypi.com/documentation/computers/getting-started.html)
+- [Raspberry Pi OS](https://www.raspberrypi.com/documentation/computers/os.html)
+- [Processors](https://www.raspberrypi.com/documentation/computers/processors.html)
 - [Raspberry Pi hardware](https://www.raspberrypi.com/documentation/computers/raspberry-pi.html)
 - [Raspberry Pi revision codes](https://www.raspberrypi.com/documentation/computers/raspberry-pi.html#raspberry-pi-revision-codes)
-- [Rasperry Pi OS](https://www.raspberrypi.com/documentation/computers/os.html)
 - [How to Benchmark a Raspberry Pi Using Vcgencmd](https://www.tomshardware.com/how-to/raspberry-pi-benchmark-vcgencmd)
