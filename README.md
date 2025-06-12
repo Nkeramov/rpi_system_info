@@ -22,35 +22,60 @@ The web server is based on Flask framework. By default the application will run 
 
 Gunicorn is used to launch.
 
-## Setting up project
-
-Install the requirements. To keep things simple, we will use the Python virtual environment.
-
-```bash
-        python -m venv .venv
-        source .venv/bin/activate           # for linux and mac
-        ./env/Scripts/activate              # for windows
-        pip install -r requirements.txt
+## Setting up and running the project
+Clone repository:
+```bash 
+git clone https://github.com/Nkeramov/raspberry_pi_system_info.git
 ```
-
-Make run.sh executable and use it to run project.
-
+Switch to repo directory
+```bash 
+cd raspberry_pi_system_info
+```
+Сreate new virtual environment:
+```bash 
+python -m venv .venv 
+```
+Activate the virtual environment with the command:
+```bash 
+source .venv/bin/activate
+```
+Install dependencies from the requirements file:
 ```bash
-        chmod +x run.sh
-        ./run.sh
+pip install -r requirements.txt
+```
+Run with command:
+```bash
+gunicorn --bind 0.0.0.0:8080 main:app
+```
+Or use a launch script `run.sh`, making it executable first
+```bash
+chmod +x run.sh
 ```
 
 ## Configuration
 
 The configuration file is located in the `.env` file. You can copy the `env.example` to `.env` and make your edits.
-
 ```bash
-        cp env.example .env
+cp env.example .env
 ```
+
+## Adding to startup
+
+You can set up automatic script launch at system startup.
+
+Open the /etc/rc.local file in editor:
+```bash
+sudo nano /etc/rc.local
+```
+Add to the end of file this line:
+```bash
+/home/pi/raspberry_pi_system_info/run.sh &
+```
+Press Ctrl+O → Enter → Ctrl+X to save and exit.
 
 ## Contributing
 
-We welcome contributions! If you want to contribute, please follow these steps:
+If you want to contribute, please follow these steps:
 
 1. Fork the repository.
 2. Create a new branch for your feature or bug fix.
