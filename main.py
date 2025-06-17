@@ -92,7 +92,7 @@ def internal_server_error(error: InternalServerError) -> tuple[str, int]:
 
 
 @app.context_processor
-def generic_board_info(logger: Logger = logger) -> dict[str, dict[str, Optional[str]]]:
+def generic_board_info(logger: Logger = logger) -> dict[str, dict[str, Any]]:
     uptime = pi_info.get_uptime_since()
     return dict(generic_board_info=
         {
@@ -147,16 +147,17 @@ def ram_details(logger: Logger = logger) -> dict[str, dict[str, str]]:
 
 
 @app.context_processor
-def eth_interface_info(logger: Logger = logger) -> dict[str, str]:
+def eth_interface_info(logger: Logger = logger) -> dict[str, dict[str, str]]:
     return dict(eth_info=pi_info.get_network_interface_info('eth0'))
 
 
 @app.context_processor
-def wlan_interface_info(logger: Logger = logger) -> dict[str, str]:
+def wlan_interface_info(logger: Logger = logger) -> dict[str, dict[str, str]]:
     return dict(wlan_info=pi_info.get_network_interface_info('wlan0'))
 
+
 @app.context_processor
-def wifi_network_name(logger: Logger = logger) -> str:
+def wifi_network_name(logger: Logger = logger) -> dict[str, str]:
     network_name = pi_info.get_wifi_network_name()
     return dict(wifi_network_name=network_name)
 
@@ -164,7 +165,7 @@ def wifi_network_name(logger: Logger = logger) -> str:
 @app.context_processor
 def bluetooth_mac_address(logger: Logger = logger) -> dict[str, str]:
     address = pi_info.get_bluetooth_mac_address()
-    return dict(bluetooth_mac_address=address or 'Unknown')
+    return dict(bluetooth_mac_address=address)
 
 
 @app.context_processor
