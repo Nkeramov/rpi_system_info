@@ -470,7 +470,7 @@ class PiInfo(metaclass=Singleton):
             Wi-Fi networks in list ordered by SSID.
         """
         networks: list[dict[str, str]] = []
-        command = "nmcli dev wifi"
+        command = "nmcli dev wifi list"
         output = self.__get_shell_cmd_output(command)
         if output:
             try:
@@ -480,6 +480,8 @@ class PiInfo(metaclass=Singleton):
                     return networks
                 for line in lines:
                     values = line.split()
+                    if line.startswith('*'):
+                        values = values[1:]
                     k = values.index("Mbit/s")
                     networks.append({
                         'ssid': " ".join(values[1:k-3]),
