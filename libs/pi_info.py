@@ -382,71 +382,85 @@ class PiInfo(metaclass=Singleton):
                 self.logger.error(f"Failed to parse 'free' command output: {output} ({e})")
         return ram_info
 
-    def get_mac_address(self, interface: str='eth0') -> Optional[str]:
-        """Retrieves the MAC address for a specified network interface.
+
+    def get_network_interface_info(self, interface: str='eth0') -> dict[str, str]:
+        """Retrieves network interface info. Uses a safer approach.
 
         Args:
             interface: The network interface name (default: 'eth0').
 
         Returns:
-            The MAC address, or None if the command fails or the interface is not found.
+            The network interface info dict with mac address, ip addres, network mask,
+            broadcast ip address, default gateway ip address and state.
         """
+        nic_fields = ['mac', 'ip', 'mask', 'broadcast', 'gateway', 'state']
+        nic_info = {field: "" for field in nic_fields}
         try:
             if interface in os.listdir(self._NET_PATH):
-                command = f"cat /sys/class/net/{interface}/address"
-                address = self.__get_shell_cmd_output(command)
-                return address.upper()
+                try:
+                    mac_addr_cmd = f"cat /sys/class/net/{interface}/address"
+                    mac_addr_output = self.__get_shell_cmd_output(mac_addr_cmd)
+                    nic_info['mac'] = mac_addr_output.upper()
+
+                    ip_link_cmd = f"ip -o link show {interface}"
+                    ip_link_output = self.__get_shell_cmd_output(ip_link_cmd)
+                    if "state UP" not in ip_link_output and "LOWER_UP" not in ip_link_output:
+                        nic_info['state'] = 'DOWN'
+                        self.logger.warning(f"Interface {interface} is DOWN")
+                        return nic_info
+
+                    nic_info['state'] = 'UP'
+                    ip_addr_cmd = f"ip -4 addr show {interface}"
+                    ip_addr_output = self.__get_shell_cmd_output(ip_addr_cmd)
+                    ip_match = re.search(r'inet (\d+\.\d+\.\d+\.\d+)/(\d+)', ip_addr_output)
+                    broadcast_match = re.search(r'brd (\d+\.\d+\.\d+\.\d+)', ip_addr_output)
+                    if not ip_match or not broadcast_match:
+                        self.logger.error(f"Failed to parse 'ip addr' command output: {ip_addr_output}")
+                    else:
+                        nic_info['ip'] = ip_match.group(1)
+                        prefix_len = int(ip_match.group(2))
+                        nic_info['broadcast'] = broadcast_match.group(1)
+                        mask = (0xffffffff << (32 - prefix_len)) & 0xffffffff
+                        mask_bytes = [
+                            (mask >> 24) & 0xff,
+                            (mask >> 16) & 0xff,
+                            (mask >> 8) & 0xff,
+                            mask & 0xff
+                        ]
+                        nic_info['mask'] = ".".join(map(str, mask_bytes))
+
+                        ip_route_cmd = f"ip route show | grep ^def.*{interface}"
+                        ip_route_output = self.__get_shell_cmd_output(ip_route_cmd)
+                        gateway_match = re.search(rf'^default via (\d+\.\d+\.\d+\.\d+)', ip_route_output)
+                        if gateway_match:
+                            nic_info['gateway'] = gateway_match.group(1)
+                except Exception as e:
+                    self.logger.error(f"Unexpected error while retrieving interface {interface} information: {e}")
             else:
                 self.logger.error(f"Incorrect network interface: {interface}")
         except FileNotFoundError:
             self.logger.error(f"Can not load network interface info from {self._NET_PATH}")
-        return None
+        return nic_info
 
-    def get_ip_info(self, interface: str = 'eth0') -> Optional[dict[str, str]]:
-        """Retrieves the IP information for a specified network interface.
 
-        Args:
-            interface: The network interface name (default: 'eth0').
-
-        Returns:
-            The IP info dict with IP address, network mask, broadcast IP address,
-            or None if the command fails or the interface is not connected.
-        """
-        try:
-            if interface in os.listdir(self._NET_PATH):
-                command = f"ifconfig {interface} | grep 'inet '"
-                output = self.__get_shell_cmd_output(command)
-                if output:
-                    try:
-                        fields = output.split()
-                        return {
-                            'ip': fields[1],
-                            'mask': fields[3],
-                            'broadscast': fields[5],
-                        }
-                    except (IndexError, ValueError) as e:
-                        self.logger.error(f"Failed to parse 'ifconfig' command output: {output} ({e})")
-            else:
-                self.logger.error(f"Incorrect network interface: {interface}")
-        except FileNotFoundError:
-            self.logger.error(f"Can not load network interface info from {self._NET_PATH}")
-        return None
-
-    def get_bluetooth_mac_address(self) -> Optional[str]:
+    def get_bluetooth_mac_address(self) -> str:
         """Retrieves the MAC address for the Bluetooth interface.
 
         Returns:
-            The MAC address, or None if the command fails or the interface is not found.
+            The Wi-Fi network name.
+
+        Returns:
+            The MAC address, or  if the command fails or the interface is not found.
         """
-        command = f"hcitool dev"
+        command = "hcitool dev"
         address = self.__get_shell_cmd_output(command)
         if address:
             try:
                 address = address.split('\n')[1].split()[1]
                 return address.upper()
             except (IndexError, ValueError) as e:
-                self.logger.error(f"Failed to parse 'hcitool dev' command output: {address} ({e})")
-        return None
+                self.logger.error(f"Failed to parse {command} command output: {address} ({e})")
+        return ''
 
     def get_available_wifi_networks(self) -> list[dict[str, str]]:
         """Retrieves info about available Wi-Fi networks.
@@ -479,14 +493,14 @@ class PiInfo(metaclass=Singleton):
                     })
                 return networks
             except Exception as e:
-                self.logger.error(f"Unexpected error getting Wi-Fi networks info: {e}")
+                self.logger.error(f"Unexpected error while retrieving Wi-Fi networks info: {e}")
         return networks
 
     def get_wifi_network_name(self) -> str:
         """Retrieves the name of the wireless network to which the Raspberry Pi is connected.
 
         Returns:
-            The Wi-Fi network name.
+            The Wi-Fi network name, or empty string if unable to obtain.
         """
         command = "iwgetid -r"
         return self.__get_shell_cmd_output(command)
@@ -518,7 +532,7 @@ class PiInfo(metaclass=Singleton):
         Args:
             timeout: Timeout in seconds for a response.
         Returns:
-            The public IP address as a string, or empty if unable to obtain.
+            The public IP address as a string, or empty string if unable to obtain.
         """
         ip_service_urls = [
             "http://icanhazip.com",
@@ -641,10 +655,12 @@ def main() -> None:
         logger.info(f"Manufacturer: {pi_info.manufacturer}")
         logger.info(f"OS: {pi_info.os_name}")
         for interface in ['eth0', 'wlan0']:
-            mac_address = pi_info.get_mac_address(interface)
-            ip_info = pi_info.get_ip_info(interface)
-            ip_address = ip_info['ip'] if ip_info else ''
-            logger.info(f"{interface} interface: MAC address {mac_address}, IP address {ip_address}")
+            nic_info = pi_info.get_network_interface_info(interface)
+            mac_address = nic_info['mac'] or 'Unknown'
+            ip_address = nic_info['ip'] or 'Not connected'
+            mask = nic_info['mask'] or 'Not connected'
+            default_gateway = nic_info['gateway'] or 'Not connected'
+            logger.info(f"{interface} interface: MAC address {mac_address}, IP address {ip_address}, Subnet mask: {mask}, Default gateway: {default_gateway}")
         logger.info(f"Wi-Fi network name: {pi_info.get_wifi_network_name()}")
         logger.info(f"Internet connection is{' not' if not pi_info.check_internet_connection() else ''} active")
         logger.info(f"Public IP address: {pi_info.get_public_ip()}")
