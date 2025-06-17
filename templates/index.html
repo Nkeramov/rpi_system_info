@@ -116,6 +116,28 @@
                         {{generic_board_info.uptime_pretty}}
                     </div>
                 </div>
+                <div class="row t-row">
+                    <div class="five columns t-caption">
+                        Internet connection
+                    </div>
+                    <div class="seven columns">
+                    {% if generic_board_info.internet_connection_status %}
+                        Active
+                    {% else %}
+                        Not active
+                    {% endif %}
+                    </div>
+                </div>
+                {% if generic_board_info.internet_connection_status %}
+                <div class="row t-row">
+                    <div class="five columns t-caption">
+                        Public IP address
+                    </div>
+                    <div class="seven columns">
+                        {{ generic_board_info.public_ip}}
+                    </div>
+                </div>
+                {% endif %}
             </div>
             <div class="row t-header toggle-header collapsed">
                 <div class="t-header-img">
@@ -348,6 +370,14 @@
                 </div>
             </div>
             <div class="toggle-content collapsed">
+                <div class="row t-row">
+                    <div class="five columns t-caption">
+                        Network name
+                    </div>
+                    <div class="seven columns t-row">
+                        {{wifi_network_name}}
+                    </div>
+                </div>
                 <div class="row t-row">
                     <div class="five columns t-caption">
                         IP address

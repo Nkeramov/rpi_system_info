@@ -104,7 +104,9 @@ def generic_board_info(logger: Logger = logger) -> dict[str, dict[str, Optional[
             'hostname': pi_info.hostname,
             'system_time': datetime.now().strftime(TEXT_DATETIME_FORMAT),
             'uptime_since': uptime.strftime(TEXT_DATETIME_FORMAT) if uptime else '',
-            'uptime_pretty': pi_info.get_uptime_pretty()
+            'uptime_pretty': pi_info.get_uptime_pretty(),
+            'internet_connection_status': pi_info.check_internet_connection(),
+            'public_ip': pi_info.get_public_ip()
         }
     )
 
@@ -177,6 +179,12 @@ def wifi_ip_details(logger: Logger = logger) -> dict[str, str]:
 def wifi_mac_address(logger: Logger = logger) -> dict[str, str]:
     address = pi_info.get_mac_address('wlan0')
     return dict(wifi_mac_address=address or 'Unknown')
+
+
+@app.context_processor
+def wifi_network_name(logger: Logger = logger) -> str:
+    network_name = pi_info.get_wifi_network_name()
+    return dict(wifi_network_name=network_name or 'Not connected')
 
 
 @app.context_processor
