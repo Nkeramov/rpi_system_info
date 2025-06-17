@@ -338,10 +338,38 @@
             <div class="toggle-content collapsed">
                 <div class="row t-row">
                     <div class="five columns t-caption">
+                        MAC address
+                    </div>
+                    <div class="seven columns">
+                    {% if eth_info.mac %}
+                        {{eth_info.mac}}
+                    {% else %}
+                        Unknown
+                    {% endif %}
+                    </div>
+                </div>
+                <div class="row t-row">
+                    <div class="five columns t-caption">
                         IP address
                     </div>
                     <div class="seven columns t-row">
-                        {{ethernet_ip_address}}
+                    {% if eth_info.state == 'UP' %}
+                        {{eth_info.ip}}
+                    {% else %}
+                        Not connected
+                    {% endif %}
+                    </div>
+                </div>
+                <div class="row t-row">
+                    <div class="five columns t-caption">
+                        Default gateway
+                    </div>
+                    <div class="seven columns t-row">
+                    {% if eth_info.state == 'UP' %}
+                        {{eth_info.gateway}}
+                    {% else %}
+                        Not connected
+                    {% endif %}
                     </div>
                 </div>
                 <div class="row t-row">
@@ -349,15 +377,23 @@
                         Network mask
                     </div>
                     <div class="seven columns t-row">
-                        {{ethernet_network_mask}}
+                    {% if eth_info.state == 'UP' %}
+                        {{eth_info.mask}}
+                    {% else %}
+                        Not connected
+                    {% endif %}
                     </div>
                 </div>
                 <div class="row t-row">
                     <div class="five columns t-caption">
-                        MAC address
+                        Broadcast IP address
                     </div>
-                    <div class="seven columns">
-                        {{ethernet_mac_address}}
+                    <div class="seven columns t-row">
+                    {% if eth_info.state == 'UP' %}
+                        {{eth_info.broadcast}}
+                    {% else %}
+                        Not connected
+                    {% endif %}
                     </div>
                 </div>
             </div>
@@ -372,10 +408,26 @@
             <div class="toggle-content collapsed">
                 <div class="row t-row">
                     <div class="five columns t-caption">
-                        Network name
+                        MAC address
+                    </div>
+                    <div class="seven columns">
+                    {% if wlan_info.mac %}
+                        {{wlan_info.mac}}
+                    {% else %}
+                        Unknown
+                    {% endif %}
+                    </div>
+                </div>
+                <div class="row t-row">
+                    <div class="five columns t-caption">
+                        Wi-Fi network
                     </div>
                     <div class="seven columns t-row">
+                    {% if wifi_network_name %}
                         {{wifi_network_name}}
+                    {% else %}
+                        Not connected
+                    {% endif %}
                     </div>
                 </div>
                 <div class="row t-row">
@@ -383,7 +435,23 @@
                         IP address
                     </div>
                     <div class="seven columns t-row">
-                        {{wifi_ip_address}}
+                    {% if wlan_info.state == 'UP' %}
+                        {{wlan_info.ip}}
+                    {% else %}
+                        Not connected
+                    {% endif %}
+                    </div>
+                </div>
+                <div class="row t-row">
+                    <div class="five columns t-caption">
+                        Default gateway
+                    </div>
+                    <div class="seven columns t-row">
+                    {% if wlan_info.state == 'UP' %}
+                        {{wlan_info.gateway}}
+                    {% else %}
+                        Not connected
+                    {% endif %}
                     </div>
                 </div>
                 <div class="row t-row">
@@ -391,18 +459,27 @@
                         Network mask
                     </div>
                     <div class="seven columns t-row">
-                        {{wifi_network_mask}}
+                    {% if wlan_info.state == 'UP' %}
+                        {{wlan_info.mask}}
+                    {% else %}
+                        Not connected
+                    {% endif %}
                     </div>
                 </div>
                 <div class="row t-row">
                     <div class="five columns t-caption">
-                        MAC address
+                        Broadcast IP address
                     </div>
-                    <div class="seven columns">
-                        {{wifi_mac_address}}
+                    <div class="seven columns t-row">
+                    {% if wlan_info.state == 'UP' %}
+                        {{wlan_info.broadcast}}
+                    {% else %}
+                        Not connected
+                    {% endif %}
                     </div>
                 </div>
             </div>
+            {% if wlan_info.state == 'UP' %}
             <div class="row t-header toggle-header collapsed">
                 <div class="t-header-img">
                     <img src="static/images/wifi.png" style="width:32px">
@@ -439,6 +516,7 @@
                     </table>
                 </div>
             </div>
+            {% endif %}
             <div class="row t-header toggle-header collapsed">
                 <div class="t-header-img">
                     <img src="static/images/bluetooth.png" style="width:32px">
@@ -453,7 +531,11 @@
                         MAC address
                     </div>
                     <div class="seven columns">
+                    {% if bluetooth_mac_address %}
                         {{bluetooth_mac_address}}
+                    {% else %}
+                        Unknown
+                    {% endif %}
                     </div>
                 </div>
             </div>

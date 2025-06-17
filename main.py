@@ -146,45 +146,19 @@ def ram_details(logger: Logger = logger) -> dict[str, dict[str, str]]:
     return dict(ram_details=pi_info.get_ram_info())
 
 
-def process_ip_info(ip_info: Optional[dict[str, str]]) -> tuple[str, str]:
-    ip, mask = '', ''
-    if ip_info:
-        default_str = 'Not connected'
-        ip = ip_info.get('ip') or default_str
-        mask = ip_info.get('mask') or default_str
-    return ip, mask
+@app.context_processor
+def eth_interface_info(logger: Logger = logger) -> dict[str, str]:
+    return dict(eth_info=pi_info.get_network_interface_info('eth0'))
 
 
 @app.context_processor
-def ethernet_ip_details(logger: Logger = logger) -> dict[str, str]:
-    ip_info = pi_info.get_ip_info('eth0')
-    ip, mask = process_ip_info(ip_info)
-    return dict(ethernet_ip_address=ip, ethernet_network_mask=mask)
-
-
-@app.context_processor
-def ethernet_mac_address(logger: Logger = logger) -> dict[str, str]:
-    address = pi_info.get_mac_address('eth0')
-    return dict(ethernet_mac_address=address or 'Unknown')
-
-
-@app.context_processor
-def wifi_ip_details(logger: Logger = logger) -> dict[str, str]:
-    ip_info = pi_info.get_ip_info('wlan0')
-    ip, mask = process_ip_info(ip_info)
-    return dict(wifi_ip_address=ip, wifi_network_mask=mask)
-
-
-@app.context_processor
-def wifi_mac_address(logger: Logger = logger) -> dict[str, str]:
-    address = pi_info.get_mac_address('wlan0')
-    return dict(wifi_mac_address=address or 'Unknown')
-
+def wlan_interface_info(logger: Logger = logger) -> dict[str, str]:
+    return dict(wlan_info=pi_info.get_network_interface_info('wlan0'))
 
 @app.context_processor
 def wifi_network_name(logger: Logger = logger) -> str:
     network_name = pi_info.get_wifi_network_name()
-    return dict(wifi_network_name=network_name or 'Not connected')
+    return dict(wifi_network_name=network_name)
 
 
 @app.context_processor
