@@ -1,9 +1,12 @@
-
 import os
 import re
 import time
+import socket
 import logging
 import subprocess
+import http.client
+import urllib.error
+import urllib.request
 from enum import Enum
 from datetime import datetime
 from dataclasses import dataclass, field
@@ -12,7 +15,6 @@ from typing import Any, Literal, Optional
 
 from .cls_utils import Singleton
 from .log_utils import LoggerSingleton
-
 
 
 class ModelType(Enum):
@@ -480,6 +482,66 @@ class PiInfo(metaclass=Singleton):
                 self.logger.error(f"Unexpected error getting Wi-Fi networks info: {e}")
         return networks
 
+    def get_wifi_network_name(self) -> str:
+        """Retrieves the name of the wireless network to which the Raspberry Pi is connected.
+
+        Returns:
+            The Wi-Fi network name.
+        """
+        command = "iwgetid -r"
+        return self.__get_shell_cmd_output(command)
+
+    def check_internet_connection(self, test_url: str = "http://www.google.com", timeout: int = 5) -> bool:
+        """Checks for an active internet connection by attempting to make an HTTP request.
+
+        Args:
+            test_url: URL to test the connection to. Defaults to "http://www.google.com".
+            timeout: Timeout in seconds to wait for a response.
+        Returns:
+            True if there is a connection, False otherwise.
+        """
+        try:
+            urllib.request.urlopen(test_url, timeout=timeout)
+            self.logger.debug("Internet connection is active.")
+            return True
+        except urllib.error.URLError as e:
+            self.logger.error("URLError while checking connection: {e.reason}. Internet connection is missing or blocked.")
+        except socket.timeout:
+            self.logger.error("Connection check timed out. Internet may be slow or unavailable.")
+        except Exception as e:
+            self.logger.error(f"Unexpected error while checking connection: {e}")
+        return False
+
+    def get_public_ip(self, timeout: int = 5) -> str:
+        """Returns the public IP address using an external service.
+
+        Args:
+            timeout: Timeout in seconds for a response.
+        Returns:
+            The public IP address as a string, or empty if unable to obtain.
+        """
+        ip_service_urls = [
+            "http://icanhazip.com",
+            "http://api.ipify.org"
+            "http://myexternalip.com/raw"
+        ]
+        for ip_service_url in ip_service_urls:
+            self.logger.debug(f"Trying to get public IP address via {ip_service_url}...")
+            try:
+                response: http.client.HTTPResponse
+                with urllib.request.urlopen(ip_service_url, timeout=timeout) as response:
+                    public_ip = response.read().decode('utf-8').strip()
+                    self.logger.debug(f"Public IP address: {public_ip}")
+                    return public_ip
+            except urllib.error.URLError as e:
+                self.logger.error(f"URLError when getting public IP: {e.reason}")
+                self.logger.error("Unable to obtain public IP address (maybe there is no internet or the service is unavailable).")
+            except socket.timeout:
+                self.logger.error("Timeout while getting public IP address.")
+            except Exception as e:
+                self.logger.error(f"Unexpected error while getting public IP address: {e}")
+        return ''
+
     def get_disks_info(self) -> list[dict[str, str]]:
         """Retrieves disk info in human readable format.
 
@@ -568,31 +630,35 @@ class PiInfo(metaclass=Singleton):
 
 def main() -> None:
     logger = LoggerSingleton(
-        level="DEBUG",
+        level="INFO",
         colored=True
     ).get_logger()
     pi_info = PiInfo(logger)
-    print(pi_info)
-
-    return
     try:
-        logger.info(f"Model: {pi_info.model}")
+        logger.info(f"Model: {pi_info.model_name}")
+        logger.info(f"Revision: {pi_info.revision}")
+        logger.info(f"Serial number: {pi_info.serial_number}")
+        logger.info(f"Manufacturer: {pi_info.manufacturer}")
         logger.info(f"OS: {pi_info.os_name}")
         for interface in ['eth0', 'wlan0']:
             mac_address = pi_info.get_mac_address(interface)
-            ip_address = pi_info.get_ip_info(interface)['ip']
+            ip_info = pi_info.get_ip_info(interface)
+            ip_address = ip_info['ip'] if ip_info else ''
             logger.info(f"{interface} interface: MAC address {mac_address}, IP address {ip_address}")
+        logger.info(f"Wi-Fi network name: {pi_info.get_wifi_network_name()}")
+        logger.info(f"Internet connection is{' not' if not pi_info.check_internet_connection() else ''} active")
+        logger.info(f"Public IP address: {pi_info.get_public_ip()}")
         while True:
             try:
                 cpu_temp = pi_info.get_cpu_temperature()
-                cpu_freq = pi_info.get_cpu_core_frequency()
+                cpu_freq = pi_info.get_cpu_core_frequencies()
                 cpu_usage = pi_info.get_cpu_usage()
                 ram_info = pi_info.get_ram_info()
-                logger.info(f"CPU: temperature {cpu_temp} \xb0C, frequency {cpu_freq} MHz, usage {cpu_usage}%")
+                logger.info(f"CPU: temperature {cpu_temp} \xb0C, frequency {cpu_freq['cur']} MHz, usage {cpu_usage}%")
                 logger.info(f"RAM: total {ram_info['total']} Mb, used {ram_info['used']} Mb, free {ram_info['free']} Mb, "
                             f"cache {ram_info['cache']} Mb, available {ram_info['available']} Mb")
             except Exception as e:
-                logger.error("Error during system info retrieval: {e}")
+                logger.error(f"Error during system info retrieval: {e}")
             time.sleep(2)
     except KeyboardInterrupt:
         logger.info("Stopped by user")
