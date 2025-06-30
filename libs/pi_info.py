@@ -644,6 +644,52 @@ class PiInfo(metaclass=Singleton):
         return self.__get_shell_cmd_output(command)
 
 
+    def get_throttled_status(self) -> Optional[dict[str, Any]]:
+        """
+        Gets the throttling status of the Raspberry Pi processor.
+        Returns a dictionary with flags and state descriptions.
+
+        Returns:
+            dict with raw throttled value, bool flags (under_voltage, arm_frequency_capped,
+            currently_throttled, soft_temperature_limit, under_voltage_occurred,
+            arm_frequency_capped_occurred, throttling_occurred, soft_temperature_limit_occurred)
+            and text description
+        """
+        command = "vcgencmd get_throttled | cut -d= -f2"
+        throttled = self.__get_shell_cmd_output(command).strip('"')
+        try:
+            throttled_int = int(throttled, 16)
+            status = {
+                "raw_value": throttled_int,
+                "description": "",
+                "under_voltage": bool(throttled_int & 0x1),
+                "arm_frequency_capped": bool(throttled_int & 0x2),
+                "currently_throttled": bool(throttled_int & 0x4),
+                "soft_temperature_limit": bool(throttled_int & 0x8),
+                "under_voltage_occurred": bool(throttled_int & 0x10000),
+                "arm_frequency_capped_occurred": bool(throttled_int & 0x20000),
+                "throttling_occurred": bool(throttled_int & 0x40000),
+                "soft_temperature_limit_occurred": bool(throttled_int & 0x80000)
+            }
+            descriptions = []
+            if status["under_voltage"]:
+                descriptions.append("Undervoltage detected")
+            if status["arm_frequency_capped"]:
+                descriptions.append("Arm frequency capped")
+            if status["currently_throttled"]:
+                descriptions.append("Currently throttled")
+            if status["soft_temperature_limit"]:
+                descriptions.append("Soft temperature limit active")
+            if not descriptions:
+                descriptions.append("No active issues")
+            status["description"] = '; '.join(descriptions)
+            return status
+        except ValueError as e:
+            self.logger.error(f"Error while converting throttled value {throttled} to int: {e}")
+        except Exception as e:
+            self.logger.error(f"Failed to read throttled status: {e}")
+        return None
+
 def main() -> None:
     logger = LoggerSingleton(
         level="INFO",
@@ -656,6 +702,7 @@ def main() -> None:
         logger.info(f"Serial number: {pi_info.serial_number}")
         logger.info(f"Manufacturer: {pi_info.manufacturer}")
         logger.info(f"OS: {pi_info.os_name}")
+        logger.info(f"Throttled state: {pi_info.get_throttled_status()['description']}")
         for interface in ['eth0', 'wlan0']:
             nic_info = pi_info.get_network_interface_info(interface)
             mac_address = nic_info['mac'] or 'Unknown'
@@ -682,7 +729,6 @@ def main() -> None:
         logger.info("Stopped by user")
     except Exception as e:
         logger.error(f"Unhandled exception in main loop: {e}")
-
 
 
 if __name__ == "__main__":
