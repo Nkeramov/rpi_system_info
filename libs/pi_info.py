@@ -65,6 +65,7 @@ class PiInfo(metaclass=Singleton):
     overvoltage_allowed: bool = field(init=False, default=False)
     otp_programming_allowed: bool = field(init=False, default=False)
     otp_reading_allowed: bool = field(init=False, default=False)
+    FrequencyUnit = Literal['Hz', 'KHz', 'MHz', 'GHz']
 
     def __post_init__(self) -> None:
         self.logger.debug("Fetching board revision code...")
@@ -146,7 +147,7 @@ class PiInfo(metaclass=Singleton):
     @staticmethod
     def float_to_int_if_zero_fraction(x: float) -> float | int:
         """Converts a real number to an integer if its fractional part is zero.
-            Otherwise, returns the passed value.
+           Otherwise, returns the passed value.
         """
         if isinstance(x, float):
             if x.is_integer():
@@ -157,7 +158,8 @@ class PiInfo(metaclass=Singleton):
             raise TypeError("Floating point number expected")
 
     @staticmethod
-    def convert_frequency(frequency: float, unit: Literal['Hz', 'KHz', 'MHz', 'GHz'] = 'MHz') -> float | int:
+    def convert_frequency(frequency: float, unit: FrequencyUnit = 'MHz') -> float | int:
+        """Converts input frequency value from Hz to specified unit."""
         result = 0.0
         match unit:
             case 'Hz':
@@ -318,7 +320,7 @@ class PiInfo(metaclass=Singleton):
             self.logger.error(f"Error while converting CPU temperature to float, temperature value: {result}")
         return None
 
-    def get_cpu_core_frequencies(self, unit: Literal['Hz', 'KHz', 'MHz', 'GHz'] = 'MHz') -> dict[str, int | float]:
+    def get_cpu_core_frequencies(self, unit: FrequencyUnit = 'MHz') -> dict[str, int | float]:
         """Retrieves min, max and current CPU core frequencies in specified units (Hz, KHz, MHz or GHz).
         If for some frequency type the command failss, then 0 will return for it.
 
@@ -447,9 +449,6 @@ class PiInfo(metaclass=Singleton):
         """Retrieves the MAC address for the Bluetooth interface.
 
         Returns:
-            The Wi-Fi network name.
-
-        Returns:
             The MAC address, or  if the command fails or the interface is not found.
         """
         command = "hcitool dev"
@@ -562,8 +561,8 @@ class PiInfo(metaclass=Singleton):
         """Retrieves disk info in human readable format.
 
         Returns:
-            List of dictionaries with disk info or None if error occurs.
-            Each dict contains: filesystem, size, used, available, use_percent, mounted_on
+            List of dicts with disk info or empty list if error occurs.
+            Each dict contains: filesystem, size, used, available, use_percent, mounted_on.
         """
         headers = ["filesystem", "size", "used", "available", "use_percent", "mounted_on"]
         disks: list[dict[str, str]] = []
@@ -592,8 +591,8 @@ class PiInfo(metaclass=Singleton):
         """Retrieves info about running processes in system.
 
         Returns:
-            List of process dictionaries or None if error occurs.
-            Each dict contains: user, pid, cpu%, mem%, command, start_time
+            List of discts with process info or empty list if error occurs.
+            Each dict contains: user, pid, cpu%, mem%, command, start_time.
         """
         processes: list[dict[str, Any]] = []
         command = "ps -eo user,pid,pcpu,pmem,comm,lstart --sort=-pcpu"
@@ -643,17 +642,15 @@ class PiInfo(metaclass=Singleton):
         command = "uptime -p"
         return self.__get_shell_cmd_output(command)
 
-
-    def get_throttled_status(self) -> Optional[dict[str, Any]]:
+    def get_throttled_state(self) -> Optional[dict[str, Any]]:
         """
-        Gets the throttling status of the Raspberry Pi processor.
-        Returns a dictionary with flags and state descriptions.
+        Gets the throttled status of the Raspberry Pi processor.
 
         Returns:
-            dict with raw throttled value, bool flags (under_voltage, arm_frequency_capped,
+            Dict with raw throttled value, bool flags (under_voltage, arm_frequency_capped,
             currently_throttled, soft_temperature_limit, under_voltage_occurred,
             arm_frequency_capped_occurred, throttling_occurred, soft_temperature_limit_occurred)
-            and text description
+            and text description.
         """
         command = "vcgencmd get_throttled | cut -d= -f2"
         throttled = self.__get_shell_cmd_output(command).strip('"')
@@ -690,6 +687,7 @@ class PiInfo(metaclass=Singleton):
             self.logger.error(f"Failed to read throttled status: {e}")
         return None
 
+
 def main() -> None:
     logger = LoggerSingleton(
         level="INFO",
@@ -702,7 +700,9 @@ def main() -> None:
         logger.info(f"Serial number: {pi_info.serial_number}")
         logger.info(f"Manufacturer: {pi_info.manufacturer}")
         logger.info(f"OS: {pi_info.os_name}")
-        logger.info(f"Throttled state: {pi_info.get_throttled_status()['description']}")
+        throttled_state = pi_info.get_throttled_state()
+        if throttled_state:
+            logger.info(f"Throttled state: {['description']}")
         for interface in ['eth0', 'wlan0']:
             nic_info = pi_info.get_network_interface_info(interface)
             mac_address = nic_info['mac'] or 'Unknown'
