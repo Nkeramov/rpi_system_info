@@ -93,7 +93,9 @@ def internal_server_error(error: InternalServerError) -> tuple[str, int]:
 
 @app.context_processor
 def generic_board_info(logger: Logger = logger) -> dict[str, dict[str, Any]]:
-    uptime = pi_info.get_uptime_since()
+    system_time = datetime.now().strftime(TEXT_DATETIME_FORMAT)
+    boot_time = pi_info.boot_time
+    boot_time_str = boot_time.strftime(TEXT_DATETIME_FORMAT) if boot_time else ''
     return dict(generic_board_info=
         {
             'model_name': pi_info.model_name,
@@ -102,8 +104,8 @@ def generic_board_info(logger: Logger = logger) -> dict[str, dict[str, Any]]:
             'manufacturer': pi_info.manufacturer,
             'os': pi_info.os_name,
             'hostname': pi_info.hostname,
-            'system_time': datetime.now().strftime(TEXT_DATETIME_FORMAT),
-            'uptime_since': uptime.strftime(TEXT_DATETIME_FORMAT) if uptime else '',
+            'system_time': system_time,
+            'boot_time': boot_time_str,
             'uptime_pretty': pi_info.get_uptime_pretty(),
             'internet_connection_status': pi_info.check_internet_connection(),
             'public_ip': pi_info.get_public_ip()

@@ -290,6 +290,29 @@ class PiInfo(metaclass=Singleton):
         command = "cat /etc/*-release | grep PRETTY_NAME | cut -d= -f2"
         return self.__get_shell_cmd_output(command).strip('"')
 
+    @cached_property
+    def boot_time(self) -> Optional[datetime]:
+        """Retrieves the time of boot from which uptime is calculated.
+
+        Returns:
+            The datetime of boot or None if the command fails.
+        """
+        command = "uptime -s"
+        uptime_str = self.__get_shell_cmd_output(command)
+        if uptime_str:
+            return datetime.strptime(uptime_str, "%Y-%m-%d %H:%M:%S")
+        else:
+            return None
+
+    def get_uptime_pretty(self) -> str:
+        """Retrieves the system uptime in a human-readable format.
+
+        Returns:
+            The uptime in human-readable format or empty string if the command fails.
+        """
+        command = "uptime -p"
+        return self.__get_shell_cmd_output(command)
+
     def get_cpu_core_voltage(self) -> Optional[float]:
         """Retrieves the CPU core voltage using 'vcgencmd'.
 
@@ -384,7 +407,6 @@ class PiInfo(metaclass=Singleton):
                 self.logger.error(f"Failed to parse 'free' command output: {output} ({e})")
         return ram_info
 
-
     def get_network_interface_info(self, interface: str='eth0') -> dict[str, str]:
         """Retrieves network interface info. Uses a safer approach.
 
@@ -443,7 +465,6 @@ class PiInfo(metaclass=Singleton):
         except FileNotFoundError:
             self.logger.error(f"Can not load network interface info from {self._NET_PATH}")
         return nic_info
-
 
     def get_bluetooth_mac_address(self) -> str:
         """Retrieves the MAC address for the Bluetooth interface.
@@ -623,25 +644,6 @@ class PiInfo(metaclass=Singleton):
                 self.logger.error(f"Unexpected error getting process info: {e}")
         return processes
 
-    def get_uptime_since(self) -> Optional[datetime]:
-        """Retrieves the system uptime since boot, in YYYY-MM-DD HH:MM:SS format using 'uptime -s'.
-
-        Returns:
-            The uptime since boot, or None if the command fails.
-        """
-        command = "uptime -s"
-        uptime_str = self.__get_shell_cmd_output(command)
-        return datetime.strptime(uptime_str, "%Y-%m-%d %H:%M:%S")
-
-    def get_uptime_pretty(self) -> str:
-        """Retrieves the system uptime in a human-readable format using 'uptime -p'.
-
-        Returns:
-            The pretty uptime, or None if the command fails.
-        """
-        command = "uptime -p"
-        return self.__get_shell_cmd_output(command)
-
     def get_throttled_state(self) -> Optional[dict[str, Any]]:
         """
         Gets the throttled status of the Raspberry Pi processor.
@@ -702,7 +704,7 @@ def main() -> None:
         logger.info(f"OS: {pi_info.os_name}")
         throttled_state = pi_info.get_throttled_state()
         if throttled_state:
-            logger.info(f"Throttled state: {['description']}")
+            logger.info(f"Throttled state: {throttled_state.get('description', 'Unknown')}")
         for interface in ['eth0', 'wlan0']:
             nic_info = pi_info.get_network_interface_info(interface)
             mac_address = nic_info['mac'] or 'Unknown'
