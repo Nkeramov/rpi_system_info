@@ -49,7 +49,7 @@ class ModelType(Enum):
 
 
 class IncorrectFrequencyUnitError(Exception):
-    """Raise when frequncy unit not in ['Hz', 'KHz', 'MHz', 'GHz']"""
+    """Raise when frequency unit not in ['Hz', 'KHz', 'MHz', 'GHz']"""
 
 
 @dataclass(frozen=True)
@@ -193,7 +193,7 @@ class PiInfo(metaclass=Singleton):
 
         Returns:
             The stripped standard output of the command as a string if the
-            command executes successfully, otherwise `None`.
+            command executes successfully or empty string if the command fails.
         """
         try:
             result = subprocess.run(command, shell=True, capture_output=True, text=True, check=True)
@@ -209,7 +209,7 @@ class PiInfo(metaclass=Singleton):
         """Retrieves the board model name from /sys/firmware/devicetree/base/model.
 
         Returns:
-            The board model name, or None if the command fails or the file is not found.
+            The board model name, or empty string if the command fails or the file is not found.
         """
         command = "cat /sys/firmware/devicetree/base/model"
         return self.__get_shell_cmd_output(command)
@@ -219,24 +219,24 @@ class PiInfo(metaclass=Singleton):
         """Retrieves the board serial number from /proc/cpuinfo.
 
         Returns:
-            The board serial number, or None if the command fails.
+            The board serial number, or empty string if the command fails.
         """
         command = "cat /proc/cpuinfo | grep 'Serial' | cut -d: -f2"
         return self.__get_shell_cmd_output(command)
 
     @cached_property
     def cpu_architecture(self) -> str:
-        """Retrieves the CPU architecture from lscpu.
+        """Retrieves the CPU architecture using the 'lscpu' command.
 
         Returns:
-            The CPU architecture, or None if the command fails.
+            The CPU architecture, or empty string if the command fails.
         """
         command = "lscpu | grep 'Architecture' | cut -d: -f2"
         return self.__get_shell_cmd_output(command)
 
     @cached_property
     def cpu_cores_count(self) -> int:
-        """Retrieves the number of CPU cores using 'nproc'.
+        """Retrieves the number of CPU cores using the 'nproc' command.
 
         Returns:
             The number of CPU cores, or 0 if the command fails.
@@ -251,10 +251,10 @@ class PiInfo(metaclass=Singleton):
 
     @cached_property
     def cpu_cache_sizes(self) -> dict[str, str]:
-        """Retrieves CPU cache sizes using the lscpu command.
+        """Retrieves CPU cache sizes using the 'lscpu' command.
 
         Returns:
-            A dictionary {L1d: size, L1i: size, L2: size}, where size is a string representing value in KiB, or None if command fails.
+            A dictionary {L1d: size, L1i: size, L2: size}, where size is a string representing value in KiB, or empty string if command fails.
         """
         command = "lscpu"
         output = self.__get_shell_cmd_output(command)
@@ -275,7 +275,7 @@ class PiInfo(metaclass=Singleton):
         """Retrieves the hostname using the 'hostname' command.
 
         Returns:
-            The hostname, or None if the command fails.
+            The hostname, or empty string if the command fails.
         """
         command = "hostname"
         return self.__get_shell_cmd_output(command)
@@ -285,7 +285,7 @@ class PiInfo(metaclass=Singleton):
         """Retrieves the pretty OS name from /etc/*-release.
 
         Returns:
-            The pretty OS name, or None if the command fails.  Removes surrounding quotes.
+            The pretty OS name, or empty string if the command fails.  Removes surrounding quotes.
         """
         command = "cat /etc/*-release | grep PRETTY_NAME | cut -d= -f2"
         return self.__get_shell_cmd_output(command).strip('"')
@@ -314,7 +314,7 @@ class PiInfo(metaclass=Singleton):
         return self.__get_shell_cmd_output(command)
 
     def get_cpu_core_voltage(self) -> Optional[float]:
-        """Retrieves the CPU core voltage using 'vcgencmd'.
+        """Retrieves the CPU core voltage using the 'vcgencmd' command.
 
         Returns:
             The CPU core voltage, or None if the command fails.
@@ -329,7 +329,7 @@ class PiInfo(metaclass=Singleton):
         return None
 
     def get_cpu_temperature(self) -> Optional[float]:
-        """Retrieves the CPU temperature using 'vcgencmd'.
+        """Retrieves the CPU temperature using the 'vcgencmd' command.
 
         Returns:
             The CPU temperature, or None if the command fails.
@@ -345,7 +345,7 @@ class PiInfo(metaclass=Singleton):
 
     def get_cpu_core_frequencies(self, unit: FrequencyUnit = 'MHz') -> dict[str, int | float]:
         """Retrieves min, max and current CPU core frequencies in specified units (Hz, KHz, MHz or GHz).
-        If for some frequency type the command failss, then 0 will return for it.
+        If for some frequency type the command fails, then 0 will return for it.
 
         Args:
             unit: The desired unit for the core frequency (Hz, KHz, MHz, GHz). Defaults to 'MHz'.
@@ -372,7 +372,7 @@ class PiInfo(metaclass=Singleton):
         return core_frequencies
 
     def get_cpu_usage(self) -> str:
-        """Retrieves the CPU usage using 'top'.
+        """Retrieves the CPU usage using the 'top' command.
 
         Returns:
             The CPU usage, or None if the command fails. Note that the output format is dependent on 'top'.
@@ -414,7 +414,7 @@ class PiInfo(metaclass=Singleton):
             interface: The network interface name (default: 'eth0').
 
         Returns:
-            The network interface info dict with mac address, ip addres, network mask,
+            The network interface info dict with mac address, ip address, network mask,
             broadcast ip address, default gateway ip address and state.
         """
         nic_fields = ['mac', 'ip', 'mask', 'broadcast', 'gateway', 'state']
@@ -579,7 +579,7 @@ class PiInfo(metaclass=Singleton):
         return ''
 
     def get_disks_info(self) -> list[dict[str, str]]:
-        """Retrieves disk info in human readable format.
+        """Retrieves disk info in human-readable format.
 
         Returns:
             List of dicts with disk info or empty list if error occurs.
@@ -612,7 +612,7 @@ class PiInfo(metaclass=Singleton):
         """Retrieves info about running processes in system.
 
         Returns:
-            List of discts with process info or empty list if error occurs.
+            List of dicts with process info or empty list if error occurs.
             Each dict contains: user, pid, cpu%, mem%, command, start_time.
         """
         processes: list[dict[str, Any]] = []
@@ -646,7 +646,7 @@ class PiInfo(metaclass=Singleton):
 
     def get_throttled_state(self) -> Optional[dict[str, Any]]:
         """
-        Gets the throttled status of the Raspberry Pi processor.
+        Retrieves the throttled status of the Raspberry Pi processor.
 
         Returns:
             Dict with raw throttled value, bool flags (under_voltage, arm_frequency_capped,
