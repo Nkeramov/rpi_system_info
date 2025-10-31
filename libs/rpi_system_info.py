@@ -53,7 +53,7 @@ class IncorrectFrequencyUnitError(Exception):
 
 
 @dataclass(frozen=True)
-class PiInfo(metaclass=Singleton):
+class RPiSystemInfo(metaclass=Singleton):
     _NET_PATH = "/sys/class/net"
     logger: logging.Logger = field(repr=False)
     revision_code: str = field(init=False)
@@ -74,7 +74,7 @@ class PiInfo(metaclass=Singleton):
         self.logger.debug(f"Board revision code: {fetched_revision_code}")
         object.__setattr__(self, 'revision_code', fetched_revision_code)
         self.logger.debug("Parsing board revision code string...")
-        decoded_data = PiInfo.decode_revision_code(fetched_revision_code)
+        decoded_data = RPiSystemInfo.decode_revision_code(fetched_revision_code)
         object.__setattr__(self, 'model_type', decoded_data['model_type'])
         object.__setattr__(self, 'revision', decoded_data['revision'])
         object.__setattr__(self, 'manufacturer', decoded_data['manufacturer'])
@@ -172,7 +172,7 @@ class PiInfo(metaclass=Singleton):
                 result = frequency / 10**9
             case _:
                 raise IncorrectFrequencyUnitError(f"Requested unknown CPU frequency unit: {unit}")
-        return PiInfo.float_to_int_if_zero_fraction(result)
+        return RPiSystemInfo.float_to_int_if_zero_fraction(result)
 
     def __get_shell_cmd_output(self, command: str) -> str:
         """Executes a shell command and returns its standard output.
@@ -364,7 +364,7 @@ class PiInfo(metaclass=Singleton):
             if result:
                 try:
                     frequency = float(result) * 1000
-                    core_frequencies[ft] = PiInfo.convert_frequency(frequency, unit)
+                    core_frequencies[ft] = RPiSystemInfo.convert_frequency(frequency, unit)
                 except ValueError:
                     self.logger.error(f"Error while converting CPU frequency value '{result}' to float")
                 except Exception as e:
@@ -695,32 +695,32 @@ def main() -> None:
         level="INFO",
         colored=True
     ).get_logger()
-    pi_info = PiInfo(logger)
+    rpi_info = RPiSystemInfo(logger)
     try:
-        logger.info(f"Model: {pi_info.model_name}")
-        logger.info(f"Revision: {pi_info.revision}")
-        logger.info(f"Serial number: {pi_info.serial_number}")
-        logger.info(f"Manufacturer: {pi_info.manufacturer}")
-        logger.info(f"OS: {pi_info.os_name}")
-        throttled_state = pi_info.get_throttled_state()
+        logger.info(f"Model: {rpi_info.model_name}")
+        logger.info(f"Revision: {rpi_info.revision}")
+        logger.info(f"Serial number: {rpi_info.serial_number}")
+        logger.info(f"Manufacturer: {rpi_info.manufacturer}")
+        logger.info(f"OS: {rpi_info.os_name}")
+        throttled_state = rpi_info.get_throttled_state()
         if throttled_state:
             logger.info(f"Throttled state: {throttled_state.get('description', 'Unknown')}")
         for interface in ['eth0', 'wlan0']:
-            nic_info = pi_info.get_network_interface_info(interface)
+            nic_info = rpi_info.get_network_interface_info(interface)
             mac_address = nic_info['mac'] or 'Unknown'
             ip_address = nic_info['ip'] or 'Not connected'
             mask = nic_info['mask'] or 'Not connected'
             default_gateway = nic_info['gateway'] or 'Not connected'
             logger.info(f"{interface} interface: MAC address {mac_address}, IP address {ip_address}, Subnet mask: {mask}, Default gateway: {default_gateway}")
-        logger.info(f"Wi-Fi network name: {pi_info.get_wifi_network_name()}")
-        logger.info(f"Internet connection is{' not' if not pi_info.check_internet_connection() else ''} active")
-        logger.info(f"Public IP address: {pi_info.get_public_ip()}")
+        logger.info(f"Wi-Fi network name: {rpi_info.get_wifi_network_name()}")
+        logger.info(f"Internet connection is{' not' if not rpi_info.check_internet_connection() else ''} active")
+        logger.info(f"Public IP address: {rpi_info.get_public_ip()}")
         while True:
             try:
-                cpu_temp = pi_info.get_cpu_temperature()
-                cpu_freq = pi_info.get_cpu_core_frequencies()
-                cpu_usage = pi_info.get_cpu_usage()
-                ram_info = pi_info.get_ram_info()
+                cpu_temp = rpi_info.get_cpu_temperature()
+                cpu_freq = rpi_info.get_cpu_core_frequencies()
+                cpu_usage = rpi_info.get_cpu_usage()
+                ram_info = rpi_info.get_ram_info()
                 logger.info(f"CPU: temperature {cpu_temp} \xb0C, frequency {cpu_freq['cur']} MHz, usage {cpu_usage}%")
                 logger.info(f"RAM: total {ram_info['total']} Mb, used {ram_info['used']} Mb, free {ram_info['free']} Mb, "
                             f"cache {ram_info['cache']} Mb, available {ram_info['available']} Mb")

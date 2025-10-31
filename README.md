@@ -63,7 +63,7 @@ cp env.example .env
 
 You can set up automatic script launch at system startup.
 
-Open the /etc/rc.local file in editor:
+Open the `/etc/rc.local` file in editor:
 ```bash
 sudo nano /etc/rc.local
 ```
