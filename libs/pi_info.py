@@ -86,7 +86,7 @@ class PiInfo(metaclass=Singleton):
             object.__setattr__(self, 'otp_programming_allowed', decoded_data['otp_programming_allowed'])
         if 'otp_reading_allowed' in decoded_data:
             object.__setattr__(self, 'otp_reading_allowed', decoded_data['otp_reading_allowed'])
-        self.logger.info(f"Board info fully initialized")
+        self.logger.info("Board info fully initialized")
 
     def __str__(self) -> str:
         return (f"Model: {self.model_name}, "
@@ -245,8 +245,8 @@ class PiInfo(metaclass=Singleton):
         result = self.__get_shell_cmd_output(command)
         try:
             return int(result)
-        except ValueError as e:
-            self.logger.error(f"Error while converting number of cores to int: {result}")
+        except ValueError:
+            self.logger.error(f"Error while converting number of cores value '{result}' to int")
         return 0
 
     @cached_property
@@ -285,7 +285,7 @@ class PiInfo(metaclass=Singleton):
         """Retrieves the pretty OS name from /etc/*-release.
 
         Returns:
-            The pretty OS name, or empty string if the command fails.  Removes surrounding quotes.
+            The pretty OS name, or empty string if the command fails. Removes surrounding quotes.
         """
         command = "cat /etc/*-release | grep PRETTY_NAME | cut -d= -f2"
         return self.__get_shell_cmd_output(command).strip('"')
@@ -324,8 +324,8 @@ class PiInfo(metaclass=Singleton):
         try:
             if result is not None:
                 return float(result[:-1])
-        except (IndexError, ValueError) as e:
-            self.logger.error(f"Error while converting CPU voltage to float, voltage value: {result}")
+        except (IndexError, ValueError):
+            self.logger.error(f"Error while converting CPU voltage value '{result}' to float")
         return None
 
     def get_cpu_temperature(self) -> Optional[float]:
@@ -339,8 +339,8 @@ class PiInfo(metaclass=Singleton):
         try:
             if result is not None:
                 return float(result)
-        except ValueError as e:
-            self.logger.error(f"Error while converting CPU temperature to float, temperature value: {result}")
+        except ValueError:
+            self.logger.error(f"Error while converting CPU temperature value '{result}' to float")
         return None
 
     def get_cpu_core_frequencies(self, unit: FrequencyUnit = 'MHz') -> dict[str, int | float]:
@@ -365,8 +365,8 @@ class PiInfo(metaclass=Singleton):
                 try:
                     frequency = float(result) * 1000
                     core_frequencies[ft] = PiInfo.convert_frequency(frequency, unit)
-                except ValueError as e:
-                    self.logger.error(f"Error while converting CPU frequency to float, frequency value: {result}")
+                except ValueError:
+                    self.logger.error(f"Error while converting CPU frequency value '{result}' to float")
                 except Exception as e:
                     self.logger.error(f"CPU frequency processing error: {e}")
         return core_frequencies
@@ -455,7 +455,7 @@ class PiInfo(metaclass=Singleton):
 
                         ip_route_cmd = f"ip route show | grep ^def.*{interface}"
                         ip_route_output = self.__get_shell_cmd_output(ip_route_cmd)
-                        gateway_match = re.search(rf'^default via (\d+\.\d+\.\d+\.\d+)', ip_route_output)
+                        gateway_match = re.search(r'^default via (\d+\.\d+\.\d+\.\d+)', ip_route_output)
                         if gateway_match:
                             nic_info['gateway'] = gateway_match.group(1)
                 except Exception as e:
@@ -541,9 +541,9 @@ class PiInfo(metaclass=Singleton):
             self.logger.debug("Internet connection is active.")
             return True
         except urllib.error.URLError as e:
-            self.logger.error("URLError while checking connection: {e.reason}. Internet connection is missing or blocked.")
+            self.logger.error(f"URLError while checking connection: {e.reason}. Internet connection is missing or blocked.")
         except socket.timeout:
-            self.logger.error("Connection check timed out. Internet may be slow or unavailable.")
+            self.logger.error("Connection timed out. Internet may be slow or unavailable.")
         except Exception as e:
             self.logger.error(f"Unexpected error while checking connection: {e}")
         return False

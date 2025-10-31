@@ -1,5 +1,5 @@
 from threading import RLock
-from typing import TypeVar, Type, Any, Dict, Tuple, ClassVar, cast
+from typing import TypeVar, Type, Any, Dict, ClassVar, cast
 
 T = TypeVar('T')
 

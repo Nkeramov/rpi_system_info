@@ -1,6 +1,5 @@
 import logging
 import logging.handlers
-import threading
 from pathlib import Path
 from logging import Logger, LogRecord
 from colorama import Fore, Style

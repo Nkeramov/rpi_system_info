@@ -4,7 +4,7 @@ from pathlib import Path
 from datetime import datetime
 from dotenv import load_dotenv
 
-from flask import Flask, render_template, redirect, url_for, flash
+from flask import Flask, render_template, url_for, flash
 from flask_caching import Cache
 
 from werkzeug.exceptions import NotFound, InternalServerError
@@ -14,7 +14,7 @@ from logging import Logger
 from libs.pi_info import PiInfo
 from libs.log_utils import LoggerSingleton
 
-from typing import Any, Optional
+from typing import Any
 
 load_dotenv('.env')
 
