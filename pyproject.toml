@@ -1,4 +1,50 @@
+[project]
+name = "rpi_system_info"
+version = "1.0.0"
+description = "Python library for monitoring Raspberry Pi system information"
+authors = [
+    {name = "Nizam Keramov", email = "keramov.nizam@gmail.com"},
+]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.11"
+keywords = [ 
+    "rpi",
+    "raspberrypi",
+    "raspberry-pi",
+    "raspberry-pi-projects"
+    "python",
+    "flask",
+    "system-info",
+    "system-monitoring",
+    "hardware-monitoring"
+]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: POSIX :: Linux",
+    "Topic :: System :: Monitoring",
+    "Topic :: Utilities",
+]
+
+[project.urls]
+Repository = "https://github.com/Nkeramov/rpi_system_info"
+"Bug Tracker" = "https://github.com/Nkeramov/rpi_system_info/issues"
+
 [tool.mypy]
 python_version = "3.11"
-warn_return_any = true
-disallow_untyped_defs = true
+strict = True
+# already included in strict = True, but left for clarity
+# disallow_untyped_defs = True
+# check_untyped_defs = True  
+# warn_return_any = True
+# warn_unused_configs = True
+ignore_missing_imports = True
+warn_redundant_casts = True
+warn_unused_ignores = True
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
