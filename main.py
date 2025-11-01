@@ -11,7 +11,7 @@ from werkzeug.exceptions import NotFound, InternalServerError
 
 from logging import Logger
 
-from libs.pi_info import RPiSystemInfo
+from libs.rpi_system_info import RPiSystemInfo
 from libs.log_utils import LoggerSingleton
 
 from typing import Any

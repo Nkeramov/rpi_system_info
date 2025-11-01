@@ -8,6 +8,7 @@ import http.client
 import urllib.error
 import urllib.request
 from enum import Enum
+from string import hexdigits
 from datetime import datetime
 from dataclasses import dataclass, field
 from functools import cached_property
@@ -68,25 +69,38 @@ class RPiSystemInfo(metaclass=Singleton):
     FrequencyUnit = Literal['Hz', 'KHz', 'MHz', 'GHz']
 
     def __post_init__(self) -> None:
+        """Initialize Raspberry Pi hardware information.
+
+        Raises:
+            ValueError: if revision code is invalid
+            RuntimeError: if hardware info cannot be decoded
+        """
         self.logger.debug("Fetching board revision code...")
         command = "cat /proc/cpuinfo | grep 'Revision' | cut -d: -f2"
         fetched_revision_code = self.__get_shell_cmd_output(command)
         self.logger.debug(f"Board revision code: {fetched_revision_code}")
         object.__setattr__(self, 'revision_code', fetched_revision_code)
-        self.logger.debug("Parsing board revision code string...")
-        decoded_data = RPiSystemInfo.decode_revision_code(fetched_revision_code)
-        object.__setattr__(self, 'model_type', decoded_data['model_type'])
-        object.__setattr__(self, 'revision', decoded_data['revision'])
-        object.__setattr__(self, 'manufacturer', decoded_data['manufacturer'])
-        object.__setattr__(self, 'cpu_model', decoded_data['cpu_model'])
-        object.__setattr__(self, 'memory_size', decoded_data['memory_size'])
-        if 'overvoltage_allowed' in decoded_data:
-            object.__setattr__(self, 'overvoltage_allowed', decoded_data['overvoltage_allowed'])
-        if 'otp_programming_allowed' in decoded_data:
-            object.__setattr__(self, 'otp_programming_allowed', decoded_data['otp_programming_allowed'])
-        if 'otp_reading_allowed' in decoded_data:
-            object.__setattr__(self, 'otp_reading_allowed', decoded_data['otp_reading_allowed'])
-        self.logger.info("Board info fully initialized")
+        try:
+            decoded_data = RPiSystemInfo.decode_revision_code(fetched_revision_code)
+            self.logger.debug(f"Successfully decoded revision code: {fetched_revision_code}")
+            object.__setattr__(self, 'model_type', decoded_data['model_type'])
+            object.__setattr__(self, 'revision', decoded_data['revision'])
+            object.__setattr__(self, 'manufacturer', decoded_data['manufacturer'])
+            object.__setattr__(self, 'cpu_model', decoded_data['cpu_model'])
+            object.__setattr__(self, 'memory_size', decoded_data['memory_size'])
+            if 'overvoltage_allowed' in decoded_data:
+                object.__setattr__(self, 'overvoltage_allowed', decoded_data['overvoltage_allowed'])
+            if 'otp_programming_allowed' in decoded_data:
+                object.__setattr__(self, 'otp_programming_allowed', decoded_data['otp_programming_allowed'])
+            if 'otp_reading_allowed' in decoded_data:
+                object.__setattr__(self, 'otp_reading_allowed', decoded_data['otp_reading_allowed'])
+            self.logger.info("RPiSystemInfo info fully initialized")
+        except (ValueError, TypeError) as e:
+            self.logger.error(f"Invalid revision code '{fetched_revision_code}': {e}")
+            raise ValueError(f"Cannot initialize with revision code '{fetched_revision_code}': {e}") from e
+        except Exception as e:
+            self.logger.exception("Failed to initialize RPiSystemInfo")
+            raise RuntimeError(f"RPiSystemInfo initialization failed: {e}") from e
 
     def __str__(self) -> str:
         return (f"Model: {self.model_name}, "
@@ -98,6 +112,29 @@ class RPiSystemInfo(metaclass=Singleton):
 
     @staticmethod
     def decode_revision_code(revision_code: str) -> dict[str, Any]:
+        """Decode Raspberry Pi revision code into hardware information.
+
+        Parses hexadecimal revision code and extracts model type, revision,
+        memory size, CPU model, manufacturer, and other hardware details.
+        Supports both old and new style revision codes.
+
+        Args:
+            revision_code: Hexadecimal string representing the revision code
+
+        Returns:
+            Dictionary containing decoded hardware information
+
+        Raises:
+            ValueError: If revision code is invalid or cannot be decoded
+            TypeError: If revision code is not a string
+        """
+        if not revision_code:
+            raise ValueError("Revision code cannot be empty or None")
+        if not isinstance(revision_code, str):
+            raise TypeError(f"Revision code must be a string, got {type(revision_code).__name__}")
+        if not revision_code.startswith(('0x', '0X')) and not all(c in hexdigits for c in revision_code):
+            raise ValueError(f"Invalid revision code format: '{revision_code}'. Expected hex string")
+
         old_boards_revisions_decoder = {
             0x0000: (ModelType.UNKNOWN, "0.0", 0, "UNKNOWN", "UNKNOWN"),
             0x0002: (ModelType.RPI_B, "1.0", 256, "BCM2835", "EGOMAN"),
@@ -122,27 +159,52 @@ class RPiSystemInfo(metaclass=Singleton):
         cpu_models = ["BCM2835", "BCM2836", "BCM2837", "BCM2711", "BCM2712"]
         manufacturers = ["Sony UK", "Egoman", "Embest", "Sony Japan", "Embest", "Stadium"]
 
-        code = int(revision_code, 16)
+        try:
+            code = int(revision_code, 16)
+        except ValueError as e:
+            raise ValueError(f"Failed to parse revision code '{revision_code}' as hex: {e}") from e
+
         flag = (code & 0x800000) >> 23
-        if flag:
-            return {
-                'model_type': ModelType((code & 0xFF0) >> 4),
-                'revision':  f"1.{code & 0xF}",
-                'memory_size': memory_sizes[(code & 0x700000) >> 20],
-                'cpu_model': cpu_models[(code & 0xF000) >> 12],
-                'manufacturer': manufacturers[(code & 0xF0000) >> 16],
-                'overvoltage_allowed': bool((code & 0x80000000) >> 31),
-                'otp_programming_allowed': bool((code & 0x40000000) >> 30),
-                'otp_reading_allowed': bool((code & 0x20000000) >> 29),
-            }
-        else:
-            return {
-                'model_type': old_boards_revisions_decoder[code][0],
-                'revision': old_boards_revisions_decoder[code][1],
-                'memory_size': old_boards_revisions_decoder[code][2],
-                'cpu_model': old_boards_revisions_decoder[code][3],
-                'manufacturer': old_boards_revisions_decoder[code][4]
-            }
+
+        try:
+            if flag:
+                # New style revision code decoding
+                memory_index = (code & 0x700000) >> 20
+                cpu_index = (code & 0xF000) >> 12
+                manufacturer_index = (code & 0xF0000) >> 16
+                if memory_index >= len(memory_sizes):
+                    raise ValueError(f"Invalid memory size index: {memory_index}")
+                if cpu_index >= len(cpu_models):
+                    raise ValueError(f"Invalid CPU model index: {cpu_index}")
+                if manufacturer_index >= len(manufacturers):
+                    raise ValueError(f"Invalid manufacturer index: {manufacturer_index}")
+                return {
+                    'model_type': ModelType((code & 0xFF0) >> 4),
+                    'revision': f"1.{code & 0xF}",
+                    'memory_size': memory_sizes[memory_index],
+                    'cpu_model': cpu_models[cpu_index],
+                    'manufacturer': manufacturers[manufacturer_index],
+                    'overvoltage_allowed': bool((code & 0x80000000) >> 31),
+                    'otp_programming_allowed': bool((code & 0x40000000) >> 30),
+                    'otp_reading_allowed': bool((code & 0x20000000) >> 29),
+                }
+            else:
+                # Old style revision code decoding
+                if code not in old_boards_revisions_decoder:
+                    raise ValueError(f"Unknown old board revision code: 0x{code:04X}")
+                board_data = old_boards_revisions_decoder[code]
+                return {
+                    'model_type': board_data[0],
+                    'revision': board_data[1],
+                    'memory_size': board_data[2],
+                    'cpu_model': board_data[3],
+                    'manufacturer': board_data[4]
+                }
+        except (IndexError, ValueError) as e:
+            raise ValueError(f"Failed to decode revision code 0x{code:08X}: {e}") from e
+        except Exception as e:
+            raise RuntimeError(f"Unexpected error while decoding revision code: {e}") from e
+
 
     @staticmethod
     def float_to_int_if_zero_fraction(x: float) -> float | int:
