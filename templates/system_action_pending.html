@@ -7,9 +7,8 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="description" content="System information of Raspberry Pi">
         <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
-        <link rel="stylesheet" href="static/css/normalize.css">
-        <link rel="stylesheet" href="static/css/skeleton.css">
-        <link rel="stylesheet" href="static/css/styles.css">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/skeleton.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
         <style>
             .flashes {
                 margin-top: 75px;
@@ -35,10 +34,10 @@
                 <div class="two columns">
                     <a href="{{index_url}}">
                         <div class="two columns">
-                            <img src="static/images/logo.png" style="width:75px">
+                            <img class="logo" src="static/images/rpi_logo_128.png">
                         </div>
-                        <div class="nine columns title">
-                            <h3>{{title}}</h3>
+                        <div class="nine columns">
+                            <h3 class="title">{{title}}</h3>
                         </div>
                     </a>
                 </div>

@@ -6,23 +6,20 @@
         <link rel="icon" type="image/png" href="static/images/favicon.png">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="description" content="System information of Raspberry Pi">
-        <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
-        <link rel="stylesheet" href="static/css/normalize.css">
-        <link rel="stylesheet" href="static/css/skeleton.css">
-        <link rel="stylesheet" href="static/css/styles.css">
-        <link rel="stylesheet" href="static/css/toggle.css">
-        <script src="static/js/sort.js"></script>
-        <script src="static/js/toggle.js"></script>
+        <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">        
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/skeleton.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+        <script src="{{ url_for('static', filename='js/sort.js') }}"></script>
     </head>
     <body>
         <div class="container">
             <div class="row">
                 <a href="{{index_url}}">
                     <div class="two columns">
-                        <img src="static/images/logo.png" style="width:75px">
+                        <img class="logo" src="static/images/rpi_logo_128.png">
                     </div>
-                    <div class="nine columns title">
-                        <h3>{{title}}</h3>
+                    <div class="nine columns">
+                        <h3 class="title">{{title}}</h3>
                     </div>
                 </a>
                 <div class="one column">
@@ -38,550 +35,570 @@
                     </div>
                 </div>
             </div>
-            <div class="row t-header toggle-header">
-                <div>
-                    <h5>Generic Board Info</h5>
+
+            <div class="tabs">
+                <div class="tab-button active" data-tab="tab1">Generic</div>
+                <div class="tab-button" data-tab="tab2">Networks</div>
+                <div class="tab-button" data-tab="tab3">Storage</div>
+                <div class="tab-button" data-tab="tab4">Processes</div>
+            </div>
+
+            <div id="tab1" class="tab-content active">
+                <div class="row t-header toggle-header">
+                    <div class="t-header-img">
+                        <img src="static/images/rpi_logo_32.png">
+                    </div>
+                    <div>
+                        <h5>Board Info</h5>
+                    </div>
+                </div>
+                <div class="toggle-content">
+                    <div class="row t-row">
+                        <div class="five columns t-caption">
+                            Model
+                        </div>
+                        <div class="seven columns">
+                            {{generic_board_info.model_name}}
+                        </div>
+                    </div>
+                    <div class="row t-row">
+                        <div class="five columns t-caption">
+                            Revision
+                        </div>
+                        <div class="seven columns">
+                            {{generic_board_info.revision}}
+                        </div>
+                    </div>
+                    <div class="row t-row">
+                        <div class="five columns t-caption">
+                            Serial Number
+                        </div>
+                        <div class="seven columns">
+                            {{generic_board_info.serial_number}}
+                        </div>
+                    </div>
+                    <div class="row t-row">
+                        <div class="five columns t-caption">
+                            Manufacturer
+                        </div>
+                        <div class="seven columns">
+                            {{generic_board_info.manufacturer}}
+                        </div>
+                    </div>
+                    <div class="row t-row">
+                        <div class="five columns t-caption">
+                            Operating System
+                        </div>
+                        <div class="seven columns">
+                            {{generic_board_info.os}}
+                        </div>
+                    </div>
+                    <div class="row t-row">
+                        <div class="five columns t-caption">
+                            Host Name
+                        </div>
+                        <div class="seven columns">
+                            {{generic_board_info.hostname}}
+                        </div>
+                     </div>
+                     <div class="row t-row">
+                        <div class="five columns t-caption">
+                            System Time
+                        </div>
+                        <div class="seven columns">
+                            {{generic_board_info.system_time}}
+                        </div>
+                    </div>
+                    <div class="row t-row">
+                        <div class="five columns t-caption">
+                            Started on
+                        </div>
+                        <div class="seven columns">
+                            {{generic_board_info.boot_time}}
+                        </div>
+                    </div>
+                    <div class="row t-row">
+                        <div class="five columns t-caption">
+                            Uptime
+                        </div>
+                        <div class="seven columns">
+                            {{generic_board_info.uptime_pretty}}
+                        </div>
+                    </div>
+                    <div class="row t-row">
+                        <div class="five columns t-caption">
+                            Internet connection
+                        </div>
+                        <div class="seven columns">
+                        {% if generic_board_info.internet_connection_status %}
+                            Active
+                        {% else %}
+                            Not active
+                        {% endif %}
+                        </div>
+                    </div>
+                    {% if generic_board_info.internet_connection_status %}
+                    <div class="row t-row">
+                        <div class="five columns t-caption">
+                            Public IP address
+                        </div>
+                        <div class="seven columns">
+                            {{ generic_board_info.public_ip}}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="row t-header toggle-header collapsed">
+                    <div class="t-header-img">
+                        <img src="static/images/cpu.png">
+                    </div>
+                    <div>
+                        <h5>CPU Details</h5>
+                    </div>
+                </div>
+                <div class="toggle-content collapsed">
+                    <div class="row t-row">
+                        <div class="five columns t-caption">
+                            Model
+                        </div>
+                        <div class="seven columns">
+                            {{cpu_details.model}}
+                        </div>
+                    </div>
+                    <div class="row t-row">
+                        <div class="five columns t-caption">
+                            Architecture
+                        </div>
+                        <div class="seven columns">
+                            {{cpu_details.architecture}}
+                        </div>
+                    </div>
+                    <div class="row t-row">
+                        <div class="five columns t-caption">
+                            Cores Count
+                        </div>
+                        <div class="seven columns">
+                            {{cpu_details.cores_count}}
+                        </div>
+                    </div>
+                    <div class="row t-row">
+                        <div class="five columns t-caption">
+                            Core Frequency
+                        </div>
+                        <div class="seven columns">
+                            {{cpu_details.cur_core_frequency}} MHz
+                        </div>
+                    </div>
+                    <div class="row t-row">
+                        <div class="five columns t-caption">
+                            Core Min Frequency
+                        </div>
+                        <div class="seven columns">
+                            {{cpu_details.min_core_frequency}} MHz
+                        </div>
+                    </div>
+                    <div class="row t-row">
+                        <div class="five columns t-caption">
+                            Core Max Frequency
+                        </div>
+                        <div class="seven columns">
+                            {{cpu_details.max_core_frequency}} MHz
+                        </div>
+                    </div>
+                    <div class="row t-row">
+                        <div class="five columns t-caption">
+                            Core Voltage
+                        </div>
+                        <div class="seven columns">
+                            {{cpu_details.core_voltage}} V
+                        </div>
+                    </div>
+                    <div class="row t-row">
+                        <div class="five columns t-caption">
+                            Temperature
+                        </div>
+                        <div class="seven columns" style="color:{{cpu_details.temperature_color}}">
+                            {{cpu_details.temperature_value}} &#176;C
+                        </div>
+                    </div>
+                    <div class="row t-row">
+                        <div class="five columns t-caption">
+                            Usage
+                        </div>
+                        <div class="seven columns">
+                            {{cpu_details.usage}} %
+                        </div>
+                    </div>
+                    <div class="row t-row">
+                        <div class="five columns t-caption">
+                            L1 Data Cache Size
+                        </div>
+                        <div class="seven columns">
+                            {{cpu_details.cache_sizes.L1d}} KiB
+                        </div>
+                    </div>
+                    <div class="row t-row">
+                        <div class="five columns t-caption">
+                            L1 Instructions Cache Size
+                        </div>
+                        <div class="seven columns">
+                            {{cpu_details.cache_sizes.L1i}} KiB
+                        </div>
+                    </div>
+                    <div class="row t-row">
+                        <div class="five columns t-caption">
+                            L2 Cache Size
+                        </div>
+                        <div class="seven columns">
+                            {{cpu_details.cache_sizes.L2}} KiB
+                        </div>
+                    </div>
+                    <div class="row t-row">
+                        <div class="five columns t-caption">
+                            Overvoltage allowed
+                        </div>
+                        <div class="seven columns">
+                            {{cpu_details.overvoltage_allowed}}
+                        </div>
+                    </div>
+                    <div class="row t-row">
+                        <div class="five columns t-caption">
+                            OTP programming allowed
+                        </div>
+                        <div class="seven columns">
+                            {{cpu_details.otp_programming_allowed}}
+                        </div>
+                    </div>
+                    <div class="row t-row">
+                        <div class="five columns t-caption">
+                            OTP reading allowed
+                        </div>
+                        <div class="seven columns">
+                            {{cpu_details.otp_reading_allowed}}
+                        </div>
+                    </div>
+                </div>
+                <div class="row t-header toggle-header collapsed">
+                    <div class="t-header-img">
+                        <img src="static/images/ram.png">
+                   </div>
+                   <div>
+                        <h5>RAM Details</h5>
+                   </div>
+                </div>
+                <div class="toggle-content collapsed">
+                    <div class="row t-row">
+                        <div class="five columns t-caption">
+                            Memory Size
+                        </div>
+                        <div class="seven columns t-row">
+                            {{ram_details.size}} MB
+                        </div>
+                    </div>
+                    <div class="row t-row">
+                        <div class="five columns t-caption">
+                            Total Memory
+                        </div>
+                        <div class="seven columns t-row">
+                            {{ram_details.total}} MB
+                        </div>
+                    </div>
+                    <div class="row t-row">
+                        <div class="five columns t-caption">
+                            Used Memory
+                        </div>
+                        <div class="seven columns">
+                            {{ram_details.used}} MB
+                        </div>
+                    </div>
+                    <div class="row t-row">
+                        <div class="five columns t-caption">
+                            Free Memory
+                        </div>
+                        <div class="seven columns">
+                            {{ram_details.free}} MB
+                        </div>
+                    </div>
+                    <div class="row t-row">
+                        <div class="five columns t-caption">
+                            Cache Memory
+                        </div>
+                        <div class="seven columns">
+                            {{ram_details.cache}} MB
+                        </div>
+                    </div>
+                    <div class="row t-row">
+                        <div class="five columns t-caption">
+                            Available Memory
+                        </div>
+                        <div class="seven columns">
+                            {{ram_details.available}} MB
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="toggle-content">
-                <div class="row t-row">
-                    <div class="five columns t-caption">
-                        Model
+
+            <div id="tab2" class="tab-content">
+                <div class="row t-header toggle-header">
+                    <div class="t-header-img">
+                        <img src="static/images/ethernet_adapter.png">
                     </div>
-                    <div class="seven columns">
-                        {{generic_board_info.model_name}}
-                    </div>
-                </div>
-                <div class="row t-row">
-                    <div class="five columns t-caption">
-                        Revision
-                    </div>
-                    <div class="seven columns">
-                        {{generic_board_info.revision}}
+                    <div>
+                        <h5>Ethernet Network Details</h5>
                     </div>
                 </div>
-                <div class="row t-row">
-                    <div class="five columns t-caption">
-                        Serial Number
+                <div class="toggle-content">
+                    <div class="row t-row">
+                        <div class="five columns t-caption">
+                            MAC address
+                        </div>
+                        <div class="seven columns">
+                        {% if eth_info.mac %}
+                            {{eth_info.mac}}
+                        {% else %}
+                            Unknown
+                        {% endif %}
+                        </div>
                     </div>
-                    <div class="seven columns">
-                        {{generic_board_info.serial_number}}
+                    <div class="row t-row">
+                        <div class="five columns t-caption">
+                            IP address
+                        </div>
+                        <div class="seven columns t-row">
+                        {% if eth_info.state == 'UP' %}
+                            {{eth_info.ip}}
+                        {% else %}
+                            Not connected
+                        {% endif %}
+                        </div>
                     </div>
-                </div>
-                <div class="row t-row">
-                    <div class="five columns t-caption">
-                        Manufacturer
+                    <div class="row t-row">
+                        <div class="five columns t-caption">
+                            Default gateway
+                        </div>
+                        <div class="seven columns t-row">
+                        {% if eth_info.state == 'UP' %}
+                            {{eth_info.gateway}}
+                        {% else %}
+                            Not connected
+                        {% endif %}
+                        </div>
                     </div>
-                    <div class="seven columns">
-                        {{generic_board_info.manufacturer}}
+                    <div class="row t-row">
+                        <div class="five columns t-caption">
+                            Network mask
+                        </div>
+                        <div class="seven columns t-row">
+                        {% if eth_info.state == 'UP' %}
+                            {{eth_info.mask}}
+                        {% else %}
+                            Not connected
+                        {% endif %}
+                        </div>
                     </div>
-                </div>
-                <div class="row t-row">
-                    <div class="five columns t-caption">
-                        Operating System
-                    </div>
-                    <div class="seven columns">
-                        {{generic_board_info.os}}
-                    </div>
-                </div>
-                <div class="row t-row">
-                    <div class="five columns t-caption">
-                        Host Name
-                    </div>
-                    <div class="seven columns">
-                        {{generic_board_info.hostname}}
-                    </div>
-                 </div>
-                 <div class="row t-row">
-                    <div class="five columns t-caption">
-                        System Time
-                    </div>
-                    <div class="seven columns">
-                        {{generic_board_info.system_time}}
-                    </div>
-                </div>
-                <div class="row t-row">
-                    <div class="five columns t-caption">
-                        Started on
-                    </div>
-                    <div class="seven columns">
-                        {{generic_board_info.boot_time}}
-                    </div>
-                </div>
-                <div class="row t-row">
-                    <div class="five columns t-caption">
-                        Uptime
-                    </div>
-                    <div class="seven columns">
-                        {{generic_board_info.uptime_pretty}}
-                    </div>
-                </div>
-                <div class="row t-row">
-                    <div class="five columns t-caption">
-                        Internet connection
-                    </div>
-                    <div class="seven columns">
-                    {% if generic_board_info.internet_connection_status %}
-                        Active
-                    {% else %}
-                        Not active
-                    {% endif %}
+                    <div class="row t-row">
+                        <div class="five columns t-caption">
+                            Broadcast IP address
+                        </div>
+                        <div class="seven columns t-row">
+                        {% if eth_info.state == 'UP' %}
+                            {{eth_info.broadcast}}
+                        {% else %}
+                            Not connected
+                        {% endif %}
+                        </div>
                     </div>
                 </div>
-                {% if generic_board_info.internet_connection_status %}
-                <div class="row t-row">
-                    <div class="five columns t-caption">
-                        Public IP address
+                <div class="row t-header toggle-header">
+                    <div class="t-header-img">
+                        <img src="static/images/wifi_adapter.png">
                     </div>
-                    <div class="seven columns">
-                        {{ generic_board_info.public_ip}}
+                    <div>
+                        <h5>Wi-Fi Network Details</h5>
+                    </div>
+                </div>
+                <div class="toggle-content">
+                    <div class="row t-row">
+                        <div class="five columns t-caption">
+                            MAC address
+                        </div>
+                        <div class="seven columns">
+                        {% if wlan_info.mac %}
+                            {{wlan_info.mac}}
+                        {% else %}
+                            Unknown
+                        {% endif %}
+                        </div>
+                    </div>
+                    <div class="row t-row">
+                        <div class="five columns t-caption">
+                            Wi-Fi network
+                        </div>
+                        <div class="seven columns t-row">
+                        {% if wifi_network_name %}
+                            {{wifi_network_name}}
+                        {% else %}
+                            Not connected
+                        {% endif %}
+                        </div>
+                    </div>
+                    <div class="row t-row">
+                        <div class="five columns t-caption">
+                            IP address
+                        </div>
+                        <div class="seven columns t-row">
+                        {% if wlan_info.state == 'UP' %}
+                            {{wlan_info.ip}}
+                        {% else %}
+                            Not connected
+                        {% endif %}
+                        </div>
+                    </div>
+                    <div class="row t-row">
+                        <div class="five columns t-caption">
+                            Default gateway
+                        </div>
+                        <div class="seven columns t-row">
+                        {% if wlan_info.state == 'UP' %}
+                            {{wlan_info.gateway}}
+                        {% else %}
+                            Not connected
+                        {% endif %}
+                        </div>
+                    </div>
+                    <div class="row t-row">
+                        <div class="five columns t-caption">
+                            Network mask
+                        </div>
+                        <div class="seven columns t-row">
+                        {% if wlan_info.state == 'UP' %}
+                            {{wlan_info.mask}}
+                        {% else %}
+                            Not connected
+                        {% endif %}
+                        </div>
+                    </div>
+                    <div class="row t-row">
+                        <div class="five columns t-caption">
+                            Broadcast IP address
+                        </div>
+                        <div class="seven columns t-row">
+                        {% if wlan_info.state == 'UP' %}
+                            {{wlan_info.broadcast}}
+                        {% else %}
+                            Not connected
+                        {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% if wlan_info.state == 'UP' %}
+                <div class="row t-header toggle-header collapsed">
+                    <div class="t-header-img">
+                        <img src="static/images/wifi.png">
+                    </div>
+                    <div>
+                        <h5>Available WiFi Networks <span class="item-count"> ( {{ available_wifi_networks | length}} ) </span></h5>
+                    </div>
+                </div>
+                <div class="toggle-content collapsed">
+                    <div>
+                        <table class="u-full-width sortable">
+                            <thead>
+                                <tr>
+                                    <th>SSID</th>
+                                    <th>Channel</th>
+                                    <th>Rate</th>
+                                    <th>Signal</th>
+                                    <th>Bars</th>
+                                    <th>Security</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for wifi_network in available_wifi_networks %}
+                                <tr>
+                                    <td>{{wifi_network.ssid}}</td>
+                                    <td>{{wifi_network.channel}}</td>
+                                    <td>{{wifi_network.rate}}</td>
+                                    <td>{{wifi_network.signal}}</td>
+                                    <td>{{wifi_network.bars}}</td>
+                                    <td>{{wifi_network.security}}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
                 {% endif %}
-            </div>
-            <div class="row t-header toggle-header collapsed">
-                <div class="t-header-img">
-                    <img src="static/images/cpu.png" style="width:32px">
-                </div>
-                <div>
-                    <h5>CPU Details</h5>
-                </div>
-            </div>
-            <div class="toggle-content collapsed">
-                <div class="row t-row">
-                    <div class="five columns t-caption">
-                        Model
+                <div class="row t-header toggle-header collapsed">
+                    <div class="t-header-img">
+                        <img src="static/images/bluetooth.png">
                     </div>
-                    <div class="seven columns">
-                        {{cpu_details.model}}
+                    <div>
+                        <h5>Bluetooth Details</h5>
                     </div>
                 </div>
-                <div class="row t-row">
-                    <div class="five columns t-caption">
-                        Architecture
-                    </div>
-                    <div class="seven columns">
-                        {{cpu_details.architecture}}
-                    </div>
-                </div>
-                <div class="row t-row">
-                    <div class="five columns t-caption">
-                        Cores Count
-                    </div>
-                    <div class="seven columns">
-                        {{cpu_details.cores_count}}
-                    </div>
-                </div>
-                <div class="row t-row">
-                    <div class="five columns t-caption">
-                        Core Frequency
-                    </div>
-                    <div class="seven columns">
-                        {{cpu_details.cur_core_frequency}} MHz
-                    </div>
-                </div>
-                <div class="row t-row">
-                    <div class="five columns t-caption">
-                        Core Min Frequency
-                    </div>
-                    <div class="seven columns">
-                        {{cpu_details.min_core_frequency}} MHz
-                    </div>
-                </div>
-                <div class="row t-row">
-                    <div class="five columns t-caption">
-                        Core Max Frequency
-                    </div>
-                    <div class="seven columns">
-                        {{cpu_details.max_core_frequency}} MHz
-                    </div>
-                </div>
-                <div class="row t-row">
-                    <div class="five columns t-caption">
-                        Core Voltage
-                    </div>
-                    <div class="seven columns">
-                        {{cpu_details.core_voltage}} V
-                    </div>
-                </div>
-                <div class="row t-row">
-                    <div class="five columns t-caption">
-                        Temperature
-                    </div>
-                    <div class="seven columns" style="color:{{cpu_details.temperature_color}}">
-                        {{cpu_details.temperature_value}} &#176;C
-                    </div>
-                </div>
-                <div class="row t-row">
-                    <div class="five columns t-caption">
-                        Usage
-                    </div>
-                    <div class="seven columns">
-                        {{cpu_details.usage}} %
-                    </div>
-                </div>
-                <div class="row t-row">
-                    <div class="five columns t-caption">
-                        L1 Data Cache Size
-                    </div>
-                    <div class="seven columns">
-                        {{cpu_details.cache_sizes.L1d}} KiB
-                    </div>
-                </div>
-                <div class="row t-row">
-                    <div class="five columns t-caption">
-                        L1 Instructions Cache Size
-                    </div>
-                    <div class="seven columns">
-                        {{cpu_details.cache_sizes.L1i}} KiB
-                    </div>
-                </div>
-                <div class="row t-row">
-                    <div class="five columns t-caption">
-                        L2 Cache Size
-                    </div>
-                    <div class="seven columns">
-                        {{cpu_details.cache_sizes.L2}} KiB
-                    </div>
-                </div>
-                <div class="row t-row">
-                    <div class="five columns t-caption">
-                        Overvoltage allowed
-                    </div>
-                    <div class="seven columns">
-                        {{cpu_details.overvoltage_allowed}}
-                    </div>
-                </div>
-                <div class="row t-row">
-                    <div class="five columns t-caption">
-                        OTP programming allowed
-                    </div>
-                    <div class="seven columns">
-                        {{cpu_details.otp_programming_allowed}}
-                    </div>
-                </div>
-                <div class="row t-row">
-                    <div class="five columns t-caption">
-                        OTP reading allowed
-                    </div>
-                    <div class="seven columns">
-                        {{cpu_details.otp_reading_allowed}}
+                <div class="toggle-content collapsed">
+                    <div class="row t-row">
+                        <div class="five columns t-caption">
+                            MAC address
+                        </div>
+                        <div class="seven columns">
+                        {% if bluetooth_mac_address %}
+                            {{bluetooth_mac_address}}
+                        {% else %}
+                            Unknown
+                        {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="row t-header toggle-header collapsed">
-                <div class="t-header-img">
-                    <img src="static/images/ram.png" style="width:32px">
-               </div>
-               <div>
-                    <h5>RAM Details</h5>
-               </div>
-            </div>
-            <div class="toggle-content collapsed">
-                <div class="row t-row">
-                    <div class="five columns t-caption">
-                        Memory Size
+
+            <div id="tab3" class="tab-content">
+                <div class="row t-header toggle-header">
+                    <div class="t-header-img">
+                        <img src="static/images/storage.png" style="width:32px">
                     </div>
-                    <div class="seven columns t-row">
-                        {{ram_details.size}} MB
+                    <div>
+                        <h5>Disks Usage<span class="item-count"> ( {{ disks_details | length}} ) </span></h5>
                     </div>
                 </div>
-                <div class="row t-row">
-                    <div class="five columns t-caption">
-                        Total Memory
-                    </div>
-                    <div class="seven columns t-row">
-                        {{ram_details.total}} MB
-                    </div>
-                </div>
-                <div class="row t-row">
-                    <div class="five columns t-caption">
-                        Used Memory
-                    </div>
-                    <div class="seven columns">
-                        {{ram_details.used}} MB
-                    </div>
-                </div>
-                <div class="row t-row">
-                    <div class="five columns t-caption">
-                        Free Memory
-                    </div>
-                    <div class="seven columns">
-                        {{ram_details.free}} MB
-                    </div>
-                </div>
-                <div class="row t-row">
-                    <div class="five columns t-caption">
-                        Cache Memory
-                    </div>
-                    <div class="seven columns">
-                        {{ram_details.cache}} MB
-                    </div>
-                </div>
-                <div class="row t-row">
-                    <div class="five columns t-caption">
-                        Available Memory
-                    </div>
-                    <div class="seven columns">
-                        {{ram_details.available}} MB
-                    </div>
-                </div>
-            </div>
-            <div class="row t-header toggle-header collapsed">
-                <div class="t-header-img">
-                    <img src="static/images/ethernet_adapter.png" style="width:32px">
-                </div>
-                <div>
-                    <h5>Ethernet Network Details</h5>
-                </div>
-            </div>
-            <div class="toggle-content collapsed">
-                <div class="row t-row">
-                    <div class="five columns t-caption">
-                        MAC address
-                    </div>
-                    <div class="seven columns">
-                    {% if eth_info.mac %}
-                        {{eth_info.mac}}
-                    {% else %}
-                        Unknown
-                    {% endif %}
-                    </div>
-                </div>
-                <div class="row t-row">
-                    <div class="five columns t-caption">
-                        IP address
-                    </div>
-                    <div class="seven columns t-row">
-                    {% if eth_info.state == 'UP' %}
-                        {{eth_info.ip}}
-                    {% else %}
-                        Not connected
-                    {% endif %}
-                    </div>
-                </div>
-                <div class="row t-row">
-                    <div class="five columns t-caption">
-                        Default gateway
-                    </div>
-                    <div class="seven columns t-row">
-                    {% if eth_info.state == 'UP' %}
-                        {{eth_info.gateway}}
-                    {% else %}
-                        Not connected
-                    {% endif %}
-                    </div>
-                </div>
-                <div class="row t-row">
-                    <div class="five columns t-caption">
-                        Network mask
-                    </div>
-                    <div class="seven columns t-row">
-                    {% if eth_info.state == 'UP' %}
-                        {{eth_info.mask}}
-                    {% else %}
-                        Not connected
-                    {% endif %}
-                    </div>
-                </div>
-                <div class="row t-row">
-                    <div class="five columns t-caption">
-                        Broadcast IP address
-                    </div>
-                    <div class="seven columns t-row">
-                    {% if eth_info.state == 'UP' %}
-                        {{eth_info.broadcast}}
-                    {% else %}
-                        Not connected
-                    {% endif %}
-                    </div>
-                </div>
-            </div>
-            <div class="row t-header toggle-header collapsed">
-                <div class="t-header-img">
-                    <img src="static/images/wifi_adapter.png" style="width:32px">
-                </div>
-                <div>
-                    <h5>Wi-Fi Network Details</h5>
-                </div>
-            </div>
-            <div class="toggle-content collapsed">
-                <div class="row t-row">
-                    <div class="five columns t-caption">
-                        MAC address
-                    </div>
-                    <div class="seven columns">
-                    {% if wlan_info.mac %}
-                        {{wlan_info.mac}}
-                    {% else %}
-                        Unknown
-                    {% endif %}
-                    </div>
-                </div>
-                <div class="row t-row">
-                    <div class="five columns t-caption">
-                        Wi-Fi network
-                    </div>
-                    <div class="seven columns t-row">
-                    {% if wifi_network_name %}
-                        {{wifi_network_name}}
-                    {% else %}
-                        Not connected
-                    {% endif %}
-                    </div>
-                </div>
-                <div class="row t-row">
-                    <div class="five columns t-caption">
-                        IP address
-                    </div>
-                    <div class="seven columns t-row">
-                    {% if wlan_info.state == 'UP' %}
-                        {{wlan_info.ip}}
-                    {% else %}
-                        Not connected
-                    {% endif %}
-                    </div>
-                </div>
-                <div class="row t-row">
-                    <div class="five columns t-caption">
-                        Default gateway
-                    </div>
-                    <div class="seven columns t-row">
-                    {% if wlan_info.state == 'UP' %}
-                        {{wlan_info.gateway}}
-                    {% else %}
-                        Not connected
-                    {% endif %}
-                    </div>
-                </div>
-                <div class="row t-row">
-                    <div class="five columns t-caption">
-                        Network mask
-                    </div>
-                    <div class="seven columns t-row">
-                    {% if wlan_info.state == 'UP' %}
-                        {{wlan_info.mask}}
-                    {% else %}
-                        Not connected
-                    {% endif %}
-                    </div>
-                </div>
-                <div class="row t-row">
-                    <div class="five columns t-caption">
-                        Broadcast IP address
-                    </div>
-                    <div class="seven columns t-row">
-                    {% if wlan_info.state == 'UP' %}
-                        {{wlan_info.broadcast}}
-                    {% else %}
-                        Not connected
-                    {% endif %}
-                    </div>
-                </div>
-            </div>
-            {% if wlan_info.state == 'UP' %}
-            <div class="row t-header toggle-header collapsed">
-                <div class="t-header-img">
-                    <img src="static/images/wifi.png" style="width:32px">
-                </div>
-                <div>
-                    <h5>Available WiFi Networks <span class="item-count"> ( {{ available_wifi_networks | length}} ) </span></h5>
-                </div>
-            </div>
-            <div class="toggle-content collapsed">
-                <div>
+                <div class="toggle-content">
                     <table class="u-full-width sortable">
                         <thead>
                             <tr>
-                                <th>SSID</th>
-                                <th>Channel</th>
-                                <th>Rate</th>
-                                <th>Signal</th>
-                                <th>Bars</th>
-                                <th>Security</th>
+                                <th>File System</th>
+                                <th>Size</th>
+                                <th>Used</th>
+                                <th>Avail</th>
+                                <th>Used%</th>
+                                <th>Mounted On</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for wifi_network in available_wifi_networks %}
+                            {% for disk in disks_details %}
                             <tr>
-                                <td>{{wifi_network.ssid}}</td>
-                                <td>{{wifi_network.channel}}</td>
-                                <td>{{wifi_network.rate}}</td>
-                                <td>{{wifi_network.signal}}</td>
-                                <td>{{wifi_network.bars}}</td>
-                                <td>{{wifi_network.security}}</td>
+                                <td>{{disk.filesystem}}</td>
+                                <td>{{disk.size}}</td>
+                                <td>{{disk.used}}</td>
+                                <td>{{disk.available}}</td>
+                                <td>{{disk.use_percent}}</td>
+                                <td>{{disk.mounted_on}}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
                     </table>
                 </div>
             </div>
-            {% endif %}
-            <div class="row t-header toggle-header collapsed">
-                <div class="t-header-img">
-                    <img src="static/images/bluetooth.png" style="width:32px">
-                </div>
-                <div>
-                    <h5>Bluetooth Details</h5>
-                </div>
-            </div>
-            <div class="toggle-content collapsed">
-                <div class="row t-row">
-                    <div class="five columns t-caption">
-                        MAC address
+
+            <div id="tab4" class="tab-content">
+                <div class="row t-header">
+                    <div class="t-header-img">
+                        <img src="static/images/processes.png" style="width:32px">
                     </div>
-                    <div class="seven columns">
-                    {% if bluetooth_mac_address %}
-                        {{bluetooth_mac_address}}
-                    {% else %}
-                        Unknown
-                    {% endif %}
+                    <div>
+                        <h5>Running Processes<span class="item-count"> ( total {{ processes_details | length}} ) </span></h5>
                     </div>
                 </div>
-            </div>
-            <div class="row t-header toggle-header collapsed">
-                <div class="t-header-img">
-                    <img src="static/images/storage.png" style="width:32px">
-                </div>
-                <div>
-                    <h5>Disks Usage<span class="item-count"> ( {{ disks_details | length}} ) </span></h5>
-                </div>
-            </div>
-            <div class="toggle-content collapsed">
-                <table class="u-full-width sortable">
-                    <thead>
-                        <tr>
-                            <th>File System</th>
-                            <th>Size</th>
-                            <th>Used</th>
-                            <th>Avail</th>
-                            <th>Used%</th>
-                            <th>Mounted On</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for disk in disks_details %}
-                        <tr>
-                            <td>{{disk.filesystem}}</td>
-                            <td>{{disk.size}}</td>
-                            <td>{{disk.used}}</td>
-                            <td>{{disk.available}}</td>
-                            <td>{{disk.use_percent}}</td>
-                            <td>{{disk.mounted_on}}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            <div class="row t-header toggle-header collapsed">
-                <div class="t-header-img">
-                    <img src="static/images/processes.png" style="width:32px">
-                </div>
-                <div>
-                    <h5>Running Processes<span class="item-count"> ( total {{ processes_details | length}} ) </span></h5>
-                </div>
-            </div>
-            <div class="toggle-content collapsed">
                 <table class="u-full-width sortable">
                     <thead>
                         <tr>
@@ -609,4 +626,34 @@
             </div>
         </div>
     </body>
+
+    <script>
+        // code for tabs switching
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+                button.classList.add('active');
+                const tabId = button.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        // code for collapse rows
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggleHeaders = document.querySelectorAll('.toggle-header');
+            toggleHeaders.forEach(header => {
+                header.addEventListener('click', function() {
+                    this.classList.toggle('collapsed');
+                    const content = this.nextElementSibling;
+                    if (content && content.classList.contains('toggle-content')) {
+                        content.classList.toggle('collapsed');
+                    }
+                });
+            });
+        });
+    </script>
 </html>
