@@ -18,41 +18,53 @@ Some information is parsed from the device's [revision code](https://www.raspber
 
 Information about disks and processes is presented in the form of tables. You can sort the tables by clicking on the column in the header.
 
-The web server is based on Flask framework. By default the application will run on port 8080. It can be changed in env file.
+The web server is based on Flask framework. By default the application will run on port 8080. It can be changed in env file. Gunicorn is used to launch.
 
-Gunicorn is used to launch.
+## Setting up and running the project 🚀
 
-## Setting up and running the project
+### Prerequisites
 Clone repository:
 ```bash 
-git clone https://github.com/Nkeramov/raspberry_pi_system_info.git
+git clone https://github.com/Nkeramov/rpi_system_info.git
 ```
-Switch to repo directory
+Switch to repo directory:
 ```bash 
-cd raspberry_pi_system_info
+cd ner_analyzer
 ```
-Сreate new virtual environment:
+### Traditional method with venv and pip
+Create and activate virtual environment:
 ```bash 
 python -m venv .venv 
+source .venv/bin/activate       # Linux/Mac
+# or
+./env/Scripts/activate          # Windows
 ```
-Activate the virtual environment with the command:
-```bash 
-source .venv/bin/activate
-```
-Install dependencies from the requirements file:
+Install dependencies and run:
 ```bash
 pip install -r requirements.txt
-```
-Run with command:
-```bash
 gunicorn --bind 0.0.0.0:8080 main:app
 ```
-Or use a launch script `run.sh`, making it executable first
+### Modern method with uv
+Install dependencies and create virtual environment automatically:
+```bash
+uv sync
+```
+Run the project (virtual environment is handled automatically):
+```bash
+uv run gunicorn --bind 0.0.0.0:8080 main:app
+```
+Or with explicit activation:
+```bash
+source .venv/bin/activate       # After uv sync
+gunicorn --bind 0.0.0.0:8080 main:app
+```
+
+Also you can use the launch script `run.sh`, making it executable first
 ```bash
 chmod +x run.sh
 ```
 
-## Configuration
+## Configuration 🛠️
 
 The configuration file is located in the `.env` file. You can copy the `env.example` to `.env` and make your edits.
 ```bash
@@ -69,7 +81,7 @@ sudo nano /etc/rc.local
 ```
 Add to the end of file this line:
 ```bash
-/home/pi/raspberry_pi_system_info/run.sh &
+/home/pi/rpi_system_info/run.sh &
 ```
 Press Ctrl+O → Enter → Ctrl+X to save and exit.
 
@@ -86,7 +98,7 @@ If you want to contribute, please follow these steps:
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-## Ref
+## References 📚
 
 - [Getting started](https://www.raspberrypi.com/documentation/computers/getting-started.html)
 - [Raspberry Pi OS](https://www.raspberrypi.com/documentation/computers/os.html)
