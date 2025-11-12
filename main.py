@@ -1,10 +1,12 @@
 import os
+import time
+import threading
 import subprocess
 from pathlib import Path
 from datetime import datetime
 from dotenv import load_dotenv
 
-from flask import Flask, render_template, url_for, flash
+from flask import Flask, render_template, url_for, flash, after_this_request
 from flask_caching import Cache
 
 from werkzeug.exceptions import NotFound, InternalServerError
@@ -56,27 +58,58 @@ cache = Cache(app)
 app.logger.handlers = logger.handlers
 app.logger.setLevel(logger.level)
 
+
 @app.route('/')
 @cache.cached(timeout=INDEX_PAGE_CACHE_TIMEOUT)
 def index(logger: Logger = logger) -> str:
     logger.info('Request index.html')
-    return render_template("index.html", title=INDEX_PAGE_TITLE, index_url=url_for('index'))
+    return render_template('index.html', title=INDEX_PAGE_TITLE, index_url=url_for('index'))
 
 
-@app.route('/restart')
+@app.route('/reboot')
 def restart(logger: Logger = logger) -> str:
-    flash("Rebooting... please wait.<br>This will take approx. one minute.", 'info')
-    logger.info('Restart initiated from web interface')
-    subprocess.Popen(["sudo", "reboot"])
-    return render_template('system_action_pending.html',  title=INDEX_PAGE_TITLE, index_url=url_for('index'), action="Restart")
+    logger.info('Reboot initiated from web interface')
+    messages = [
+        'Rebooting... please wait.',
+        'This will take approx. one minute.',
+        'This page will not automatically refresh. You will need to manually reconnect to the system after a restart.'
+    ]
+    for message in messages:
+        flash(message, 'info')
+
+    @after_this_request
+    def delayed_restart(response):
+        def restart_thread():
+            time.sleep(3)
+            subprocess.Popen(["sudo", "reboot"])
+
+        threading.Thread(target=restart_thread).start()
+        return response
+
+    return render_template('system_action_pending.html', title=INDEX_PAGE_TITLE, index_url=url_for('index'))
 
 
 @app.route('/shutdown')
 def shutdown(logger: Logger = logger) -> str:
-    flash("Shutting down.<br>When the LEDs on the board stop flashing, it should be safe to unplug your Raspberry Pi.", 'info')
     logger.info('Shutdown initiated from web interface')
-    subprocess.Popen(["sudo", "halt"])
-    return render_template('system_action_pending.html',  title=INDEX_PAGE_TITLE,  index_url=url_for('index'), action="Shutdown")
+    messages = [
+	    'Shutting down.',
+        'When the LEDs on the board stop flashing, it should be safe to unplug your Raspberry Pi.',
+        'This page will not automatically refresh. You will need to manually reconnect to the system after a restart.'
+    ]
+    for message in messages:
+        flash(message, 'info')
+
+    @after_this_request
+    def delayed_restart(response):
+        def restart_thread():
+            time.sleep(3)
+            subprocess.Popen(["sudo", "halt"])
+
+        threading.Thread(target=restart_thread).start()
+        return response
+
+    return render_template('system_action_pending.html', title=INDEX_PAGE_TITLE, index_url=url_for('index'))
 
 
 @app.errorhandler(404)

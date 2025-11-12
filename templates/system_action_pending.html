@@ -9,54 +9,29 @@
         <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/skeleton.css') }}">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-        <style>
-            .flashes {
-                margin-top: 75px;
-            }
-            .alert {
-                padding: 10px;
-                margin-bottom: 15px;
-                border: 2px solid transparent;
-                border-radius: 7px;
-            }
-            .alert-info {
-                color: #FF8C00;
-                border-color: #FF8C00;
-            }
-            li {
-                list-style-type: none;
-            }
-        </style>
     </head>
     <body>
         <div class="container">
             <div class="row">
-                <div class="two columns">
-                    <a href="{{index_url}}">
-                        <div class="two columns">
-                            <img class="logo" src="static/images/rpi_logo_128.png">
-                        </div>
-                        <div class="nine columns">
-                            <h3 class="title">{{title}}</h3>
-                        </div>
-                    </a>
-                </div>
-                <div class="ten columns title">
-                    <h3>{{title}}</h3>
-                </div>
+                <a href="{{index_url}}">
+                    <div class="two columns">
+                        <img class="logo" src="static/images/rpi_logo_128.png">
+                    </div>
+                    <div class="nine columns">
+                        <h3 class="title">{{title}}</h3>
+                    </div>
+                </a>
             </div>
             <div class="row">
                 {% with messages = get_flashed_messages(with_categories=true) %}
                     {% if messages %}
-                        <ul class="flashes">
+                        <ul class="system-action-flashes">
                             {% for category, message in messages %}
                                 <li class="alert alert-{{ category }}">{{ message|safe }}</li>
                             {% endfor %}
                         </ul>
                     {% endif %}
                 {% endwith %}
-                <p>Please wait while the system is {{ action|lower }}ing.</p>
-                <p>This page will not automatically refresh. You will need to manually reconnect to the system after a restart.</p>
             </div>
         </div>
     </body>

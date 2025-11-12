@@ -1,3 +1,4 @@
+
 body {
     background-color: #1a1a1a;
     font-size: 1.7em;
@@ -86,6 +87,32 @@ table.sortable th:hover {
 
 table.sortable tr:hover td{
     color: white !important;
+}
+
+
+.system-action-flashes {
+    margin-top: 50px;
+    padding: 25px;
+    border: 1px solid #ffd700;
+    border-radius: 4px;
+}
+
+.system-action-flashes li:first-child {
+    color: #ffd700 !important;
+    font-weight: bold !important;
+}
+
+.system-action-flashes li:last-child {
+    margin-bottom: 0px !important;
+}
+
+.alert {
+    list-style-type: none;
+    margin-bottom: 25px;
+}
+
+.alert-info {
+    color: #00ff40;
 }
 
 
