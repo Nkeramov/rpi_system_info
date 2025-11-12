@@ -1,12 +1,13 @@
 import os
 import time
+import secrets
 import threading
 import subprocess
 from pathlib import Path
 from datetime import datetime
 from dotenv import load_dotenv
 
-from flask import Flask, render_template, url_for, flash, after_this_request
+from flask import Flask, Response, render_template, url_for, flash, after_this_request
 from flask_caching import Cache
 
 from werkzeug.exceptions import NotFound, InternalServerError
@@ -47,9 +48,8 @@ rpi_info = RPiSystemInfo(logger=logger)
 config = {
     "CACHE_TYPE": "SimpleCache",
     "CACHE_DEFAULT_TIMEOUT": 30,
-    "SECRET_KEY": "pi_system'info"
+    "SECRET_KEY": secrets.token_hex(32)
 }
-
 app = Flask(__name__)
 app.config.from_mapping(config)
 
@@ -78,8 +78,8 @@ def restart(logger: Logger = logger) -> str:
         flash(message, 'info')
 
     @after_this_request
-    def delayed_restart(response):
-        def restart_thread():
+    def delayed_restart(response: Response) -> Response:
+        def restart_thread() -> None:
             time.sleep(3)
             subprocess.Popen(["sudo", "reboot"])
 
@@ -101,8 +101,8 @@ def shutdown(logger: Logger = logger) -> str:
         flash(message, 'info')
 
     @after_this_request
-    def delayed_restart(response):
-        def restart_thread():
+    def delayed_restart(response: Response) -> Response:
+        def restart_thread() -> None:
             time.sleep(3)
             subprocess.Popen(["sudo", "halt"])
 
