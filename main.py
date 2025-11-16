@@ -214,6 +214,11 @@ def disks_details(logger: Logger = logger) -> dict[str, list[dict[str, str]]]:
 
 
 @app.context_processor
+def disks_inodes_details(logger: Logger = logger) -> dict[str, list[dict[str, str]]]:
+    return dict(disks_inodes_details=rpi_info.get_disks_inodes_info())
+
+
+@app.context_processor
 def processes_details(logger: Logger = logger) -> dict[str, list[dict[str, Any]]]:
     processes_details = rpi_info.get_processes_info()
     for process in processes_details:

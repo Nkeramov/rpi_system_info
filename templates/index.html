@@ -344,7 +344,7 @@
                         <img src="static/images/ethernet_adapter.png">
                     </div>
                     <div>
-                        <h5>Ethernet Network Details</h5>
+                        <h5>Ethernet Adapter Details</h5>
                     </div>
                 </div>
                 <div class="toggle-content">
@@ -414,7 +414,7 @@
                         <img src="static/images/wifi_adapter.png">
                     </div>
                     <div>
-                        <h5>Wi-Fi Network Details</h5>
+                        <h5>Wi-Fi Adapter Details</h5>
                     </div>
                 </div>
                 <div class="toggle-content">
@@ -497,7 +497,7 @@
                         <img src="static/images/wifi.png">
                     </div>
                     <div>
-                        <h5>Available WiFi Networks <span class="item-count"> ( {{ available_wifi_networks | length}} ) </span></h5>
+                        <h5>Available WiFi Networks <span class="item-count"> ( total {{ available_wifi_networks | length}} ) </span></h5>
                     </div>
                 </div>
                 <div class="toggle-content collapsed">
@@ -508,7 +508,7 @@
                                     <th>SSID</th>
                                     <th>Channel</th>
                                     <th>Rate</th>
-                                    <th>Signal</th>
+                                    <th>Signal%</th>
                                     <th>Bars</th>
                                     <th>Security</th>
                                 </tr>
@@ -559,7 +559,7 @@
                         <img src="static/images/storage.png" style="width:32px">
                     </div>
                     <div>
-                        <h5>Disks Usage<span class="item-count"> ( {{ disks_details | length}} ) </span></h5>
+                        <h5>Disks Usage Details<span class="item-count"> ( total {{ disks_details | length }} ) </span></h5>
                     </div>
                 </div>
                 <div class="toggle-content">
@@ -569,7 +569,7 @@
                                 <th>File System</th>
                                 <th>Size</th>
                                 <th>Used</th>
-                                <th>Avail</th>
+                                <th>Available</th>
                                 <th>Used%</th>
                                 <th>Mounted On</th>
                             </tr>
@@ -588,6 +588,41 @@
                         </tbody>
                     </table>
                 </div>
+
+                <div class="row t-header toggle-header">
+                    <div class="t-header-img">
+                        <img src="static/images/storage.png" style="width:32px">
+                    </div>
+                    <div>
+                        <h5>Disks Inodes Details<span class="item-count"> ( total {{ disks_inodes_details | length }} ) </span></h5>
+                    </div>
+                </div>
+                <div class="toggle-content">
+                    <table class="u-full-width sortable">
+                        <thead>
+                            <tr>
+                                <th>File System</th>
+                                <th>Inodes</th>
+                                <th>Used</th>
+                                <th>Free</th>
+                                <th>Used%</th>
+                                <th>Mounted On</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for disk in disks_inodes_details %}
+                            <tr>
+                                <td>{{disk.filesystem}}</td>
+                                <td>{{disk.inodes}}</td>
+                                <td>{{disk.used}}</td>
+                                <td>{{disk.free}}</td>
+                                <td>{{disk.use_percent}}</td>
+                                <td>{{disk.mounted_on}}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <div id="tab4" class="tab-content">
@@ -596,16 +631,16 @@
                         <img src="static/images/processes.png" style="width:32px">
                     </div>
                     <div>
-                        <h5>Running Processes<span class="item-count"> ( total {{ processes_details | length}} ) </span></h5>
+                        <h5>Running Processes<span class="item-count"> ( total {{ processes_details | length }} ) </span></h5>
                     </div>
                 </div>
                 <table class="u-full-width sortable">
                     <thead>
                         <tr>
                             <th>User</th>
-                            <th>ProcId</th>
+                            <th>PID</th>
                             <th>CPU%</th>
-                            <th>Mem%</th>
+                            <th>MME%</th>
                             <th>Command</th>
                             <th>Started On</th>
                         </tr>

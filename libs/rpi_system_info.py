@@ -641,7 +641,7 @@ class RPiSystemInfo(metaclass=Singleton):
         return ''
 
     def get_disks_info(self) -> list[dict[str, str]]:
-        """Retrieves disk info in human-readable format.
+        """Retrieves disks info in human-readable format.
 
         Returns:
             List of dicts with disk info or empty list if error occurs.
@@ -655,7 +655,7 @@ class RPiSystemInfo(metaclass=Singleton):
             try:
                 lines = output.splitlines()[1:]
                 if not lines:
-                    self.logger.warning("No disk usage information available")
+                    self.logger.warning("No disks information available")
                     return disks
                 for line in lines:
                     values = line.split()
@@ -667,7 +667,37 @@ class RPiSystemInfo(metaclass=Singleton):
                     disks.append(disk_info)
                 return disks
             except Exception as e:
-                self.logger.error(f"Unexpected error getting disk info: {e}")
+                self.logger.error(f"Unexpected error getting disks info: {e}")
+        return disks
+
+    def get_disks_inodes_info(self) -> list[dict[str, str]]:
+        """Retrieves disks inodes info.
+
+        Returns:
+            List of dicts with disk inodes info or empty list if error occurs.
+            Each dict contains: filesystem, inodes, used, free, use_percent, mounted_on.
+        """
+        headers = ["filesystem", "inodes", "used", "free", "use_percent", "mounted_on"]
+        disks: list[dict[str, str]] = []
+        command = "df -i | head -n 1; df -i | tail -n +2 | sort -k6"
+        output = self.__get_shell_cmd_output(command)
+        if output:
+            try:
+                lines = output.splitlines()[1:]
+                if not lines:
+                    self.logger.warning("No disks inodes information available")
+                    return disks
+                for line in lines:
+                    values = line.split()
+                    values = line.split(maxsplit=5)
+                    if len(values) != 6:
+                        continue
+                    disk_info = dict(zip(headers, values))
+                    disk_info["use_percent"] = disk_info["use_percent"].replace("%", "")
+                    disks.append(disk_info)
+                return disks
+            except Exception as e:
+                self.logger.error(f"Unexpected error getting disks inodes info: {e}")
         return disks
 
     def get_processes_info(self) -> list[dict[str, Any]]:
