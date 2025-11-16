@@ -43,7 +43,7 @@ git clone https://github.com/Nkeramov/rpi_system_info.git
 ```
 Switch to repo directory:
 ```bash 
-cd ner_analyzer
+cd rpi_system_info
 ```
 ### Traditional method with venv and pip
 Create and activate virtual environment:
@@ -51,7 +51,7 @@ Create and activate virtual environment:
 python -m venv .venv 
 source .venv/bin/activate       # Linux/Mac
 # or
-./env/Scripts/activate          # Windows
+./venv/Scripts/activate         # Windows
 ```
 Install dependencies and run:
 ```bash
