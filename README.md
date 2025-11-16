@@ -9,10 +9,24 @@
 This project is a simple web server that displays system information about your Raspberry Pi.
 
 <div align="center">
-    <img src="title.png">
+    <img src="title.png" width="75%">
 </div>
 
-The information includes generic board info, CPU details (model, architecture, number of cores, frequency, voltage, temperature, usage), RAM (total, used, free, cache, available), network interfaces (ip, mac), mounted disks and processes running in the system. 
+The interface is divided into 4 tabs:
+- 1️⃣  *General*: 
+    - Board info (model, revision, manufacturer, OS name, host name, system time and uptime, internet connection status and public IP if connections is active)
+    - CPU details (model, architecture, cores count, cores frequency, cores voltage, temperature, usage, cache sizes)
+    - RAM details (size, total, used, free, cache, available)
+- 2️⃣  *Networks*:
+    - Ethernet adapter details (MAC and IP adresses, default gateway, network mask, broadcast IP adress)
+    - Wi-Fi afapter details (MAC and IP adresses, default gateway, network mask, broadcast IP adress)
+    - Available Wi-Fi networks (SSID, channel, rate, signal, bars, security). If the networkы list only shows the network the Raspberry Pi is connected to, you need to force a scan using the `sudo nmcli dev wifi rescan` command. This will be fixed in future versions.
+    - Bluetooth details (MAC address)
+- 3️⃣  *Storage*:
+    - Disks usage details (file system, size, used, available, used%, mounted on).
+    - Disks inodes details (file system, inodes, used, free, used%, mounted on).
+    - ~~SD card details~~ (will be added in the future versions).
+- 4️⃣  *Processes*: shows only running processes (user, PID, CPU%, MEM%, command, started on time)
 
 Some information is parsed from the device's [revision code](https://www.raspberrypi.com/documentation/computers/raspberry-pi.html#raspberry-pi-revision-codes) located in /proc/cpuinfo.
 
@@ -20,7 +34,7 @@ Information about disks and processes is presented in the form of tables. You ca
 
 The web server is based on Flask framework. By default the application will run on port 8080. It can be changed in env file. Gunicorn is used to launch.
 
-## Setting up and running the project 🚀
+## 🚀 Quick start
 
 ### Prerequisites
 Clone repository:
@@ -64,14 +78,14 @@ Also you can use the launch script `run.sh`, making it executable first
 chmod +x run.sh
 ```
 
-## Configuration 🛠️
+## 🛠️  Configuration 
 
 The configuration file is located in the `.env` file. You can copy the `env.example` to `.env` and make your edits.
 ```bash
 cp env.example .env
 ```
 
-## Adding to startup
+## ⚙️  Adding to startup
 
 You can set up automatic script launch at system startup.
 
@@ -85,7 +99,7 @@ Add to the end of file this line:
 ```
 Press Ctrl+O → Enter → Ctrl+X to save and exit.
 
-## Contributing
+## 🤝 Contributing
 
 If you want to contribute, please follow these steps:
 
@@ -94,11 +108,11 @@ If you want to contribute, please follow these steps:
 3. Make your changes and commit them.
 4. Push to your fork and create a pull request.
 
-## License
+## 📝 License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-## References 📚
+## 📚 References 
 
 - [Getting started](https://www.raspberrypi.com/documentation/computers/getting-started.html)
 - [Raspberry Pi OS](https://www.raspberrypi.com/documentation/computers/os.html)
