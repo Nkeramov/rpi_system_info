@@ -4,66 +4,90 @@ import secrets
 import threading
 import subprocess
 from pathlib import Path
+from logging import Logger
 from datetime import datetime
 from dotenv import load_dotenv
+
+from typing import Any, Optional
+from dataclasses import dataclass
 
 from flask import Flask, Response, render_template, url_for, flash, after_this_request
 from flask_caching import Cache
 
 from werkzeug.exceptions import NotFound, InternalServerError
 
-from logging import Logger
-
 from libs.rpi_system_info import RPiSystemInfo
 from libs.log_utils import LoggerSingleton
 
-from typing import Any
+@dataclass(frozen=True)
+class AppConfig:
+    PORT: int = 8080
+    INDEX_PAGE_CACHE_TIMEOUT: int = 10
+    INDEX_PAGE_TITLE: str = 'Raspberry Pi System Info'
+    CPU_ORANGE_TEMP_THRESHOLD: float = 50.0
+    CPU_RED_TEMP_THRESHOLD: float = 60.0
+    TEXT_GREEN_COLOR: str = "#00FF40"
+    TEXT_ORANGE_COLOR: str = "#FF8C00"
+    TEXT_RED_COLOR: str = "#CC0000"
+    TEXT_DATETIME_FORMAT: str = "%d-%b-%Y, %H : %M : %S"
+    LOGS_PATH: Path = Path("logs")
+    LOG_FILENAME: Optional[str] = None
+    LOG_LEVEL: str = "INFO"
+    LOG_MSG_FORMAT: Optional[str] = None
+    LOG_DATETIME_FORMAT: Optional[str] = None
 
-load_dotenv('.env')
+    @classmethod
+    def from_env(cls) -> 'AppConfig':
+        load_dotenv('.env')
+        return cls(
+            PORT=int(os.getenv("PORT", cls.PORT)),
+            INDEX_PAGE_CACHE_TIMEOUT=int(os.getenv("INDEX_PAGE_CACHE_TIMEOUT", cls.INDEX_PAGE_CACHE_TIMEOUT)),
+            INDEX_PAGE_TITLE=os.getenv("INDEX_PAGE_TITLE", cls.INDEX_PAGE_TITLE),
+            CPU_ORANGE_TEMP_THRESHOLD=float(os.getenv("CPU_ORANGE_TEMP_THRESHOLD", cls.CPU_ORANGE_TEMP_THRESHOLD)),
+            CPU_RED_TEMP_THRESHOLD=float(os.getenv("CPU_RED_TEMP_THRESHOLD", cls.CPU_RED_TEMP_THRESHOLD)),
+            TEXT_GREEN_COLOR=os.getenv("TEXT_GREEN_COLOR", cls.TEXT_GREEN_COLOR),
+            TEXT_ORANGE_COLOR=os.getenv("TEXT_ORANGE_COLOR", cls.TEXT_ORANGE_COLOR),
+            TEXT_RED_COLOR=os.getenv("TEXT_RED_COLOR", cls.TEXT_RED_COLOR),
+            TEXT_DATETIME_FORMAT=os.getenv("TEXT_DATETIME_FORMAT", cls.TEXT_DATETIME_FORMAT),
+            LOGS_PATH=Path(os.getenv("LOGS_PATH", str(cls.LOGS_PATH))),
+            LOG_FILENAME=os.getenv("LOG_FILENAME"),
+            LOG_LEVEL=os.getenv("LOG_LEVEL", cls.LOG_LEVEL),
+            LOG_MSG_FORMAT=os.getenv("LOG_MSG_FORMAT"),
+            LOG_DATETIME_FORMAT=os.getenv("LOG_DATETIME_FORMAT"),
+        )
 
-PORT = int(os.getenv("PORT", 8080))
-INDEX_PAGE_CACHE_TIMEOUT = int(os.getenv("INDEX_PAGE_CACHE_TIMEOUT", 10))
-INDEX_PAGE_TITLE = os.getenv("INDEX_PAGE_TITLE", 'Raspberry Pi System Info')
-
-CPU_ORANGE_TEMP_THRESHOLD = float(os.getenv("CPU_ORANGE_TEMP_THRESHOLD", 50))
-CPU_RED_TEMP_THRESHOLD = float(os.getenv("CPU_RED_TEMP_THRESHOLD", 60))
-
-TEXT_GREEN_COLOR = os.getenv("TEXT_GREEN_COLOR", "#00FF40")
-TEXT_ORANGE_COLOR = os.getenv("TEXT_ORANGE_COLOR", "#FF8C00")
-TEXT_RED_COLOR = os.getenv("TEXT_RED_COLOR", "#CC0000")
-
-TEXT_DATETIME_FORMAT = os.getenv("TEXT_DATETIME_FORMAT", "%d-%b-%Y, %H : %M : %S")
+config = AppConfig.from_env()
 
 logger = LoggerSingleton(
-    log_dir=Path(os.getenv("LOGS_PATH", "logs")),
-    log_file=os.getenv("LOG_FILENAME"),
-    level=os.getenv("LOG_LEVEL"),
-    msg_format=os.getenv("LOG_MSG_FORMAT"),
-    date_format=os.getenv("LOG_DATETIME_FORMAT"),
-    colored=True
-).get_logger()
+        log_dir=config.LOGS_PATH,
+        log_file=config.LOG_FILENAME,
+        level=config.LOG_LEVEL,
+        msg_format=config.LOG_MSG_FORMAT,
+        date_format=config.LOG_DATETIME_FORMAT,
+        colored=True
+    ).get_logger()
 
-rpi_info = RPiSystemInfo(logger=logger)
-
-config = {
+cache_config = {
     "CACHE_TYPE": "SimpleCache",
-    "CACHE_DEFAULT_TIMEOUT": 30,
+    "CACHE_DEFAULT_TIMEOUT": 10,
     "SECRET_KEY": secrets.token_hex(32)
 }
 app = Flask(__name__)
-app.config.from_mapping(config)
+app.config.from_mapping(cache_config)
 
 cache = Cache(app)
 
 app.logger.handlers = logger.handlers
 app.logger.setLevel(logger.level)
 
+rpi_info = RPiSystemInfo(logger=logger)
+
 
 @app.route('/')
-@cache.cached(timeout=INDEX_PAGE_CACHE_TIMEOUT)
+@cache.cached(timeout=config.INDEX_PAGE_CACHE_TIMEOUT)
 def index(logger: Logger = logger) -> str:
     logger.info('Request index.html')
-    return render_template('index.html', title=INDEX_PAGE_TITLE, index_url=url_for('index'))
+    return render_template('index.html', title=config.INDEX_PAGE_TITLE, index_url=url_for('index'))
 
 
 @app.route('/reboot')
@@ -86,7 +110,7 @@ def restart(logger: Logger = logger) -> str:
         threading.Thread(target=restart_thread).start()
         return response
 
-    return render_template('system_action_pending.html', title=INDEX_PAGE_TITLE, index_url=url_for('index'))
+    return render_template('system_action_pending.html', title=config.INDEX_PAGE_TITLE, index_url=url_for('index'))
 
 
 @app.route('/shutdown')
@@ -109,26 +133,26 @@ def shutdown(logger: Logger = logger) -> str:
         threading.Thread(target=restart_thread).start()
         return response
 
-    return render_template('system_action_pending.html', title=INDEX_PAGE_TITLE, index_url=url_for('index'))
+    return render_template('system_action_pending.html', title=config.INDEX_PAGE_TITLE, index_url=url_for('index'))
 
 
 @app.errorhandler(404)
 def page_not_found_error(error: NotFound) -> tuple[str, int]:
-    return render_template('error.html',  title=INDEX_PAGE_TITLE, error_code="404",
+    return render_template('error.html',  title=config.INDEX_PAGE_TITLE, error_code="404",
         error_message="Page not found", redirect_delay=5, index_url=url_for('index')), 404
 
 
 @app.errorhandler(500)
 def internal_server_error(error: InternalServerError) -> tuple[str, int]:
-    return render_template('error.html',  title=INDEX_PAGE_TITLE, error_code="500",
+    return render_template('error.html',  title=config.INDEX_PAGE_TITLE, error_code="500",
         error_message="Internal server error", redirect_delay=5, index_url=url_for('index')), 500
 
 
 @app.context_processor
 def generic_board_info(logger: Logger = logger) -> dict[str, dict[str, Any]]:
-    system_time = datetime.now().strftime(TEXT_DATETIME_FORMAT)
+    system_time = datetime.now().strftime(config.TEXT_DATETIME_FORMAT)
     boot_time = rpi_info.boot_time
-    boot_time_str = boot_time.strftime(TEXT_DATETIME_FORMAT) if boot_time else ''
+    boot_time_str = boot_time.strftime(config.TEXT_DATETIME_FORMAT) if boot_time else ''
     return dict(generic_board_info=
         {
             'model_name': rpi_info.model_name,
@@ -149,12 +173,12 @@ def generic_board_info(logger: Logger = logger) -> dict[str, dict[str, Any]]:
 @app.context_processor
 def cpu_details(logger: Logger = logger) -> dict[str, dict[str, Any]]:
     temperature = rpi_info.get_cpu_temperature()
-    color = TEXT_GREEN_COLOR
+    color = config.TEXT_GREEN_COLOR
     if temperature is not None:
-        if CPU_ORANGE_TEMP_THRESHOLD < temperature < CPU_RED_TEMP_THRESHOLD:
-            color = TEXT_ORANGE_COLOR
-        elif temperature >= CPU_RED_TEMP_THRESHOLD:
-            color = TEXT_RED_COLOR
+        if config.CPU_ORANGE_TEMP_THRESHOLD < temperature < config.CPU_RED_TEMP_THRESHOLD:
+            color = config.TEXT_ORANGE_COLOR
+        elif temperature >= config.CPU_RED_TEMP_THRESHOLD:
+            color = config.TEXT_RED_COLOR
     voltage = rpi_info.get_cpu_core_voltage()
     return dict(cpu_details=
         {
@@ -222,14 +246,14 @@ def disks_inodes_details(logger: Logger = logger) -> dict[str, list[dict[str, st
 def processes_details(logger: Logger = logger) -> dict[str, list[dict[str, Any]]]:
     processes_details = rpi_info.get_processes_info()
     for process in processes_details:
-        process['started_on'] = process['started_on'].strftime(TEXT_DATETIME_FORMAT)
+        process['started_on'] = process['started_on'].strftime(config.TEXT_DATETIME_FORMAT)
     return dict(processes_details=processes_details)
 
 
 if __name__ == "__main__":
     logger.info("Started")
     try:
-        app.run(host="0.0.0.0", port=PORT, debug=False)
+        app.run(host="0.0.0.0", port=config.PORT, debug=False)
     except KeyboardInterrupt:
         logger.info("Stopped")
         exit()
