@@ -4,7 +4,6 @@ import secrets
 import threading
 import subprocess
 from pathlib import Path
-from logging import Logger
 from datetime import datetime
 from dotenv import load_dotenv
 
@@ -85,13 +84,13 @@ rpi_info = RPiSystemInfo(logger=logger)
 
 @app.route('/')
 @cache.cached(timeout=config.INDEX_PAGE_CACHE_TIMEOUT)
-def index(logger: Logger = logger) -> str:
+def index() -> str:
     logger.info('Request index.html')
     return render_template('index.html', title=config.INDEX_PAGE_TITLE, index_url=url_for('index'))
 
 
 @app.route('/reboot')
-def restart(logger: Logger = logger) -> str:
+def restart() -> str:
     logger.info('Reboot initiated from web interface')
     messages = [
         'Rebooting... please wait.',
@@ -114,7 +113,7 @@ def restart(logger: Logger = logger) -> str:
 
 
 @app.route('/shutdown')
-def shutdown(logger: Logger = logger) -> str:
+def shutdown() -> str:
     logger.info('Shutdown initiated from web interface')
     messages = [
 	    'Shutting down.',
@@ -138,21 +137,33 @@ def shutdown(logger: Logger = logger) -> str:
 
 @app.errorhandler(404)
 def page_not_found_error(error: NotFound) -> tuple[str, int]:
+    logger.error(f"404 error: {error}")
     return render_template('error.html',  title=config.INDEX_PAGE_TITLE, error_code="404",
         error_message="Page not found", redirect_delay=5, index_url=url_for('index')), 404
 
 
 @app.errorhandler(500)
 def internal_server_error(error: InternalServerError) -> tuple[str, int]:
+    logger.error(f"500 error: {error}")
     return render_template('error.html',  title=config.INDEX_PAGE_TITLE, error_code="500",
         error_message="Internal server error", redirect_delay=5, index_url=url_for('index')), 500
 
 
+def format_datetime(dt: datetime, config: AppConfig) -> str:
+    """Datetime formatting with error handling
+    based on the format string from the config"""
+    try:
+        return dt.strftime(config.TEXT_DATETIME_FORMAT)
+    except (ValueError, TypeError) as e:
+        logger.warning(f"Error formatting datetime {dt}: {e}")
+        return dt.isoformat()
+
+
 @app.context_processor
-def generic_board_info(logger: Logger = logger) -> dict[str, dict[str, Any]]:
-    system_time = datetime.now().strftime(config.TEXT_DATETIME_FORMAT)
+def generic_board_info() -> dict[str, dict[str, Any]]:
+    system_time = format_datetime(datetime.now(), config)
     boot_time = rpi_info.boot_time
-    boot_time_str = boot_time.strftime(config.TEXT_DATETIME_FORMAT) if boot_time else ''
+    boot_time_str = format_datetime(boot_time, config) if boot_time else ''
     return dict(generic_board_info=
         {
             'model_name': rpi_info.model_name,
@@ -171,7 +182,7 @@ def generic_board_info(logger: Logger = logger) -> dict[str, dict[str, Any]]:
 
 
 @app.context_processor
-def cpu_details(logger: Logger = logger) -> dict[str, dict[str, Any]]:
+def cpu_details() -> dict[str, dict[str, Any]]:
     temperature = rpi_info.get_cpu_temperature()
     color = config.TEXT_GREEN_COLOR
     if temperature is not None:
@@ -201,49 +212,49 @@ def cpu_details(logger: Logger = logger) -> dict[str, dict[str, Any]]:
 
 
 @app.context_processor
-def ram_details(logger: Logger = logger) -> dict[str, dict[str, str]]:
+def ram_details() -> dict[str, dict[str, str]]:
     return dict(ram_details=rpi_info.get_ram_info())
 
 
 @app.context_processor
-def eth_interface_info(logger: Logger = logger) -> dict[str, dict[str, str]]:
+def eth_interface_info() -> dict[str, dict[str, str]]:
     return dict(eth_info=rpi_info.get_network_interface_info('eth0'))
 
 
 @app.context_processor
-def wlan_interface_info(logger: Logger = logger) -> dict[str, dict[str, str]]:
+def wlan_interface_info() -> dict[str, dict[str, str]]:
     return dict(wlan_info=rpi_info.get_network_interface_info('wlan0'))
 
 
 @app.context_processor
-def wifi_network_name(logger: Logger = logger) -> dict[str, str]:
+def wifi_network_name() -> dict[str, str]:
     network_name = rpi_info.get_wifi_network_name()
     return dict(wifi_network_name=network_name)
 
 
 @app.context_processor
-def bluetooth_mac_address(logger: Logger = logger) -> dict[str, str]:
+def bluetooth_mac_address() -> dict[str, str]:
     address = rpi_info.get_bluetooth_mac_address()
     return dict(bluetooth_mac_address=address)
 
 
 @app.context_processor
-def available_wifi_networks(logger: Logger = logger) -> dict[str, list[dict[str, str]]]:
+def available_wifi_networks() -> dict[str, list[dict[str, str]]]:
     return dict(available_wifi_networks=rpi_info.get_available_wifi_networks())
 
 
 @app.context_processor
-def disks_details(logger: Logger = logger) -> dict[str, list[dict[str, str]]]:
+def disks_details() -> dict[str, list[dict[str, str]]]:
     return dict(disks_details=rpi_info.get_disks_info())
 
 
 @app.context_processor
-def disks_inodes_details(logger: Logger = logger) -> dict[str, list[dict[str, str]]]:
+def disks_inodes_details() -> dict[str, list[dict[str, str]]]:
     return dict(disks_inodes_details=rpi_info.get_disks_inodes_info())
 
 
 @app.context_processor
-def processes_details(logger: Logger = logger) -> dict[str, list[dict[str, Any]]]:
+def processes_details() -> dict[str, list[dict[str, Any]]]:
     processes_details = rpi_info.get_processes_info()
     for process in processes_details:
         process['started_on'] = process['started_on'].strftime(config.TEXT_DATETIME_FORMAT)
@@ -251,9 +262,16 @@ def processes_details(logger: Logger = logger) -> dict[str, list[dict[str, Any]]
 
 
 if __name__ == "__main__":
-    logger.info("Started")
     try:
-        app.run(host="0.0.0.0", port=config.PORT, debug=False)
+        logger.info(f"Starting application on port {config.PORT}")
+        app.run(
+            host='0.0.0.0',
+            port=config.PORT,
+            debug=False
+        )
     except KeyboardInterrupt:
         logger.info("Stopped")
         exit()
+    except Exception as e:
+        logger.critical(f"Failed to start application: {e}")
+        raise
