@@ -7,7 +7,6 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="description" content="System information of Raspberry Pi">
         <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">        
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/skeleton.css') }}">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
         <script src="{{ url_for('static', filename='js/sort.js') }}"></script>
     </head>
@@ -18,11 +17,11 @@
                     <div class="two columns">
                         <img class="logo" src="static/images/rpi_logo_128.png">
                     </div>
-                    <div class="nine columns">
+                    <div class="seven columns">
                         <h3 class="title">{{title}}</h3>
                     </div>
                 </a>
-                <div class="one column">
+                <div class="half column">
                     <div>
                         <a href="reboot" onclick="return confirm('Do you wish to re-start your system ?')">
                             <img src="static/images/reboot.png" style="width:24px; margin-top:5px" alt="Restart">
@@ -54,82 +53,82 @@
                 </div>
                 <div class="toggle-content">
                     <div class="row t-row">
-                        <div class="five columns t-caption">
+                        <div class="four columns">
                             Model
                         </div>
-                        <div class="seven columns">
+                        <div class="six columns">
                             {{generic_board_info.model_name}}
                         </div>
                     </div>
                     <div class="row t-row">
-                        <div class="five columns t-caption">
+                        <div class="four columns">
                             Revision
                         </div>
-                        <div class="seven columns">
+                        <div class="six columns">
                             {{generic_board_info.revision}}
                         </div>
                     </div>
                     <div class="row t-row">
-                        <div class="five columns t-caption">
+                        <div class="four columns">
                             Serial Number
                         </div>
-                        <div class="seven columns">
+                        <div class="six columns">
                             {{generic_board_info.serial_number}}
                         </div>
                     </div>
                     <div class="row t-row">
-                        <div class="five columns t-caption">
+                        <div class="four columns">
                             Manufacturer
                         </div>
-                        <div class="seven columns">
+                        <div class="six columns">
                             {{generic_board_info.manufacturer}}
                         </div>
                     </div>
                     <div class="row t-row">
-                        <div class="five columns t-caption">
+                        <div class="four columns">
                             Operating System
                         </div>
-                        <div class="seven columns">
+                        <div class="six columns">
                             {{generic_board_info.os}}
                         </div>
                     </div>
                     <div class="row t-row">
-                        <div class="five columns t-caption">
+                        <div class="four columns">
                             Host Name
                         </div>
-                        <div class="seven columns">
+                        <div class="six columns">
                             {{generic_board_info.hostname}}
                         </div>
                      </div>
                      <div class="row t-row">
-                        <div class="five columns t-caption">
+                        <div class="four columns">
                             System Time
                         </div>
-                        <div class="seven columns">
+                        <div class="six columns">
                             {{generic_board_info.system_time}}
                         </div>
                     </div>
                     <div class="row t-row">
-                        <div class="five columns t-caption">
+                        <div class="four columns">
                             Started on
                         </div>
-                        <div class="seven columns">
+                        <div class="six columns">
                             {{generic_board_info.boot_time}}
                         </div>
                     </div>
                     <div class="row t-row">
-                        <div class="five columns t-caption">
+                        <div class="four columns">
                             Uptime
                         </div>
-                        <div class="seven columns">
+                        <div class="six columns">
                             {{generic_board_info.uptime_pretty}}
                         </div>
                     </div>
                     <div class="row t-row">
-                        <div class="five columns t-caption">
-                            Internet connection
+                        <div class="four columns">
+                            Internet Connection
                         </div>
-                        <div class="seven columns">
+                        <div class="six columns">
                         {% if generic_board_info.internet_connection_status %}
                             Active
                         {% else %}
@@ -139,10 +138,10 @@
                     </div>
                     {% if generic_board_info.internet_connection_status %}
                     <div class="row t-row">
-                        <div class="five columns t-caption">
-                            Public IP address
+                        <div class="four columns">
+                            Public IP Address
                         </div>
-                        <div class="seven columns">
+                        <div class="six columns">
                             {{ generic_board_info.public_ip}}
                         </div>
                     </div>
@@ -158,122 +157,122 @@
                 </div>
                 <div class="toggle-content collapsed">
                     <div class="row t-row">
-                        <div class="five columns t-caption">
+                        <div class="four columns">
                             Model
                         </div>
-                        <div class="seven columns">
+                        <div class="six columns">
                             {{cpu_details.model}}
                         </div>
                     </div>
                     <div class="row t-row">
-                        <div class="five columns t-caption">
+                        <div class="four columns">
                             Architecture
                         </div>
-                        <div class="seven columns">
+                        <div class="six columns">
                             {{cpu_details.architecture}}
                         </div>
                     </div>
                     <div class="row t-row">
-                        <div class="five columns t-caption">
+                        <div class="four columns">
                             Cores Count
                         </div>
-                        <div class="seven columns">
+                        <div class="six columns">
                             {{cpu_details.cores_count}}
                         </div>
                     </div>
                     <div class="row t-row">
-                        <div class="five columns t-caption">
+                        <div class="four columns">
                             Core Frequency
                         </div>
-                        <div class="seven columns">
+                        <div class="six columns">
                             {{cpu_details.cur_core_frequency}} MHz
                         </div>
                     </div>
                     <div class="row t-row">
-                        <div class="five columns t-caption">
+                        <div class="four columns">
                             Core Min Frequency
                         </div>
-                        <div class="seven columns">
+                        <div class="six columns">
                             {{cpu_details.min_core_frequency}} MHz
                         </div>
                     </div>
                     <div class="row t-row">
-                        <div class="five columns t-caption">
+                        <div class="four columns">
                             Core Max Frequency
                         </div>
-                        <div class="seven columns">
+                        <div class="six columns">
                             {{cpu_details.max_core_frequency}} MHz
                         </div>
                     </div>
                     <div class="row t-row">
-                        <div class="five columns t-caption">
+                        <div class="four columns">
                             Core Voltage
                         </div>
-                        <div class="seven columns">
+                        <div class="six columns">
                             {{cpu_details.core_voltage}} V
                         </div>
                     </div>
                     <div class="row t-row">
-                        <div class="five columns t-caption">
+                        <div class="four columns">
                             Temperature
                         </div>
-                        <div class="seven columns" style="color:{{cpu_details.temperature_color}}">
+                        <div class="six columns" style="color:{{cpu_details.temperature_color}}">
                             {{cpu_details.temperature_value}} &#176;C
                         </div>
                     </div>
                     <div class="row t-row">
-                        <div class="five columns t-caption">
+                        <div class="four columns">
                             Usage
                         </div>
-                        <div class="seven columns">
+                        <div class="six columns">
                             {{cpu_details.usage}} %
                         </div>
                     </div>
                     <div class="row t-row">
-                        <div class="five columns t-caption">
+                        <div class="four columns">
                             L1 Data Cache Size
                         </div>
-                        <div class="seven columns">
+                        <div class="six columns">
                             {{cpu_details.cache_sizes.L1d}} KiB
                         </div>
                     </div>
                     <div class="row t-row">
-                        <div class="five columns t-caption">
+                        <div class="four columns">
                             L1 Instructions Cache Size
                         </div>
-                        <div class="seven columns">
+                        <div class="six columns">
                             {{cpu_details.cache_sizes.L1i}} KiB
                         </div>
                     </div>
                     <div class="row t-row">
-                        <div class="five columns t-caption">
+                        <div class="four columns">
                             L2 Cache Size
                         </div>
-                        <div class="seven columns">
+                        <div class="six columns">
                             {{cpu_details.cache_sizes.L2}} KiB
                         </div>
                     </div>
                     <div class="row t-row">
-                        <div class="five columns t-caption">
+                        <div class="four columns">
                             Overvoltage allowed
                         </div>
-                        <div class="seven columns">
+                        <div class="six columns">
                             {{cpu_details.overvoltage_allowed}}
                         </div>
                     </div>
                     <div class="row t-row">
-                        <div class="five columns t-caption">
+                        <div class="four columns">
                             OTP programming allowed
                         </div>
-                        <div class="seven columns">
+                        <div class="six columns">
                             {{cpu_details.otp_programming_allowed}}
                         </div>
                     </div>
                     <div class="row t-row">
-                        <div class="five columns t-caption">
+                        <div class="four columns">
                             OTP reading allowed
                         </div>
-                        <div class="seven columns">
+                        <div class="six columns">
                             {{cpu_details.otp_reading_allowed}}
                         </div>
                     </div>
@@ -288,50 +287,50 @@
                 </div>
                 <div class="toggle-content collapsed">
                     <div class="row t-row">
-                        <div class="five columns t-caption">
+                        <div class="four columns">
                             Memory Size
                         </div>
-                        <div class="seven columns t-row">
+                        <div class="six columns t-row">
                             {{ram_details.size}} MB
                         </div>
                     </div>
                     <div class="row t-row">
-                        <div class="five columns t-caption">
+                        <div class="four columns">
                             Total Memory
                         </div>
-                        <div class="seven columns t-row">
+                        <div class="six columns t-row">
                             {{ram_details.total}} MB
                         </div>
                     </div>
                     <div class="row t-row">
-                        <div class="five columns t-caption">
+                        <div class="four columns">
                             Used Memory
                         </div>
-                        <div class="seven columns">
+                        <div class="six columns">
                             {{ram_details.used}} MB
                         </div>
                     </div>
                     <div class="row t-row">
-                        <div class="five columns t-caption">
+                        <div class="four columns">
                             Free Memory
                         </div>
-                        <div class="seven columns">
+                        <div class="six columns">
                             {{ram_details.free}} MB
                         </div>
                     </div>
                     <div class="row t-row">
-                        <div class="five columns t-caption">
+                        <div class="four columns">
                             Cache Memory
                         </div>
-                        <div class="seven columns">
+                        <div class="six columns">
                             {{ram_details.cache}} MB
                         </div>
                     </div>
                     <div class="row t-row">
-                        <div class="five columns t-caption">
+                        <div class="four columns">
                             Available Memory
                         </div>
-                        <div class="seven columns">
+                        <div class="six columns">
                             {{ram_details.available}} MB
                         </div>
                     </div>
@@ -349,10 +348,10 @@
                 </div>
                 <div class="toggle-content">
                     <div class="row t-row">
-                        <div class="five columns t-caption">
+                        <div class="four columns">
                             MAC address
                         </div>
-                        <div class="seven columns">
+                        <div class="six columns">
                         {% if eth_info.mac %}
                             {{eth_info.mac}}
                         {% else %}
@@ -361,10 +360,10 @@
                         </div>
                     </div>
                     <div class="row t-row">
-                        <div class="five columns t-caption">
+                        <div class="four columns">
                             IP address
                         </div>
-                        <div class="seven columns t-row">
+                        <div class="six columns t-row">
                         {% if eth_info.state == 'UP' %}
                             {{eth_info.ip}}
                         {% else %}
@@ -373,10 +372,10 @@
                         </div>
                     </div>
                     <div class="row t-row">
-                        <div class="five columns t-caption">
+                        <div class="four columns">
                             Default gateway
                         </div>
-                        <div class="seven columns t-row">
+                        <div class="six columns t-row">
                         {% if eth_info.state == 'UP' %}
                             {{eth_info.gateway}}
                         {% else %}
@@ -385,10 +384,10 @@
                         </div>
                     </div>
                     <div class="row t-row">
-                        <div class="five columns t-caption">
+                        <div class="four columns">
                             Network mask
                         </div>
-                        <div class="seven columns t-row">
+                        <div class="six columns t-row">
                         {% if eth_info.state == 'UP' %}
                             {{eth_info.mask}}
                         {% else %}
@@ -397,10 +396,10 @@
                         </div>
                     </div>
                     <div class="row t-row">
-                        <div class="five columns t-caption">
+                        <div class="four columns">
                             Broadcast IP address
                         </div>
-                        <div class="seven columns t-row">
+                        <div class="six columns t-row">
                         {% if eth_info.state == 'UP' %}
                             {{eth_info.broadcast}}
                         {% else %}
@@ -419,10 +418,10 @@
                 </div>
                 <div class="toggle-content">
                     <div class="row t-row">
-                        <div class="five columns t-caption">
+                        <div class="four columns">
                             MAC address
                         </div>
-                        <div class="seven columns">
+                        <div class="six columns">
                         {% if wlan_info.mac %}
                             {{wlan_info.mac}}
                         {% else %}
@@ -431,10 +430,10 @@
                         </div>
                     </div>
                     <div class="row t-row">
-                        <div class="five columns t-caption">
+                        <div class="four columns">
                             Wi-Fi network
                         </div>
-                        <div class="seven columns t-row">
+                        <div class="six columns t-row">
                         {% if wifi_network_name %}
                             {{wifi_network_name}}
                         {% else %}
@@ -443,10 +442,10 @@
                         </div>
                     </div>
                     <div class="row t-row">
-                        <div class="five columns t-caption">
+                        <div class="four columns">
                             IP address
                         </div>
-                        <div class="seven columns t-row">
+                        <div class="six columns t-row">
                         {% if wlan_info.state == 'UP' %}
                             {{wlan_info.ip}}
                         {% else %}
@@ -455,10 +454,10 @@
                         </div>
                     </div>
                     <div class="row t-row">
-                        <div class="five columns t-caption">
+                        <div class="four columns">
                             Default gateway
                         </div>
-                        <div class="seven columns t-row">
+                        <div class="six columns t-row">
                         {% if wlan_info.state == 'UP' %}
                             {{wlan_info.gateway}}
                         {% else %}
@@ -467,10 +466,10 @@
                         </div>
                     </div>
                     <div class="row t-row">
-                        <div class="five columns t-caption">
+                        <div class="four columns">
                             Network mask
                         </div>
-                        <div class="seven columns t-row">
+                        <div class="six columns t-row">
                         {% if wlan_info.state == 'UP' %}
                             {{wlan_info.mask}}
                         {% else %}
@@ -479,10 +478,10 @@
                         </div>
                     </div>
                     <div class="row t-row">
-                        <div class="five columns t-caption">
+                        <div class="four columns">
                             Broadcast IP address
                         </div>
-                        <div class="seven columns t-row">
+                        <div class="six columns t-row">
                         {% if wlan_info.state == 'UP' %}
                             {{wlan_info.broadcast}}
                         {% else %}
@@ -505,23 +504,23 @@
                         <table class="u-full-width sortable">
                             <thead>
                                 <tr>
-                                    <th>SSID</th>
-                                    <th>Channel</th>
-                                    <th>Rate</th>
-                                    <th>Signal%</th>
-                                    <th>Bars</th>
-                                    <th>Security</th>
+                                    <th class="tal">SSID</th>
+                                    <th class="tac">Channel</th>
+                                    <th class="tac">Rate</th>
+                                    <th class="tac">Signal%</th>
+                                    <th class="tac">Bars</th>
+                                    <th class="tac">Security</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for wifi_network in available_wifi_networks %}
                                 <tr>
-                                    <td>{{wifi_network.ssid}}</td>
-                                    <td>{{wifi_network.channel}}</td>
-                                    <td>{{wifi_network.rate}}</td>
-                                    <td>{{wifi_network.signal}}</td>
-                                    <td>{{wifi_network.bars}}</td>
-                                    <td>{{wifi_network.security}}</td>
+                                    <td class="tal">{{wifi_network.ssid}}</td>
+                                    <td class="tac">{{wifi_network.channel}}</td>
+                                    <td class="tac">{{wifi_network.rate}}</td>
+                                    <td class="tac">{{wifi_network.signal}}</td>
+                                    <td class="tac">{{wifi_network.bars}}</td>
+                                    <td class="tac">{{wifi_network.security}}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -539,10 +538,10 @@
                 </div>
                 <div class="toggle-content collapsed">
                     <div class="row t-row">
-                        <div class="five columns t-caption">
+                        <div class="four columns t-caption">
                             MAC address
                         </div>
-                        <div class="seven columns">
+                        <div class="six columns">
                         {% if bluetooth_mac_address %}
                             {{bluetooth_mac_address}}
                         {% else %}
@@ -566,23 +565,23 @@
                     <table class="u-full-width sortable">
                         <thead>
                             <tr>
-                                <th>File System</th>
-                                <th>Size</th>
-                                <th>Used</th>
-                                <th>Available</th>
-                                <th>Used%</th>
-                                <th>Mounted On</th>
+                                <th class="tal">File System</th>
+                                <th class="tac">Size</th>
+                                <th class="tac">Used</th>
+                                <th class="tac">Available</th>
+                                <th class="tac">Used%</th>
+                                <th class="tal">Mounted On</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for disk in disks_details %}
                             <tr>
-                                <td>{{disk.filesystem}}</td>
-                                <td>{{disk.size}}</td>
-                                <td>{{disk.used}}</td>
-                                <td>{{disk.available}}</td>
-                                <td>{{disk.use_percent}}</td>
-                                <td>{{disk.mounted_on}}</td>
+                                <td class="tal">{{disk.filesystem}}</td>
+                                <td class="tac">{{disk.size}}</td>
+                                <td class="tac">{{disk.used}}</td>
+                                <td class="tac">{{disk.available}}</td>
+                                <td class="tac">{{disk.use_percent}}</td>
+                                <td class="tal">{{disk.mounted_on}}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -601,23 +600,23 @@
                     <table class="u-full-width sortable">
                         <thead>
                             <tr>
-                                <th>File System</th>
-                                <th>Inodes</th>
-                                <th>Used</th>
-                                <th>Free</th>
-                                <th>Used%</th>
-                                <th>Mounted On</th>
+                                <th class="tal">File System</th>
+                                <th class="tac">Inodes</th>
+                                <th class="tac">Used</th>
+                                <th class="tac">Free</th>
+                                <th class="tac">Used%</th>
+                                <th class="tal">Mounted On</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for disk in disks_inodes_details %}
                             <tr>
-                                <td>{{disk.filesystem}}</td>
-                                <td>{{disk.inodes}}</td>
-                                <td>{{disk.used}}</td>
-                                <td>{{disk.free}}</td>
-                                <td>{{disk.use_percent}}</td>
-                                <td>{{disk.mounted_on}}</td>
+                                <td class="tal">{{disk.filesystem}}</td>
+                                <td class="tac">{{disk.inodes}}</td>
+                                <td class="tac">{{disk.used}}</td>
+                                <td class="tac">{{disk.free}}</td>
+                                <td class="tac">{{disk.use_percent}}</td>
+                                <td class="tal">{{disk.mounted_on}}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -637,23 +636,23 @@
                 <table class="u-full-width sortable">
                     <thead>
                         <tr>
-                            <th>User</th>
-                            <th>PID</th>
-                            <th>CPU%</th>
-                            <th>MME%</th>
-                            <th>Command</th>
-                            <th>Started On</th>
+                            <th class="tal">User</th>
+                            <th class="tac">PID</th>
+                            <th class="tac">CPU%</th>
+                            <th class="tac">MEM%</th>
+                            <th class="tal">Command</th>
+                            <th class="tac">Started On</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for process in processes_details %}
                         <tr>
-                            <td>{{process.user}}</td>
-                            <td>{{process.pid}}</td>
-                            <td>{{process.cpu_percent}}</td>
-                            <td>{{process.mem_percent}}</td>
-                            <td>{{process.command}}</td>
-                            <td>{{process.started_on}}</td>
+                            <td class="tal">{{process.user}}</td>
+                            <td class="tac">{{process.pid}}</td>
+                            <td class="tac">{{process.cpu_percent}}</td>
+                            <td class="tac">{{process.mem_percent}}</td>
+                            <td class="tal">{{process.command}}</td>
+                            <td class="tac">{{process.started_on}}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
