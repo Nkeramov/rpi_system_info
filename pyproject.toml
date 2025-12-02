@@ -74,3 +74,27 @@ warn_unused_ignores = true
 [tool.ruff]
 line-length = 120
 target-version = "py311"
+
+[tool.ruff.lint]
+# https://docs.astral.sh/ruff/rules/
+select = [
+    "E",        # pycodestyle errors
+    "W",        # pycodestyle warnings
+    "F",        # pyflakes
+    "I",        # isort
+    "N",        # pep8-naming
+    "B",        # flake8-bugbear
+    "C4",       # flake8-comprehensions
+    "UP",       # pyupgrade
+    "RUF",      # ruff-specific rules
+    "SIM",      # flake8-simplify
+    "COM",      # flake8-commas
+    "A",        # flake8-builtins
+    "PERF",     # flake8-perf-issues
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+skip-magic-trailing-comma = false

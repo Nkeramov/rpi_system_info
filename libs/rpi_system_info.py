@@ -1,18 +1,17 @@
+import http.client
+import logging
 import os
 import re
-import time
-import socket
-import logging
 import subprocess
-import http.client
+import time
 import urllib.error
 import urllib.request
-from enum import Enum
-from string import hexdigits
-from datetime import datetime
 from dataclasses import dataclass, field
+from datetime import datetime
+from enum import Enum
 from functools import cached_property
-from typing import Any, Literal, Optional
+from string import hexdigits
+from typing import Any, Literal
 
 from .cls_utils import Singleton
 from .log_utils import LoggerSingleton
@@ -153,7 +152,7 @@ class RPiSystemInfo(metaclass=Singleton):
             0x0012: (ModelType.RPI_A_PLUS, "1.1", 256, "BCM2835", "SONY_UK"),
             0x0013: (ModelType.RPI_B_PLUS, "1.2", 512, "BCM2835", "EMBEST"),
             0x0014: (ModelType.RPI_CM1, "1.0", 512, "BCM2835", "EMBEST"),
-            0x0015: (ModelType.RPI_A_PLUS, "1.1", 512, "BCM2835", "EMBEST")
+            0x0015: (ModelType.RPI_A_PLUS, "1.1", 512, "BCM2835", "EMBEST"),
         }
         memory_sizes = [256, 512, 1024, 2048, 4096, 8192, 16384]
         cpu_models = ["BCM2835", "BCM2836", "BCM2837", "BCM2711", "BCM2712"]
@@ -198,7 +197,7 @@ class RPiSystemInfo(metaclass=Singleton):
                     'revision': board_data[1],
                     'memory_size': board_data[2],
                     'cpu_model': board_data[3],
-                    'manufacturer': board_data[4]
+                    'manufacturer': board_data[4],
                 }
         except (IndexError, ValueError) as e:
             raise ValueError(f"Failed to decode revision code 0x{code:08X}: {e}") from e
@@ -316,7 +315,8 @@ class RPiSystemInfo(metaclass=Singleton):
         """Retrieves CPU cache sizes using the 'lscpu' command.
 
         Returns:
-            A dictionary {L1d: size, L1i: size, L2: size}, where size is a string representing value in KiB, or empty string if command fails.
+            A dictionary {L1d: size, L1i: size, L2: size}, where size is a string
+            representing value in KiB, or empty string if command fails.
         """
         command = "lscpu"
         output = self.__get_shell_cmd_output(command)
@@ -353,7 +353,7 @@ class RPiSystemInfo(metaclass=Singleton):
         return self.__get_shell_cmd_output(command).strip('"')
 
     @cached_property
-    def boot_time(self) -> Optional[datetime]:
+    def boot_time(self) -> datetime | None:
         """Retrieves the time of boot from which uptime is calculated.
 
         Returns:
@@ -375,7 +375,7 @@ class RPiSystemInfo(metaclass=Singleton):
         command = "uptime -p"
         return self.__get_shell_cmd_output(command)
 
-    def get_cpu_core_voltage(self) -> Optional[float]:
+    def get_cpu_core_voltage(self) -> float | None:
         """Retrieves the CPU core voltage using the 'vcgencmd' command.
 
         Returns:
@@ -390,7 +390,7 @@ class RPiSystemInfo(metaclass=Singleton):
             self.logger.error(f"Error while converting CPU voltage value '{result}' to float")
         return None
 
-    def get_cpu_temperature(self) -> Optional[float]:
+    def get_cpu_temperature(self) -> float | None:
         """Retrieves the CPU temperature using the 'vcgencmd' command.
 
         Returns:
@@ -418,7 +418,7 @@ class RPiSystemInfo(metaclass=Singleton):
         core_frequencies = {
             'min': 0.0,
             'max': 0.0,
-            'cur': 0.0
+            'cur': 0.0,
         }
         for ft in core_frequencies:
             command = f"cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_{ft}_freq"
@@ -511,7 +511,7 @@ class RPiSystemInfo(metaclass=Singleton):
                             (mask >> 24) & 0xff,
                             (mask >> 16) & 0xff,
                             (mask >> 8) & 0xff,
-                            mask & 0xff
+                            mask & 0xff,
                         ]
                         nic_info['mask'] = ".".join(map(str, mask_bytes))
 
@@ -573,7 +573,7 @@ class RPiSystemInfo(metaclass=Singleton):
                         'rate': " ".join(values[k-1:k+1]),
                         'signal': values[k+1],
                         'bars': values[k+2],
-                        'security': " ".join(values[k+3:])
+                        'security': " ".join(values[k+3:]),
                     })
                 return networks
             except Exception as e:
@@ -603,11 +603,12 @@ class RPiSystemInfo(metaclass=Singleton):
             self.logger.debug("Internet connection is active.")
             return True
         except urllib.error.URLError as e:
-            self.logger.error(f"URLError while checking connection: {e.reason}. Internet connection is missing or blocked.")
-        except socket.timeout:
-            self.logger.error("Connection timed out. Internet may be slow or unavailable.")
+            self.logger.error(f"URLError while checking connection: {e.reason}. " \
+                "Internet connection is missing or blocked.")
+        except TimeoutError:
+            self.logger.error("Connection timeout. Internet may be slow or unavailable.")
         except Exception as e:
-            self.logger.error(f"Unexpected error while checking connection: {e}")
+            self.logger.error(f"Unexpected error while checking connection: {e}.")
         return False
 
     def get_public_ip(self, timeout: int = 5) -> str:
@@ -621,8 +622,9 @@ class RPiSystemInfo(metaclass=Singleton):
         ip_service_urls = [
             "http://icanhazip.com",
             "http://api.ipify.org"
-            "http://myexternalip.com/raw"
+            "http://myexternalip.com/raw",
         ]
+        public_ip = ''
         for ip_service_url in ip_service_urls:
             self.logger.debug(f"Trying to get public IP address via {ip_service_url}...")
             try:
@@ -630,15 +632,14 @@ class RPiSystemInfo(metaclass=Singleton):
                 with urllib.request.urlopen(ip_service_url, timeout=timeout) as response:
                     public_ip = response.read().decode('utf-8').strip()
                     self.logger.debug(f"Public IP address: {public_ip}")
-                    return public_ip
             except urllib.error.URLError as e:
-                self.logger.error(f"URLError when getting public IP: {e.reason}")
-                self.logger.error("Unable to obtain public IP address (maybe there is no internet or the service is unavailable).")
-            except socket.timeout:
+                self.logger.error(f"URLError while getting public IP address: {e.reason}. " \
+                    "Maybe there is no Internet or the service is unavailable.")
+            except TimeoutError:
                 self.logger.error("Timeout while getting public IP address.")
             except Exception as e:
-                self.logger.error(f"Unexpected error while getting public IP address: {e}")
-        return ''
+                self.logger.error(f"Unexpected error while getting public IP address: {e}.")
+        return public_ip
 
     def get_disks_info(self) -> list[dict[str, str]]:
         """Retrieves disks info in human-readable format.
@@ -662,7 +663,7 @@ class RPiSystemInfo(metaclass=Singleton):
                     values = line.split(maxsplit=5)
                     if len(values) != 6:
                         continue
-                    disk_info = dict(zip(headers, values))
+                    disk_info = dict(zip(headers, values, strict=False))
                     disk_info["use_percent"] = disk_info["use_percent"].replace("%", "")
                     disks.append(disk_info)
                 return disks
@@ -692,7 +693,7 @@ class RPiSystemInfo(metaclass=Singleton):
                     values = line.split(maxsplit=5)
                     if len(values) != 6:
                         continue
-                    disk_info = dict(zip(headers, values))
+                    disk_info = dict(zip(headers, values, strict=False))
                     disk_info["use_percent"] = disk_info["use_percent"].replace("%", "")
                     disks.append(disk_info)
                 return disks
@@ -725,7 +726,7 @@ class RPiSystemInfo(metaclass=Singleton):
                             'cpu_percent': float(parts[2]),
                             'mem_percent': float(parts[3]),
                             'command': " ".join(parts[4:-5]),
-                            'started_on': datetime.strptime(" ".join(parts[-5:]), "%a %b %d %H:%M:%S %Y")
+                            'started_on': datetime.strptime(" ".join(parts[-5:]), "%a %b %d %H:%M:%S %Y"),
                         }
                         processes.append(process_info)
                     except (ValueError, IndexError) as e:
@@ -736,7 +737,7 @@ class RPiSystemInfo(metaclass=Singleton):
                 self.logger.error(f"Unexpected error getting process info: {e}")
         return processes
 
-    def get_throttled_state(self) -> Optional[dict[str, Any]]:
+    def get_throttled_state(self) -> dict[str, Any] | None:
         """
         Retrieves the throttled status of the Raspberry Pi processor.
 
@@ -760,7 +761,7 @@ class RPiSystemInfo(metaclass=Singleton):
                 "under_voltage_occurred": bool(throttled_int & 0x10000),
                 "arm_frequency_capped_occurred": bool(throttled_int & 0x20000),
                 "throttling_occurred": bool(throttled_int & 0x40000),
-                "soft_temperature_limit_occurred": bool(throttled_int & 0x80000)
+                "soft_temperature_limit_occurred": bool(throttled_int & 0x80000),
             }
             descriptions = []
             if status["under_voltage"]:
@@ -785,7 +786,7 @@ class RPiSystemInfo(metaclass=Singleton):
 def main() -> None:
     logger = LoggerSingleton(
         level="INFO",
-        colored=True
+        colored=True,
     ).get_logger()
     rpi_info = RPiSystemInfo(logger)
     try:
@@ -803,7 +804,8 @@ def main() -> None:
             ip_address = nic_info['ip'] or 'Not connected'
             mask = nic_info['mask'] or 'Not connected'
             default_gateway = nic_info['gateway'] or 'Not connected'
-            logger.info(f"{interface} interface: MAC address {mac_address}, IP address {ip_address}, Subnet mask: {mask}, Default gateway: {default_gateway}")
+            logger.info(f"{interface} interface: MAC address {mac_address}, IP address {ip_address}, " \
+                    f"Subnet mask: {mask}, Default gateway: {default_gateway}")
         logger.info(f"Wi-Fi network name: {rpi_info.get_wifi_network_name()}")
         logger.info(f"Internet connection is{' not' if not rpi_info.check_internet_connection() else ''} active")
         logger.info(f"Public IP address: {rpi_info.get_public_ip()}")
@@ -814,8 +816,9 @@ def main() -> None:
                 cpu_usage = rpi_info.get_cpu_usage()
                 ram_info = rpi_info.get_ram_info()
                 logger.info(f"CPU: temperature {cpu_temp} \xb0C, frequency {cpu_freq['cur']} MHz, usage {cpu_usage}%")
-                logger.info(f"RAM: total {ram_info['total']} Mb, used {ram_info['used']} Mb, free {ram_info['free']} Mb, "
-                            f"cache {ram_info['cache']} Mb, available {ram_info['available']} Mb")
+                logger.info(f"RAM: total {ram_info['total']} Mb, used {ram_info['used']} Mb, " \
+                        f"free {ram_info['free']} Mb, cache {ram_info['cache']} Mb, " \
+                        f"available {ram_info['available']} Mb")
             except Exception as e:
                 logger.error(f"Error during system info retrieval: {e}")
             time.sleep(2)

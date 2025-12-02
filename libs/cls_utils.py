@@ -1,14 +1,14 @@
 from threading import RLock
-from typing import TypeVar, Type, Any, Dict, ClassVar, cast
+from typing import Any, ClassVar, TypeVar, cast
 
 T = TypeVar('T')
 
 
 class Singleton(type):
-    _instances: ClassVar[Dict[Type[Any], Any]] = {}
+    _instances: ClassVar[dict[type[Any], Any]] = {}
     _lock: ClassVar[RLock] = RLock()
 
-    def __call__(cls: Type[T], *args: Any, **kwargs: Any) -> T:
+    def __call__(cls: type[T], *args: Any, **kwargs: Any) -> T:
         singleton_cls = cast(Singleton, cls.__class__)
         with singleton_cls._lock:
             if cls not in singleton_cls._instances:

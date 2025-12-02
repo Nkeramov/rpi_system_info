@@ -1,22 +1,21 @@
 import os
-import time
 import secrets
-import threading
 import subprocess
-from pathlib import Path
-from datetime import datetime
-from dotenv import load_dotenv
-
-from typing import Any, Optional
+import threading
+import time
 from dataclasses import dataclass
+from datetime import datetime
+from pathlib import Path
+from typing import Any
 
-from flask import Flask, Response, render_template, url_for, flash, after_this_request
+from dotenv import load_dotenv
+from flask import Flask, Response, after_this_request, flash, render_template, url_for
 from flask_caching import Cache
+from werkzeug.exceptions import InternalServerError, NotFound
 
-from werkzeug.exceptions import NotFound, InternalServerError
-
-from libs.rpi_system_info import RPiSystemInfo
 from libs.log_utils import LoggerSingleton
+from libs.rpi_system_info import RPiSystemInfo
+
 
 @dataclass(frozen=True)
 class AppConfig:
@@ -30,10 +29,10 @@ class AppConfig:
     TEXT_RED_COLOR: str = "#CC0000"
     TEXT_DATETIME_FORMAT: str = "%d-%b-%Y, %H : %M : %S"
     LOGS_PATH: Path = Path("logs")
-    LOG_FILENAME: Optional[str] = None
+    LOG_FILENAME: str | None = None
     LOG_LEVEL: str = "INFO"
-    LOG_MSG_FORMAT: Optional[str] = None
-    LOG_DATETIME_FORMAT: Optional[str] = None
+    LOG_MSG_FORMAT: str | None = None
+    LOG_DATETIME_FORMAT: str | None = None
 
     @classmethod
     def from_env(cls) -> 'AppConfig':
@@ -63,13 +62,13 @@ logger = LoggerSingleton(
         level=config.LOG_LEVEL,
         msg_format=config.LOG_MSG_FORMAT,
         date_format=config.LOG_DATETIME_FORMAT,
-        colored=True
+        colored=True,
     ).get_logger()
 
 cache_config = {
     "CACHE_TYPE": "SimpleCache",
     "CACHE_DEFAULT_TIMEOUT": 10,
-    "SECRET_KEY": secrets.token_hex(32)
+    "SECRET_KEY": secrets.token_hex(32),
 }
 app = Flask(__name__)
 app.config.from_mapping(cache_config)
@@ -95,7 +94,7 @@ def restart() -> str:
     messages = [
         'Rebooting... please wait.',
         'This will take approx. one minute.',
-        'This page will not automatically refresh. You will need to manually reconnect to the system after a restart.'
+        'This page will not automatically refresh. You will need to manually reconnect to the system after a restart.',
     ]
     for message in messages:
         flash(message, 'info')
@@ -116,9 +115,9 @@ def restart() -> str:
 def shutdown() -> str:
     logger.info('Shutdown initiated from web interface')
     messages = [
-	    'Shutting down.',
+        'Shutting down.',
         'When the LEDs on the board stop flashing, it should be safe to unplug your Raspberry Pi.',
-        'This page will not automatically refresh. You will need to manually reconnect to the system after a restart.'
+        'This page will not automatically refresh. You will need to manually reconnect to the system after a restart.',
     ]
     for message in messages:
         flash(message, 'info')
@@ -164,8 +163,8 @@ def generic_board_info() -> dict[str, dict[str, Any]]:
     system_time = format_datetime(datetime.now(), config)
     boot_time = rpi_info.boot_time
     boot_time_str = format_datetime(boot_time, config) if boot_time else ''
-    return dict(generic_board_info=
-        {
+    return {
+        'generic_board_info': {
             'model_name': rpi_info.model_name,
             'revision': rpi_info.revision,
             'serial_number': rpi_info.serial_number,
@@ -176,9 +175,9 @@ def generic_board_info() -> dict[str, dict[str, Any]]:
             'boot_time': boot_time_str,
             'uptime_pretty': rpi_info.get_uptime_pretty(),
             'internet_connection_status': rpi_info.check_internet_connection(),
-            'public_ip': rpi_info.get_public_ip()
-        }
-    )
+            'public_ip': rpi_info.get_public_ip(),
+        },
+    }
 
 
 @app.context_processor
@@ -191,8 +190,8 @@ def cpu_details() -> dict[str, dict[str, Any]]:
         elif temperature >= config.CPU_RED_TEMP_THRESHOLD:
             color = config.TEXT_RED_COLOR
     voltage = rpi_info.get_cpu_core_voltage()
-    return dict(cpu_details=
-        {
+    return {
+        'cpu_details': {
             'model': rpi_info.cpu_model,
             'architecture': rpi_info.cpu_architecture,
             'cores_count': rpi_info.cpu_cores_count,
@@ -206,51 +205,67 @@ def cpu_details() -> dict[str, dict[str, Any]]:
             'temperature_color': color,
             'overvoltage_allowed': 'Yes' if rpi_info.overvoltage_allowed else 'No',
             'otp_programming_allowed': 'Yes' if rpi_info.otp_programming_allowed else 'No',
-            'otp_reading_allowed': 'Yes' if rpi_info.otp_reading_allowed else 'No'
-        }
-    )
+            'otp_reading_allowed': 'Yes' if rpi_info.otp_reading_allowed else 'No',
+        },
+    }
 
 
 @app.context_processor
 def ram_details() -> dict[str, dict[str, str]]:
-    return dict(ram_details=rpi_info.get_ram_info())
+    return {
+        'ram_details': rpi_info.get_ram_info(),
+    }
 
 
 @app.context_processor
 def eth_interface_info() -> dict[str, dict[str, str]]:
-    return dict(eth_info=rpi_info.get_network_interface_info('eth0'))
+    return {
+        'eth_info': rpi_info.get_network_interface_info('eth0'),
+    }
 
 
 @app.context_processor
 def wlan_interface_info() -> dict[str, dict[str, str]]:
-    return dict(wlan_info=rpi_info.get_network_interface_info('wlan0'))
+    return {
+        'wlan_info': rpi_info.get_network_interface_info('wlan0'),
+    }
 
 
 @app.context_processor
 def wifi_network_name() -> dict[str, str]:
     network_name = rpi_info.get_wifi_network_name()
-    return dict(wifi_network_name=network_name)
+    return {
+        'wifi_network_name': network_name,
+    }
 
 
 @app.context_processor
 def bluetooth_mac_address() -> dict[str, str]:
     address = rpi_info.get_bluetooth_mac_address()
-    return dict(bluetooth_mac_address=address)
+    return {
+        'bluetooth_mac_address': address,
+    }
 
 
 @app.context_processor
 def available_wifi_networks() -> dict[str, list[dict[str, str]]]:
-    return dict(available_wifi_networks=rpi_info.get_available_wifi_networks())
+    return {
+        'available_wifi_networks': rpi_info.get_available_wifi_networks(),
+    }
 
 
 @app.context_processor
 def disks_details() -> dict[str, list[dict[str, str]]]:
-    return dict(disks_details=rpi_info.get_disks_info())
+    return {
+        'disks_details': rpi_info.get_disks_info(),
+    }
 
 
 @app.context_processor
 def disks_inodes_details() -> dict[str, list[dict[str, str]]]:
-    return dict(disks_inodes_details=rpi_info.get_disks_inodes_info())
+    return {
+        'disks_inodes_details': rpi_info.get_disks_inodes_info(),
+    }
 
 
 @app.context_processor
@@ -258,7 +273,9 @@ def processes_details() -> dict[str, list[dict[str, Any]]]:
     processes_details = rpi_info.get_processes_info()
     for process in processes_details:
         process['started_on'] = process['started_on'].strftime(config.TEXT_DATETIME_FORMAT)
-    return dict(processes_details=processes_details)
+    return {
+        'processes_details': processes_details,
+    }
 
 
 if __name__ == "__main__":
@@ -267,7 +284,7 @@ if __name__ == "__main__":
         app.run(
             host='0.0.0.0',
             port=config.PORT,
-            debug=False
+            debug=False,
         )
     except KeyboardInterrupt:
         logger.info("Stopped")
