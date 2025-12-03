@@ -42,8 +42,13 @@ body {
 
 .title {
     color: #ff8c00;
-    margin-top: 10px;
     letter-spacing: .05rem;
+}
+
+@media (min-width: 576px) {
+    .title {
+        margin-top: 20px;    
+    }
 }
 
 .logo {
