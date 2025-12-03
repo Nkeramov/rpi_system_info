@@ -632,6 +632,7 @@ class RPiSystemInfo(metaclass=Singleton):
                 with urllib.request.urlopen(ip_service_url, timeout=timeout) as response:
                     public_ip = response.read().decode('utf-8').strip()
                     self.logger.debug(f"Public IP address: {public_ip}")
+                    return public_ip
             except urllib.error.URLError as e:
                 self.logger.error(f"URLError while getting public IP address: {e.reason}. " \
                     "Maybe there is no Internet or the service is unavailable.")
