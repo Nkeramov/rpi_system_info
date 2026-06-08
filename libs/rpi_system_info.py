@@ -535,13 +535,15 @@ class RPiSystemInfo(metaclass=Singleton):
             The MAC address, or  if the command fails or the interface is not found.
         """
         command = "hcitool dev"
-        address = self.__get_shell_cmd_output(command)
-        if address:
+        output = self.__get_shell_cmd_output(command)
+        if output:
             try:
-                address = address.split('\n')[1].split()[1]
-                return address.upper()
+                lines = output.splitlines()[1:]
+                if lines:
+                    address = lines[0].split()[1]
+                    return address.upper()
             except (IndexError, ValueError) as e:
-                self.logger.error(f"Failed to parse {command} command output: {address} ({e})")
+                self.logger.error(f"Failed to parse {command} command output: {output} ({e})")
         return ''
 
     def get_available_wifi_networks(self) -> list[dict[str, str]]:
@@ -586,8 +588,16 @@ class RPiSystemInfo(metaclass=Singleton):
         Returns:
             The Wi-Fi network name, or empty string if unable to obtain.
         """
-        command = "iwgetid -r"
-        return self.__get_shell_cmd_output(command)
+        try:
+            command = "iwgetid -r"
+            output = self.__get_shell_cmd_output(command)
+            if output is None:
+                return ""
+            wifi_name = str(output).strip()
+            return wifi_name
+        except Exception as e:
+            self.logger.error(f"Failed to get Wi-Fi network name: {e}")
+        return ""
 
     def check_internet_connection(self, test_url: str = "http://www.google.com", timeout: int = 5) -> bool:
         """Checks for an active internet connection by attempting to make an HTTP request.
