@@ -278,6 +278,13 @@ def processes_details() -> dict[str, list[dict[str, Any]]]:
     }
 
 
+@app.context_processor
+def sd_card_details() -> list[dict[str, str | None]]:
+    return {
+        'sd_card_details': rpi_info.get_sd_card_info()[0],
+    }
+
+
 if __name__ == "__main__":
     try:
         logger.info(f"Starting application on port {config.PORT}")

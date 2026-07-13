@@ -501,7 +501,7 @@ class RPiSystemInfo(metaclass=Singleton):
                     ip_match = re.search(r'inet (\d+\.\d+\.\d+\.\d+)/(\d+)', ip_addr_output)
                     broadcast_match = re.search(r'brd (\d+\.\d+\.\d+\.\d+)', ip_addr_output)
                     if not ip_match or not broadcast_match:
-                        self.logger.error(f"Failed to parse 'ip addr' command output: {ip_addr_output}")
+                        self.logger.error(f"Failed to parse 'ip -4 addr show {interface}' command output: {ip_addr_output}")
                     else:
                         nic_info['ip'] = ip_match.group(1)
                         prefix_len = int(ip_match.group(2))
@@ -719,6 +719,7 @@ class RPiSystemInfo(metaclass=Singleton):
             List of dicts with process info or empty list if error occurs.
             Each dict contains: user, pid, cpu%, mem%, command, start_time.
         """
+        self.logger.info("Started get_processes_info")
         processes: list[dict[str, Any]] = []
         command = "ps -eo user,pid,pcpu,pmem,comm,lstart --sort=-pcpu"
         output = self.__get_shell_cmd_output(command)
@@ -793,6 +794,129 @@ class RPiSystemInfo(metaclass=Singleton):
             self.logger.error(f"Failed to read throttled status: {e}")
         return None
 
+    def get_sd_card_info(self) -> list[dict[str, str | None]]:
+        """
+        Retrieve information about SD cards (type 'SD') from the sysfs interface,
+        including filesystem types of their partitions.
+
+        The function scans /sys/bus/mmc/devices, reads the 'type' file of each
+        device, and for those reporting 'SD' it extracts the following fields:
+          - Device
+          - Type
+          - Name
+          - OEM App. Id (OID)
+          - Serial Number
+          - Manufacturer Id
+          - Date of manufacture
+          - Log. block size
+          - Phys. block size
+          - Hardware rev.
+          - Firmware rev.
+          - CID register
+          - CSD register
+          - DSR register
+          - SCR register
+          - OCR register
+          - Filesystem (as comma-separated list of unique filesystem types found on partitions)
+
+            If a corresponding sysfs file does not exist, the field is set to None.
+            For the Filesystem field, the function locates the associated block device
+            (e.g., /dev/mmcblk0), iterates over its partitions, and uses 'blkid' to
+            determine their filesystem types. If blkid is unavailable or no partitions
+            are found, the field is set to None.
+
+            Returns:
+                List of dicts, each containing the information for one SD card.
+                Each dict contains: device, type, name, oemid (OID), serial number, manufacturer id,
+                date of manufactured, logical block size, physical block size, hardware revision,
+                firmware revision, filesystem and CID, CSD, DSR, SCR, OCR registers values.
+            """
+        sd_cards: list[dict[str, str | None]] = []
+        mmc_path = "/sys/bus/mmc/devices"
+
+        try:
+            devices = os.listdir(mmc_path)
+        except OSError:
+            return sd_cards
+
+        for device in os.listdir(mmc_path):
+            dev_dir = os.path.join(mmc_path, device)
+            type_file = os.path.join(dev_dir, "type")
+
+            try:
+                with open(type_file, "r") as f:
+                    mmc_type = f.read().strip()
+            except (OSError, UnicodeDecodeError):
+                continue
+
+            if mmc_type != "SD":
+                continue
+
+            info: Dict[str, Optional[str]] = {
+                "device": device,
+                "type": mmc_type,
+            }
+            file_mapping = {
+                "name": "name",
+                "oemid": "oemid",
+                "serial_number": "serial",
+                "manufacturer_id": "manfid",
+                "manufactured_date": "date",
+                "logical_block_size": "erase_size",
+                "physical_block_size": "preferred_erase_size",
+                "hardware_revision": "hwrev",
+                "firmware_revision": "fwrev",
+                "cid_register": "cid",
+                "csd_register": "csd",
+                "dsr_register": "dsr",
+                "scr_register": "scr",
+                "ocr_register": "ocr"
+            }
+
+            for field, filename in file_mapping.items():
+                file_path = os.path.join(dev_dir, filename)
+                try:
+                    with open(file_path, "r") as f:
+                        info[field] = f.read().strip()
+                except (OSError, UnicodeDecodeError):
+                    info[field] = None
+
+            fs_info = None
+            block_dir = os.path.join(dev_dir, "block")
+            try:
+                if os.path.isdir(block_dir):
+                    block_devices = os.listdir(block_dir)
+                    if block_devices:
+                        block_name = block_devices[0]
+                        sys_block_path = os.path.join("/sys/block", block_name)
+                        if os.path.isdir(sys_block_path):
+                            partition_fs = []
+                            try:
+                                partitions = os.listdir(sys_block_path)
+                            except OSError:
+                                partitions = []
+                            for entry in partitions:
+                                if entry.startswith(block_name + "p"):
+                                    dev_path = f"/dev/{entry}"
+                                    try:
+                                        output = subprocess.check_output(
+                                            ["blkid", "-s", "TYPE", "-o", "value", dev_path],
+                                            stderr=subprocess.DEVNULL,
+                                            text=True
+                                        ).strip()
+                                        if output:
+                                            partition_fs.append(output)
+                                    except (subprocess.CalledProcessError, FileNotFoundError, OSError):
+                                        pass
+                            if partition_fs:
+                                unique_fs = sorted(set(partition_fs))
+                                fs_info = ", ".join(unique_fs)
+            except OSError:
+                pass
+            info["filesystem"] = fs_info
+            sd_cards.append(info)
+        return sd_cards
+
 
 def main() -> None:
     logger = LoggerSingleton(
@@ -800,6 +924,7 @@ def main() -> None:
         colored=True,
     ).get_logger()
     rpi_info = RPiSystemInfo(logger)
+    print(rpi_info.get_sd_card_info())
     try:
         logger.info(f"Model: {rpi_info.model_name}")
         logger.info(f"Revision: {rpi_info.revision}")
