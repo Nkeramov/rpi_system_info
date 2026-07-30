@@ -852,7 +852,7 @@ class RPiSystemInfo(metaclass=Singleton):
             if mmc_type != "SD":
                 continue
 
-            info: Dict[str, Optional[str]] = {
+            info: dict[str, str | None] = {
                 "device": device,
                 "type": mmc_type,
             }
@@ -919,12 +919,9 @@ class RPiSystemInfo(metaclass=Singleton):
 
 
 def main() -> None:
-    logger = LoggerSingleton(
-        level="INFO",
-        colored=True,
-    ).get_logger()
+    LoggerSingleton(level="INFO", colored=True)
+    logger = LoggerSingleton.get_logger()
     rpi_info = RPiSystemInfo(logger)
-    print(rpi_info.get_sd_card_info())
     try:
         logger.info(f"Model: {rpi_info.model_name}")
         logger.info(f"Revision: {rpi_info.revision}")

@@ -279,7 +279,7 @@ def processes_details() -> dict[str, list[dict[str, Any]]]:
 
 
 @app.context_processor
-def sd_card_details() -> list[dict[str, str | None]]:
+def sd_card_details() -> dict[str, dict[str, str | None]]:
     return {
         'sd_card_details': rpi_info.get_sd_card_info()[0],
     }
