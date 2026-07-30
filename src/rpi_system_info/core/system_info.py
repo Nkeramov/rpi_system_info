@@ -740,7 +740,8 @@ class RPiSystemInfo(metaclass=Singleton):
                             'command': " ".join(parts[4:-5]),
                             'started_on': datetime.strptime(" ".join(parts[-5:]), "%a %b %d %H:%M:%S %Y"),
                         }
-                        processes.append(process_info)
+                        if process_info['command'] != 'ps':
+                            processes.append(process_info)
                     except (ValueError, IndexError) as e:
                         self.logger.warning(f"Skipping malformed process line: {line} ({e})")
                         continue
