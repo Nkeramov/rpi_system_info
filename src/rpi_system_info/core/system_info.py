@@ -13,8 +13,8 @@ from functools import cached_property
 from string import hexdigits
 from typing import Any, Literal
 
-from .cls_utils import Singleton
-from .log_utils import LoggerSingleton
+from .utils.cls_utils import Singleton
+from .utils.log_utils import LoggerSingleton
 
 
 class ModelType(Enum):
