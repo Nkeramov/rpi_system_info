@@ -5,17 +5,17 @@ description = "Python library for monitoring Raspberry Pi system information"
 authors = [
     {name = "Nizam Keramov", email = "keramov.nizam@gmail.com"},
 ]
-license = {text = "MIT"}
+license = "MIT"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "Flask == 3.1.2",
-    "Jinja2 == 3.1.6",
-    "Werkzeug == 3.1.3",
-    "colorama == 0.4.6",
-    "gunicorn == 23.0.0",
-    "Flask-Caching == 2.3.1",
-    "python-dotenv == 1.2.1",
+    "Flask>=3.1.3",
+    "Jinja2>=3.1.6",
+    "Werkzeug>=3.1.8",
+    "colorama>=0.4.6",
+    "gunicorn>=26.0.0",
+    "Flask-Caching>=2.4.1",
+    "python-dotenv>=1.2.2",
 ]
 keywords = [ 
     "rpi",
@@ -29,10 +29,11 @@ keywords = [
     "hardware-monitoring"
 ]
 classifiers = [
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Operating System :: POSIX :: Linux",
     "Topic :: System :: Monitoring",
     "Topic :: Utilities",
@@ -48,8 +49,8 @@ build-backend = "setuptools.build_meta"
 
 [dependency-groups]
 dev = [
-    "mypy==2.1.0",
-    "ruff==0.15.16",
+    "mypy>=2.3.0",
+    "ruff==0.16.0",
 ]
 
 [tool.setuptools]
