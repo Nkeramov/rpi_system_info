@@ -1,0 +1,212 @@
+ <div class="row t-header toggle-header">
+    <div class="t-header-img">
+        <img src="static/images/ethernet_adapter.png">
+    </div>
+    <div>
+        <h5>Ethernet Adapter Details</h5>
+    </div>
+</div>
+<div class="toggle-content">
+    <div class="row t-row">
+        <div class="four columns">
+            MAC address
+        </div>
+        <div class="six columns">
+        {% if eth_info.mac %}
+            {{eth_info.mac}}
+        {% else %}
+            Unknown
+        {% endif %}
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns">
+            IP address
+        </div>
+        <div class="six columns t-row">
+        {% if eth_info.state == 'UP' %}
+            {{eth_info.ip}}
+        {% else %}
+            Not connected
+        {% endif %}
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns">
+            Default gateway
+        </div>
+        <div class="six columns t-row">
+        {% if eth_info.state == 'UP' %}
+            {{eth_info.gateway}}
+        {% else %}
+            Not connected
+        {% endif %}
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns">
+            Network mask
+        </div>
+        <div class="six columns t-row">
+        {% if eth_info.state == 'UP' %}
+            {{eth_info.mask}}
+        {% else %}
+            Not connected
+        {% endif %}
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns">
+            Broadcast IP address
+        </div>
+        <div class="six columns t-row">
+        {% if eth_info.state == 'UP' %}
+            {{eth_info.broadcast}}
+        {% else %}
+            Not connected
+        {% endif %}
+        </div>
+    </div>
+</div>
+<div class="row t-header toggle-header">
+    <div class="t-header-img">
+        <img src="static/images/wifi_adapter.png">
+    </div>
+    <div>
+        <h5>Wi-Fi Adapter Details</h5>
+    </div>
+</div>
+<div class="toggle-content">
+    <div class="row t-row">
+        <div class="four columns">
+            MAC address
+        </div>
+        <div class="six columns">
+        {% if wlan_info.mac %}
+            {{wlan_info.mac}}
+        {% else %}
+            Unknown
+        {% endif %}
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns">
+            Wi-Fi network
+        </div>
+        <div class="six columns t-row">
+        {% if wifi_network_name %}
+            {{wifi_network_name}}
+        {% else %}
+            Not connected
+        {% endif %}
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns">
+            IP address
+        </div>
+        <div class="six columns t-row">
+        {% if wlan_info.state == 'UP' %}
+            {{wlan_info.ip}}
+        {% else %}
+            Not connected
+        {% endif %}
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns">
+            Default gateway
+        </div>
+        <div class="six columns t-row">
+        {% if wlan_info.state == 'UP' %}
+            {{wlan_info.gateway}}
+        {% else %}
+            Not connected
+        {% endif %}
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns">
+            Network mask
+        </div>
+        <div class="six columns t-row">
+        {% if wlan_info.state == 'UP' %}
+            {{wlan_info.mask}}
+        {% else %}
+            Not connected
+        {% endif %}
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns">
+            Broadcast IP address
+        </div>
+        <div class="six columns t-row">
+        {% if wlan_info.state == 'UP' %}
+            {{wlan_info.broadcast}}
+        {% else %}
+            Not connected
+        {% endif %}
+        </div>
+    </div>
+</div>
+{% if wlan_info.state == 'UP' %}
+<div class="row t-header toggle-header collapsed">
+    <div class="t-header-img">
+        <img src="static/images/wifi.png">
+    </div>
+    <div>
+        <h5>Available WiFi Networks <span class="item-count"> ( total {{ available_wifi_networks | length}} ) </span></h5>
+    </div>
+</div>
+<div class="toggle-content collapsed">
+    <div>
+        <table class="u-full-width sortable">
+            <thead>
+                <tr>
+                    <th class="tal">SSID</th>
+                    <th class="tac">Channel</th>
+                    <th class="tac">Rate</th>
+                    <th class="tac">Signal%</th>
+                    <th class="tac">Bars</th>
+                    <th class="tac">Security</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for wifi_network in available_wifi_networks %}
+                <tr>
+                    <td class="tal">{{wifi_network.ssid}}</td>
+                    <td class="tac">{{wifi_network.channel}}</td>
+                    <td class="tac">{{wifi_network.rate}}</td>
+                    <td class="tac">{{wifi_network.signal}}</td>
+                    <td class="tac">{{wifi_network.bars}}</td>
+                    <td class="tac">{{wifi_network.security}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+<div class="row t-header toggle-header collapsed">
+    <div class="t-header-img">
+        <img src="static/images/bluetooth.png">
+    </div>
+    <div>
+        <h5>Bluetooth Details</h5>
+    </div>
+</div>
+<div class="toggle-content collapsed">
+    <div class="row t-row">
+        <div class="four columns t-caption">
+            MAC address
+        </div>
+        <div class="six columns">
+        {% if bluetooth_mac_address %}
+            {{bluetooth_mac_address}}
+        {% else %}
+            Unknown
+        {% endif %}
+        </div>
+    </div>
+</div>

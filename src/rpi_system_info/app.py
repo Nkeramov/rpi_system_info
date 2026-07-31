@@ -4,7 +4,7 @@ from flask_caching import Cache
 from .config import AppConfig
 from .core.utils.log_utils import LoggerSingleton
 from .core.system_info import RPiSystemInfo
-from .web import routes, context_processors, error_handlers
+from .web import routes, error_handlers
 
 
 def create_app(config: AppConfig | None = None) -> Flask:
@@ -37,7 +37,6 @@ def create_app(config: AppConfig | None = None) -> Flask:
     rpi_info = RPiSystemInfo(logger=logger)
 
     routes.register(app, rpi_info, cache, logger, config)
-    context_processors.register(app, rpi_info, config)
     error_handlers.register(app, logger, config)
 
     return app

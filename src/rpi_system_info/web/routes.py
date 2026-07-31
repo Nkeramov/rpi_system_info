@@ -2,6 +2,13 @@ import subprocess
 import threading
 import time
 
+from ..core.data_providers import (
+    get_generic_data,
+    get_network_data,
+    get_storage_data,
+    get_processes_data,
+)
+
 from flask import after_this_request, flash, render_template, url_for, Response
 
 
@@ -9,8 +16,33 @@ def register(app, rpi_info, cache, logger, config):
     @app.route('/')
     @cache.cached(timeout=config.INDEX_PAGE_CACHE_TIMEOUT)
     def index():
-        logger.info('Request index.html')
+        logger.info('Requested index page')
         return render_template('index.html', title=config.INDEX_PAGE_TITLE, index_url=url_for('index'))
+
+
+    @app.route('/partial/<section>')
+    @cache.cached(timeout=config.INDEX_PAGE_CACHE_TIMEOUT)
+    def partial_section(section):
+        logger.info(f'Requested {section} tab')
+
+        if section == 'generic':
+            data = get_generic_data(rpi_info, config)
+            return render_template('partials/generic.html', **data)
+
+        elif section == 'networks':
+            data = get_network_data(rpi_info)
+            return render_template('partials/networks.html', **data)
+
+        elif section == 'storage':
+            data = get_storage_data(rpi_info)
+            return render_template('partials/storage.html', **data)
+
+        elif section == 'processes':
+            data = get_processes_data(rpi_info, config)
+            return render_template('partials/processes.html', **data)
+
+        else:
+            abort(404)
 
     @app.route('/reboot')
     def restart():
@@ -55,3 +87,4 @@ def register(app, rpi_info, cache, logger, config):
             return response
 
         return render_template('system_action_pending.html', title=config.INDEX_PAGE_TITLE, index_url=url_for('index'))
+

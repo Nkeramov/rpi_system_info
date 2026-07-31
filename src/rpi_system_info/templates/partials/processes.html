@@ -1,0 +1,32 @@
+ <div class="row t-header">
+    <div class="t-header-img">
+        <img src="static/images/processes.png" style="width:32px">
+    </div>
+    <div>
+        <h5>Running Processes<span class="item-count"> ( total {{ processes_details | length }} ) </span></h5>
+    </div>
+</div>
+<table class="u-full-width sortable">
+    <thead>
+        <tr>
+            <th class="tal">User</th>
+            <th class="tac">PID</th>
+            <th class="tac">CPU%</th>
+            <th class="tac">MEM%</th>
+            <th class="tal">Command</th>
+            <th class="tac">Started On</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for process in processes_details %}
+        <tr>
+            <td class="tal">{{process.user}}</td>
+            <td class="tac">{{process.pid}}</td>
+            <td class="tac">{{process.cpu_percent}}</td>
+            <td class="tac">{{process.mem_percent}}</td>
+            <td class="tal">{{process.command}}</td>
+            <td class="tac">{{process.started_on}}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

@@ -318,3 +318,18 @@ table.sortable tr:hover td{
 .redirect-message #countdown {
     font-weight: 700;
 }
+
+
+.loader {
+    border: 10px solid white;
+    border-top: 10px solid #ff8c00;
+    border-radius: 50%;
+    width: 75px;
+    height: 75px;
+    animation: spin 1s linear infinite;
+    margin: 50px auto;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
