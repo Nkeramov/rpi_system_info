@@ -1,5 +1,40 @@
 <div class="row t-header toggle-header">
     <div class="t-header-img">
+        <img src="static/images/storage.png" style="width:32px">
+    </div>
+    <div>
+        <h5>Disks Usage Details<span class="item-count"> ( total {{ disks_details | length }} ) </span></h5>
+    </div>
+</div>
+<div class="toggle-content">
+    <table class="u-full-width sortable">
+        <thead>
+            <tr>
+                <th class="tal">File System</th>
+                <th class="tac">Size</th>
+                <th class="tac">Used</th>
+                <th class="tac">Available</th>
+                <th class="tac">Used%</th>
+                <th class="tal">Mounted On</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for disk in disks_details %}
+            <tr>
+                <td class="tal">{{disk.filesystem}}</td>
+                <td class="tac">{{disk.size}}</td>
+                <td class="tac">{{disk.used}}</td>
+                <td class="tac">{{disk.available}}</td>
+                <td class="tac">{{disk.use_percent}}</td>
+                <td class="tal">{{disk.mounted_on}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="row t-header toggle-header">
+    <div class="t-header-img">
         <img src="static/images/sd_card.png">
     </div>
     <div>
@@ -135,41 +170,6 @@
             {{sd_card_details.ocr_register}}
         </div>
     </div>                    
-</div>
-
-<div class="row t-header toggle-header">
-    <div class="t-header-img">
-        <img src="static/images/storage.png" style="width:32px">
-    </div>
-    <div>
-        <h5>Disks Usage Details<span class="item-count"> ( total {{ disks_details | length }} ) </span></h5>
-    </div>
-</div>
-<div class="toggle-content">
-    <table class="u-full-width sortable">
-        <thead>
-            <tr>
-                <th class="tal">File System</th>
-                <th class="tac">Size</th>
-                <th class="tac">Used</th>
-                <th class="tac">Available</th>
-                <th class="tac">Used%</th>
-                <th class="tal">Mounted On</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for disk in disks_details %}
-            <tr>
-                <td class="tal">{{disk.filesystem}}</td>
-                <td class="tac">{{disk.size}}</td>
-                <td class="tac">{{disk.used}}</td>
-                <td class="tac">{{disk.available}}</td>
-                <td class="tac">{{disk.use_percent}}</td>
-                <td class="tal">{{disk.mounted_on}}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
 </div>
 
 <div class="row t-header toggle-header">
