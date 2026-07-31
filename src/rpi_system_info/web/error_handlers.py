@@ -1,8 +1,11 @@
-from flask import render_template, url_for
+from logging import Logger
+from flask import Flask, render_template, url_for
 from werkzeug.exceptions import NotFound, InternalServerError
 
+from ..config import AppConfig
 
-def register(app, logger, config):
+
+def register(app: Flask, logger: Logger, config: AppConfig) -> None:
     @app.errorhandler(404)
     def page_not_found_error(error: NotFound) -> tuple[str, int]:
         logger.error(f"404 error: {error}")

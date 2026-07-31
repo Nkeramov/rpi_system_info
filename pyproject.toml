@@ -71,6 +71,17 @@ strict = true
 ignore_missing_imports = true
 warn_redundant_casts = true
 warn_unused_ignores = true
+explicit_package_bases = true
+mypy_path = "src"
+namespace_packages = true
+exclude = [
+    "rpi_system_info.egg-info",
+    "logs",
+    "__pycache__",
+    ".venv",
+    "build",
+    "dist",
+]
 
 [tool.ruff]
 line-length = 120

@@ -8,10 +8,12 @@ context. They are used by the dynamic partial endpoints.
 from datetime import datetime
 from typing import Any
 
-from ..core.utils.helpers import format_datetime
+from ..config import AppConfig
+from .system_info import RPiSystemInfo
+from .utils.helpers import format_datetime
 
 
-def get_generic_data(rpi_info, config) -> dict[str, dict[str, Any]]:
+def get_generic_data(rpi_info: RPiSystemInfo, config: AppConfig) -> dict[str, dict[str, Any]]:
     """
     Return all data needed for the "Generic" tab.
 
@@ -59,7 +61,7 @@ def get_generic_data(rpi_info, config) -> dict[str, dict[str, Any]]:
     }
 
 
-def get_cpu_data(rpi_info, config) -> dict[str, dict[str, Any]]:
+def get_cpu_data(rpi_info: RPiSystemInfo, config: AppConfig) -> dict[str, dict[str, Any]]:
     """
     Collect and format CPU-related metrics.
 
@@ -122,7 +124,7 @@ def get_cpu_data(rpi_info, config) -> dict[str, dict[str, Any]]:
     }
 
 
-def get_ram_data(rpi_info) -> dict[str, dict[str, str]]:
+def get_ram_data(rpi_info: RPiSystemInfo) -> dict[str, dict[str, str]]:
     """
     Retrieve current RAM usage information.
 
@@ -141,7 +143,7 @@ def get_ram_data(rpi_info) -> dict[str, dict[str, str]]:
     }
 
 
-def get_network_data(rpi_info) -> dict[str, Any]:
+def get_network_data(rpi_info: RPiSystemInfo) -> dict[str, Any]:
     """
     Collect network interface and Wi‑Fi related information.
 
@@ -170,7 +172,7 @@ def get_network_data(rpi_info) -> dict[str, Any]:
     }
 
 
-def get_storage_data(rpi_info) -> dict[str, Any]:
+def get_storage_data(rpi_info: RPiSystemInfo) -> dict[str, Any]:
     """
     Retrieve storage (disk) usage and inode information.
 
@@ -193,7 +195,7 @@ def get_storage_data(rpi_info) -> dict[str, Any]:
     }
 
 
-def get_processes_data(rpi_info, config) -> dict[str, list[dict[str, Any]]]:
+def get_processes_data(rpi_info: RPiSystemInfo, config: AppConfig) -> dict[str, list[dict[str, Any]]]:
     """
     Retrieve a list of running processes with formatted start times.
 
