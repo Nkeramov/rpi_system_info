@@ -72,8 +72,8 @@ ignore_missing_imports = true
 warn_redundant_casts = true
 warn_unused_ignores = true
 explicit_package_bases = true
-mypy_path = "src"
 namespace_packages = true
+files = "src/rpi_system_info"
 exclude = [
     "rpi_system_info.egg-info",
     "logs",
