@@ -102,7 +102,8 @@ class RPiSystemInfo(metaclass=Singleton):
             raise RuntimeError(f"RPiSystemInfo initialization failed: {e}") from e
 
     def __str__(self) -> str:
-        return (f"Model: {self.model_name}, "
+        return (f"Model type: {self.model_type.name}, "
+                f"Model name: {self.model_name}, "
                 f"Revision: {self.revision}, "
                 f"Serial number: {self.serial_number}, "
                 f"Manufacturer: {self.manufacturer}, "
@@ -321,7 +322,7 @@ class RPiSystemInfo(metaclass=Singleton):
         command = "lscpu"
         output = self.__get_shell_cmd_output(command)
         cache_types = ["L1d", "L1i", "L2"]
-        cache_sizes = {cache: "" for cache in cache_types}
+        cache_sizes = dict.fromkeys(cache_types, "")
         if output:
             lines = output.splitlines()
             for line in lines:
@@ -449,7 +450,7 @@ class RPiSystemInfo(metaclass=Singleton):
             The RAM info dict with total, used, free, cache and available memory volume in passed unit.
         """
         ram_fields = ['total', 'used', 'free', 'cache', 'available']
-        ram_info = {field: "" for field in ram_fields}
+        ram_info = dict.fromkeys(ram_fields, "")
         ram_info['size'] = str(self.memory_size)
         if unit not in ['b', 'k', 'm', 'g']:
             self.logger.error(f"Requested unknown RAM volume unit: {unit}")
@@ -480,7 +481,7 @@ class RPiSystemInfo(metaclass=Singleton):
             broadcast ip address, default gateway ip address and state.
         """
         nic_fields = ['mac', 'ip', 'mask', 'broadcast', 'gateway', 'state']
-        nic_info = {field: "" for field in nic_fields}
+        nic_info = dict.fromkeys(nic_fields, "")
         try:
             if interface in os.listdir(self._NET_PATH):
                 try:
@@ -497,11 +498,11 @@ class RPiSystemInfo(metaclass=Singleton):
 
                     nic_info['state'] = 'UP'
                     ip_addr_cmd = f"ip -4 addr show {interface}"
-                    ip_addr_output = self.__get_shell_cmd_output(ip_addr_cmd)
-                    ip_match = re.search(r'inet (\d+\.\d+\.\d+\.\d+)/(\d+)', ip_addr_output)
-                    broadcast_match = re.search(r'brd (\d+\.\d+\.\d+\.\d+)', ip_addr_output)
+                    ip_addr_cmd_output = self.__get_shell_cmd_output(ip_addr_cmd)
+                    ip_match = re.search(r'inet (\d+\.\d+\.\d+\.\d+)/(\d+)', ip_addr_cmd_output)
+                    broadcast_match = re.search(r'brd (\d+\.\d+\.\d+\.\d+)', ip_addr_cmd_output)
                     if not ip_match or not broadcast_match:
-                        self.logger.error(f"Failed to parse 'ip -4 addr show {interface}' command output: {ip_addr_output}")
+                        self.logger.error(f"Failed to parse '{ip_addr_cmd}' command output: {ip_addr_cmd_output}")
                     else:
                         nic_info['ip'] = ip_match.group(1)
                         prefix_len = int(ip_match.group(2))
@@ -583,7 +584,7 @@ class RPiSystemInfo(metaclass=Singleton):
         return networks
 
     def get_wifi_network_name(self) -> str:
-        """Retrieves the name of the wireless network to which the Raspberry Pi is connected.
+        """Retrieves the name of the Wi-Fi network to which the Raspberry Pi is connected.
 
         Returns:
             The Wi-Fi network name, or empty string if unable to obtain.
@@ -837,85 +838,84 @@ class RPiSystemInfo(metaclass=Singleton):
 
         try:
             devices = os.listdir(mmc_path)
-        except OSError:
-            return sd_cards
+            for device in devices:
+                dev_dir = os.path.join(mmc_path, device)
+                type_file = os.path.join(dev_dir, "type")
 
-        for device in os.listdir(mmc_path):
-            dev_dir = os.path.join(mmc_path, device)
-            type_file = os.path.join(dev_dir, "type")
-
-            try:
-                with open(type_file, "r") as f:
-                    mmc_type = f.read().strip()
-            except (OSError, UnicodeDecodeError):
-                continue
-
-            if mmc_type != "SD":
-                continue
-
-            info: dict[str, str | None] = {
-                "device": device,
-                "type": mmc_type,
-            }
-            file_mapping = {
-                "name": "name",
-                "oemid": "oemid",
-                "serial_number": "serial",
-                "manufacturer_id": "manfid",
-                "manufactured_date": "date",
-                "logical_block_size": "erase_size",
-                "physical_block_size": "preferred_erase_size",
-                "hardware_revision": "hwrev",
-                "firmware_revision": "fwrev",
-                "cid_register": "cid",
-                "csd_register": "csd",
-                "dsr_register": "dsr",
-                "scr_register": "scr",
-                "ocr_register": "ocr"
-            }
-
-            for field, filename in file_mapping.items():
-                file_path = os.path.join(dev_dir, filename)
                 try:
-                    with open(file_path, "r") as f:
-                        info[field] = f.read().strip()
+                    with open(type_file) as f:
+                        mmc_type = f.read().strip()
                 except (OSError, UnicodeDecodeError):
-                    info[field] = None
+                    continue
 
-            fs_info = None
-            block_dir = os.path.join(dev_dir, "block")
-            try:
-                if os.path.isdir(block_dir):
-                    block_devices = os.listdir(block_dir)
-                    if block_devices:
-                        block_name = block_devices[0]
-                        sys_block_path = os.path.join("/sys/block", block_name)
-                        if os.path.isdir(sys_block_path):
-                            partition_fs = []
-                            try:
-                                partitions = os.listdir(sys_block_path)
-                            except OSError:
-                                partitions = []
-                            for entry in partitions:
-                                if entry.startswith(block_name + "p"):
-                                    dev_path = f"/dev/{entry}"
-                                    try:
-                                        output = subprocess.check_output(
-                                            ["blkid", "-s", "TYPE", "-o", "value", dev_path],
-                                            stderr=subprocess.DEVNULL,
-                                            text=True
-                                        ).strip()
-                                        if output:
-                                            partition_fs.append(output)
-                                    except (subprocess.CalledProcessError, FileNotFoundError, OSError):
-                                        pass
-                            if partition_fs:
-                                unique_fs = sorted(set(partition_fs))
-                                fs_info = ", ".join(unique_fs)
-            except OSError:
-                pass
-            info["filesystem"] = fs_info
-            sd_cards.append(info)
+                if mmc_type != "SD":
+                    continue
+
+                info: dict[str, str | None] = {
+                    "device": device,
+                    "type": mmc_type,
+                }
+                file_mapping = {
+                    "name": "name",
+                    "oemid": "oemid",
+                    "serial_number": "serial",
+                    "manufacturer_id": "manfid",
+                    "manufactured_date": "date",
+                    "logical_block_size": "erase_size",
+                    "physical_block_size": "preferred_erase_size",
+                    "hardware_revision": "hwrev",
+                    "firmware_revision": "fwrev",
+                    "cid_register": "cid",
+                    "csd_register": "csd",
+                    "dsr_register": "dsr",
+                    "scr_register": "scr",
+                    "ocr_register": "ocr",
+                }
+
+                for field, filename in file_mapping.items():
+                    file_path = os.path.join(dev_dir, filename)
+                    try:
+                        with open(file_path) as f:
+                            info[field] = f.read().strip()
+                    except (OSError, UnicodeDecodeError):
+                        info[field] = None
+
+                fs_info = None
+                block_dir = os.path.join(dev_dir, "block")
+                try:
+                    if os.path.isdir(block_dir):
+                        block_devices = os.listdir(block_dir)
+                        if block_devices:
+                            block_name = block_devices[0]
+                            sys_block_path = os.path.join("/sys/block", block_name)
+                            if os.path.isdir(sys_block_path):
+                                partition_fs = []
+                                try:
+                                    partitions = os.listdir(sys_block_path)
+                                except OSError:
+                                    partitions = []
+                                for entry in partitions:
+                                    if entry.startswith(block_name + "p"):
+                                        dev_path = f"/dev/{entry}"
+                                        try:
+                                            output = subprocess.check_output(
+                                                ["blkid", "-s", "TYPE", "-o", "value", dev_path],
+                                                stderr=subprocess.DEVNULL,
+                                                text=True,
+                                            ).strip()
+                                            if output:
+                                                partition_fs.append(output)
+                                        except (subprocess.CalledProcessError, FileNotFoundError, OSError):
+                                            pass
+                                if partition_fs:
+                                    unique_fs = sorted(set(partition_fs))
+                                    fs_info = ", ".join(unique_fs)
+                except OSError:
+                    pass
+                info["filesystem"] = fs_info
+                sd_cards.append(info)
+        except OSError:
+            pass
         return sd_cards
 
 
@@ -940,9 +940,12 @@ def main() -> None:
             default_gateway = nic_info['gateway'] or 'Not connected'
             logger.info(f"{interface} interface: MAC address {mac_address}, IP address {ip_address}, " \
                     f"Subnet mask: {mask}, Default gateway: {default_gateway}")
-        logger.info(f"Wi-Fi network name: {rpi_info.get_wifi_network_name()}")
-        logger.info(f"Internet connection is{' not' if not rpi_info.check_internet_connection() else ''} active")
-        logger.info(f"Public IP address: {rpi_info.get_public_ip()}")
+        wifi_network_name = rpi_info.get_wifi_network_name() or 'Not connected'
+        logger.info(f"Wi-Fi network name: {wifi_network_name}")
+        if rpi_info.check_internet_connection():
+            logger.info(f"Internet connection is active, public IP address: {rpi_info.get_public_ip()}")
+        else:
+            logger.info("Internet connection is not active")
         while True:
             try:
                 cpu_temp = rpi_info.get_cpu_temperature()
