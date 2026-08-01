@@ -531,23 +531,31 @@ class RPiSystemInfo(metaclass=Singleton):
                 self.logger.error(f"Incorrect network interface: {interface}")
         except FileNotFoundError:
             self.logger.error(f"Can not load network interface info from {self._NET_PATH}")
-        self.logger.info(nic_info)
         return nic_info
 
-    def get_bluetooth_mac_address(self) -> str:
-        """Retrieves the MAC address for the Bluetooth interface.
+    def get_bluetooth_mac_address(self, interface: str = 'hci0') -> str:
+        """Retrieves the MAC address for a specific Bluetooth interface.
+
+        Uses `hcitool dev` to list all Bluetooth controllers and extracts the MAC
+        address for the given interface name.
+
+        Args:
+            interface: The Bluetooth interface name (default: 'hci0').
 
         Returns:
-            The MAC address, or  if the command fails or the interface is not found.
+            The MAC address in uppercase, or an empty string if the command fails,
+            the specified interface is not found, or parsing fails.
         """
         command = "hcitool dev"
         output = self.__get_shell_cmd_output(command)
         if output:
             try:
                 lines = output.splitlines()[1:]
-                if lines:
-                    address = lines[0].split()[1]
-                    return address.upper()
+                for line in lines:
+                    parts = line.split()
+                    if len(parts) >= 2 and parts[0] == interface:
+                        return parts[1].upper()
+                self.logger.error(f"Bluetooth interface '{interface}' not found in output: {output}")
             except (IndexError, ValueError) as e:
                 self.logger.error(f"Failed to parse {command} command output: {output} ({e})")
         return ''
