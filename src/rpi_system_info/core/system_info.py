@@ -496,37 +496,42 @@ class RPiSystemInfo(metaclass=Singleton):
                         self.logger.warning(f"Interface {interface} is DOWN")
                         return nic_info
 
-                    nic_info['state'] = 'UP'
                     ip_addr_cmd = f"ip -4 addr show {interface}"
                     ip_addr_cmd_output = self.__get_shell_cmd_output(ip_addr_cmd)
-                    ip_match = re.search(r'inet (\d+\.\d+\.\d+\.\d+)/(\d+)', ip_addr_cmd_output)
-                    broadcast_match = re.search(r'brd (\d+\.\d+\.\d+\.\d+)', ip_addr_cmd_output)
-                    if not ip_match or not broadcast_match:
-                        self.logger.error(f"Failed to parse '{ip_addr_cmd}' command output: {ip_addr_cmd_output}")
-                    else:
-                        nic_info['ip'] = ip_match.group(1)
-                        prefix_len = int(ip_match.group(2))
-                        nic_info['broadcast'] = broadcast_match.group(1)
-                        mask = (0xffffffff << (32 - prefix_len)) & 0xffffffff
-                        mask_bytes = [
-                            (mask >> 24) & 0xff,
-                            (mask >> 16) & 0xff,
-                            (mask >> 8) & 0xff,
-                            mask & 0xff,
-                        ]
-                        nic_info['mask'] = ".".join(map(str, mask_bytes))
+                    if ip_addr_cmd_output:
+                        nic_info['state'] = 'UP'
+                        ip_match = re.search(r'inet (\d+\.\d+\.\d+\.\d+)/(\d+)', ip_addr_cmd_output)
+                        broadcast_match = re.search(r'brd (\d+\.\d+\.\d+\.\d+)', ip_addr_cmd_output)
+                        if not ip_match or not broadcast_match:
+                            self.logger.error(f"Failed to parse '{ip_addr_cmd}' command output: {ip_addr_cmd_output}")
+                        else:
+                            nic_info['ip'] = ip_match.group(1)
+                            prefix_len = int(ip_match.group(2))
+                            nic_info['broadcast'] = broadcast_match.group(1)
+                            mask = (0xffffffff << (32 - prefix_len)) & 0xffffffff
+                            mask_bytes = [
+                                (mask >> 24) & 0xff,
+                                (mask >> 16) & 0xff,
+                                (mask >> 8) & 0xff,
+                                mask & 0xff,
+                            ]
+                            nic_info['mask'] = ".".join(map(str, mask_bytes))
 
-                        ip_route_cmd = f"ip route show | grep ^def.*{interface}"
-                        ip_route_output = self.__get_shell_cmd_output(ip_route_cmd)
-                        gateway_match = re.search(r'^default via (\d+\.\d+\.\d+\.\d+)', ip_route_output)
-                        if gateway_match:
-                            nic_info['gateway'] = gateway_match.group(1)
+                            ip_route_cmd = f"ip route show | grep ^def.*{interface}"
+                            ip_route_output = self.__get_shell_cmd_output(ip_route_cmd)
+                            gateway_match = re.search(r'^default via (\d+\.\d+\.\d+\.\d+)', ip_route_output)
+                            if gateway_match:
+                                nic_info['gateway'] = gateway_match.group(1)
+                    else:
+                        self.logger.error(f"Empty output for command {ip_addr_cmd}")
+                        return nic_info
                 except Exception as e:
                     self.logger.error(f"Unexpected error while retrieving interface {interface} information: {e}")
             else:
                 self.logger.error(f"Incorrect network interface: {interface}")
         except FileNotFoundError:
             self.logger.error(f"Can not load network interface info from {self._NET_PATH}")
+        self.logger.info(nic_info)
         return nic_info
 
     def get_bluetooth_mac_address(self) -> str:
