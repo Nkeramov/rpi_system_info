@@ -1,7 +1,7 @@
 [project]
 name = "rpi_system_info"
 version = "1.0.0"
-description = "Python library for monitoring Raspberry Pi system information"
+description = "Flask‑based Web Interface for Raspberry Pi Health Monitoring"
 authors = [
     {name = "Nizam Keramov", email = "keramov.nizam@gmail.com"},
 ]
