@@ -20,22 +20,22 @@ from .utils.log_utils import LoggerSingleton
 class ModelType(Enum):
     UNKNOWN = -100
 
-    RPI_A = 0
-    RPI_B = 1
-    RPI_A_PLUS = 2
-    RPI_B_PLUS = 3
-    RPI_2B = 4
-    RPI_ALPHA = 5
-    RPI_CM1 = 6
-    # 0x7 pass
-    RPI_3B = 8
-    RPI_ZERO = 9
-    RPI_CM3 = 0xA
-    # 0xb pass
-    RPI_ZERO_W = 0xC
-    RPI_3B_PLUS = 0xD
-    RPI_3A_PLUS = 0xE
-    # 0x0f: Internal use only
+    RPI_A = 0x00
+    RPI_B = 0x01
+    RPI_A_PLUS = 0x02
+    RPI_B_PLUS = 0x03
+    RPI_2B = 0x04
+    RPI_ALPHA = 0x05
+    RPI_CM1 = 0x06
+    # 0x07 pass
+    RPI_3B = 0x08
+    RPI_ZERO = 0x09
+    RPI_CM3 = 0x0A
+    # 0x0B pass
+    RPI_ZERO_W = 0x0C
+    RPI_3B_PLUS = 0x0D
+    RPI_3A_PLUS = 0x0E
+    # 0x0F: Internal use only
     RPI_CM3_PLUS = 0x10
     RPI_4B = 0x11
     RPI_Zero2W = 0x12
@@ -45,7 +45,9 @@ class ModelType(Enum):
     # 0x16: Internal use only
     RPI_5 = 0x17
     RPI_CM5 = 0x18
-    RPI_CM5_LITE = 0x19
+    RPI_500_or_500_PLUS = 0x19
+    RPI_CM5_LITE = 0x1A
+    RPI_CM0 = 0x1B
 
 
 class IncorrectFrequencyUnitError(Exception):
