@@ -1,7 +1,7 @@
-# Raspberry Pi System Info
+# RPi System Info
 
 [![Raspberry Pi](https://img.shields.io/badge/Raspberry%20Pi-A22846.svg?logo=Raspberry-Pi)](https://www.raspberrypi.com/)
-![Python](https://img.shields.io/badge/python-3.11-blue.svg)
+![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)
 [![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](https://mypy-lang.org/)
 [![license](https://img.shields.io/badge/licence-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
@@ -14,19 +14,21 @@ This project is a simple web server that displays system information about your 
 
 The interface is divided into 4 tabs:
 - 1️⃣  *General*: 
-    - Board info (model, revision, manufacturer, OS name, host name, system time and uptime, internet connection status and public IP if connections is active)
-    - CPU details (model, architecture, cores count, cores frequency, cores voltage, temperature, usage, cache sizes)
-    - RAM details (size, total, used, free, cache, available)
+    - Board info (model, revision, manufacturer, OS name, host name, system time and uptime, internet connection status and public IP if connections is active).
+    - CPU details (model, architecture, cores count, cores frequency, cores voltage, temperature, usage, cache sizes).
+    - RAM details (size, total, used, free, cache, available).
 - 2️⃣  *Networks*:
-    - Ethernet adapter details (MAC and IP adresses, default gateway, network mask, broadcast IP adress)
-    - Wi-Fi afapter details (MAC and IP adresses, default gateway, network mask, broadcast IP adress)
+    - Ethernet adapter details (MAC and IP adresses, default gateway, network mask, broadcast IP adress).
+    - Wi-Fi afapter details (MAC and IP adresses, default gateway, network mask, broadcast IP adress).
     - Available Wi-Fi networks (SSID, channel, rate, signal, bars, security). If the networkы list only shows the network the Raspberry Pi is connected to, you need to force a scan using the `sudo nmcli dev wifi rescan` command. This will be fixed in future versions.
-    - Bluetooth details (MAC address)
+    - Bluetooth details (MAC address).
 - 3️⃣  *Storage*:
     - Disks usage details (file system, size, used, available, used%, mounted on).
+    - SD card details (name, device, serial number, manufacturer id, registers info and other).
     - Disks inodes details (file system, inodes, used, free, used%, mounted on).
-    - ~~SD card details~~ (will be added in the future versions).
-- 4️⃣  *Processes*: shows only running processes (user, PID, CPU%, MEM%, command, started on time)
+- 4️⃣  *Processes*: shows only running tasks (user, PID, CPU%, MEM%, command, started on time).
+
+The contents of the tabs are loaded dynamically when they are opened.
 
 Some information is parsed from the device's [revision code](https://www.raspberrypi.com/documentation/computers/raspberry-pi.html#raspberry-pi-revision-codes) located in /proc/cpuinfo.
 
