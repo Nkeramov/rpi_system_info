@@ -531,6 +531,7 @@ class RPiSystemInfo(metaclass=Singleton):
                 self.logger.error(f"Incorrect network interface: {interface}")
         except FileNotFoundError:
             self.logger.error(f"Can not load network interface info from {self._NET_PATH}")
+        self.logger.debug(f"Network interface {interface} info: {', '.join(f'{k}: {v}' for k, v in nic_info.items())}")
         return nic_info
 
     def get_bluetooth_mac_address(self, interface: str = 'hci0') -> str:
@@ -673,6 +674,7 @@ class RPiSystemInfo(metaclass=Singleton):
             List of dicts with disk info or empty list if error occurs.
             Each dict contains: filesystem, size, used, available, use_percent, mounted_on.
         """
+        self.logger.debug("Started get_disks_info")
         headers = ["filesystem", "size", "used", "available", "use_percent", "mounted_on"]
         disks: list[dict[str, str]] = []
         command = "df -h --output=source,size,used,avail,pcent,target | head -n 1; df -h | tail -n +2 | sort -k6"
@@ -703,6 +705,7 @@ class RPiSystemInfo(metaclass=Singleton):
             List of dicts with disk inodes info or empty list if error occurs.
             Each dict contains: filesystem, inodes, used, free, use_percent, mounted_on.
         """
+        self.logger.debug("Started get_disks_inodes_info")
         headers = ["filesystem", "inodes", "used", "free", "use_percent", "mounted_on"]
         disks: list[dict[str, str]] = []
         command = "df -i | head -n 1; df -i | tail -n +2 | sort -k6"
@@ -733,7 +736,7 @@ class RPiSystemInfo(metaclass=Singleton):
             List of dicts with process info or empty list if error occurs.
             Each dict contains: user, pid, cpu%, mem%, command, start_time.
         """
-        self.logger.info("Started get_processes_info")
+        self.logger.debug("Started get_processes_info")
         processes: list[dict[str, Any]] = []
         command = "ps -eo user,pid,pcpu,pmem,comm,lstart --sort=-pcpu"
         output = self.__get_shell_cmd_output(command)
