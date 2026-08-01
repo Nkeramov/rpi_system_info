@@ -3,7 +3,7 @@
         <img src="static/images/ethernet_adapter.png">
     </div>
     <div>
-        <h5>Ethernet Adapter Details</h5>
+        <h5>Ethernet Adapter Details (eth0 interface)</h5>
     </div>
 </div>
 <div class="toggle-content">
@@ -73,7 +73,7 @@
         <img src="static/images/wifi_adapter.png">
     </div>
     <div>
-        <h5>Wi-Fi Adapter Details</h5>
+        <h5>Wi-Fi Adapter Details (wlan0 interface)</h5>
     </div>
 </div>
 <div class="toggle-content">
@@ -150,7 +150,7 @@
         </div>
     </div>
 </div>
-{% if wlan_info.state == 'UP' %}
+{% if wlan_info.state != 'DOWN' %}
 <div class="row t-header toggle-header collapsed">
     <div class="t-header-img">
         <img src="static/images/wifi.png">
@@ -193,7 +193,7 @@
         <img src="static/images/bluetooth.png">
     </div>
     <div>
-        <h5>Bluetooth Details</h5>
+        <h5>Bluetooth Details (hci0 interface)</h5>
     </div>
 </div>
 <div class="toggle-content collapsed">
