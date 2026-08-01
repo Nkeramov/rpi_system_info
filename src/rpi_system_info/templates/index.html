@@ -103,6 +103,10 @@
                     clearTimeout(timeoutId);
                     container.innerHTML = html;
                     attachCollapseHandlers();
+                    const tables = container.querySelectorAll('table.sortable');
+                    tables.forEach(table => {
+                        sorttable.makeSortable(table);
+                    });
                 })
                 .catch(error => {
                     clearTimeout(timeoutId);
