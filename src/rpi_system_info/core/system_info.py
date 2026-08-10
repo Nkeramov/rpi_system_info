@@ -744,6 +744,7 @@ class RPiSystemInfo(metaclass=Singleton):
           - OEM App. Id (OID)
           - Serial Number
           - Manufacturer Id
+          - Manufacturer
           - Date of manufacture
           - Log. block size
           - Phys. block size
@@ -762,12 +763,51 @@ class RPiSystemInfo(metaclass=Singleton):
             determine their filesystem types. If blkid is unavailable or no partitions
             are found, the field is set to None.
 
+            The manufacturer name is determined based on the device type and manufacturer id.
+
             Returns:
                 List of dicts, each containing the information for one SD card.
                 Each dict contains: device, type, name, oemid (OID), serial number, manufacturer id,
-                date of manufactured, logical block size, physical block size, hardware revision,
-                firmware revision, filesystem and CID, CSD, DSR, SCR, OCR registers values.
+                manufacturer, date of manufactured, logical block size, physical block size, hardware
+                revision, firmware revision, filesystem and CID, CSD, DSR, SCR, OCR registers values.
             """
+        manufacturers_db = {
+            ('MMC', '0x000000'): 'SanDisk',
+            ('MMC', '0x000002'): 'Kingston, or SanDisk',
+            ('MMC', '0x000003'): 'Toshiba',
+            ('MMC', '0x000005'): 'Unknown',
+            ('MMC', '0x000006'): 'Unknown',
+            ('MMC', '0x000011'): 'Toshiba',
+            ('MMC', '0x000013'): 'Micron',
+            ('MMC', '0x000015'): 'Samsung, SanDisk, or LG',
+            ('MMC', '0x000037'): 'KingMax',
+            ('MMC', '0x000044'): 'ATP',
+            ('MMC', '0x000045'): 'SanDisk Corporation',
+            ('MMC', '0x000070'): 'Kingston',
+            ('MMC', '0x00002c'): 'Kingston',
+            ('MMC', '0x0000fe'): 'Micron',
+            ('SD', '0x000001'): 'Panasonic',
+            ('SD', '0x000002'): 'Kingston, Toshiba, or Viking',
+            ('SD', '0x000003'): 'SanDisk',
+            ('SD', '0x000008'): 'Silicon Power',
+            ('SD', '0x000018'): 'Infineon',
+            ('SD', '0x000027'): 'Phison Electronics Corporation',
+            ('SD', '0x000028'): 'Lexar',
+            ('SD', '0x000030'): 'SanDisk',
+            ('SD', '0x000031'): 'Silicon Power',
+            ('SD', '0x000033'): 'STMicroelectronics',
+            ('SD', '0x000041'): 'Kingston',
+            ('SD', '0x00006f'): 'STMicroelectronics',
+            ('SD', '0x000074'): 'Transcend',
+            ('SD', '0x000076'): 'Patriot',
+            ('SD', '0x000082'): 'Gobe, or Sony',
+            ('SD', '0x000089'): 'Unknown',
+            ('SD', '0x00001b'): 'Samsung, or Transcend',
+            ('SD', '0x00001c'): 'Transcend',
+            ('SD', '0x00001d'): 'AData, or Corsair',
+            ('SD', '0x00001e'): 'Transcend',
+            ('SD', '0x00001f'): 'Kingston',
+        }
         sd_cards: list[dict[str, str | None]] = []
         mmc_path = "/sys/bus/mmc/devices"
 
@@ -814,6 +854,9 @@ class RPiSystemInfo(metaclass=Singleton):
                             info[field] = f.read().strip()
                     except (OSError, UnicodeDecodeError):
                         info[field] = None
+
+                key = (info['type'], info['manufacturer_id'])
+                info['manufacturer'] = manufacturers_db.get(key)
 
                 fs_info = None
                 block_dir = os.path.join(dev_dir, "block")

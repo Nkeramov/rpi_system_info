@@ -52,7 +52,7 @@
             Manufacturer Id
         </div>
         <div class="six columns">
-            {{sd_card_info.manufacturer_id}}
+            {{sd_card_info.manufacturer_id}} {{ '(' + sd_card_info.manufacturer + ')' if sd_card_info.manufacturer }}
         </div>
     </div>
     <div class="row t-row">
