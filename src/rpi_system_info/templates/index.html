@@ -80,18 +80,18 @@
         const tabButtons = document.querySelectorAll('.tab-button');
         const tabContents = document.querySelectorAll('.tab-content');
 
-        tabButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                tabButtons.forEach(btn => btn.classList.remove('active'));
-                tabContents.forEach(content => content.classList.remove('active'));
-                button.classList.add('active');
-                const tabId = button.getAttribute('data-tab');
-                document.getElementById(tabId).classList.add('active');
+        function getTabFromQuery() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('tab');
+        }
 
-                loadTabContent(tabId);
-            });
-        });
-
+        function setTabInQuery(tabId) {
+            const params = new URLSearchParams(window.location.search);
+            params.set('tab', tabId);
+            const newUrl = window.location.pathname + '?' + params.toString();
+            history.pushState({ tab: tabId }, '', newUrl);
+        }
+    
         function loadTabContent(tabId) {
             const container = document.getElementById(tabId + '-content');
             if (!container) return;
@@ -138,7 +138,48 @@
             }
         }
 
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+                button.classList.add('active');
+                const tabId = button.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+
+                loadTabContent(tabId);
+
+                setTabInQuery(tabId.replace('tab-', ''));
+            });
+        });
+
+        window.addEventListener('popstate', function(event) {
+            const tabParam = getTabFromQuery();
+            if (tabParam) {
+                const targetTabId = 'tab-' + tabParam;
+                const button = document.querySelector('.tab-button[data-tab="' + targetTabId + '"]');
+                if (button) {
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    button.classList.add('active');
+                    document.getElementById(targetTabId).classList.add('active');
+                    loadTabContent(targetTabId);
+                }
+            }
+        });
+
         document.addEventListener('DOMContentLoaded', function() {
+            const tabParam = getTabFromQuery();
+            if (tabParam) {
+                const targetTabId = 'tab-' + tabParam;
+                const button = document.querySelector('.tab-button[data-tab="' + targetTabId + '"]');
+                if (button) {
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    button.classList.add('active');
+                    document.getElementById(targetTabId).classList.add('active');
+                }
+            }
             const activeButton = document.querySelector('.tab-button.active');
             if (activeButton) {
                 const tabId = activeButton.getAttribute('data-tab');
