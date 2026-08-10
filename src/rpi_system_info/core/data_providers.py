@@ -13,7 +13,12 @@ from .system_info import RPiSystemInfo
 from .utils.helpers import format_datetime
 
 
-def get_generic_data(rpi_info: RPiSystemInfo, config: AppConfig) -> dict[str, dict[str, Any]]:
+def get_generic_data(
+        rpi_info: RPiSystemInfo,
+        config: AppConfig,
+        hardware_data: dict[str, dict[str, Any]] | None = None,
+        network_data: dict[str, Any] | None = None
+    ) -> dict[str, dict[str, Any]]:
     """
     Return all data needed for the "Generic" tab.
 
@@ -36,7 +41,10 @@ def get_generic_data(rpi_info: RPiSystemInfo, config: AppConfig) -> dict[str, di
     system_time_str = format_datetime(system_time, config.TEXT_DATETIME_FORMAT)
     boot_time = rpi_info.boot_time
     boot_time_str = format_datetime(boot_time, config.TEXT_DATETIME_FORMAT) if boot_time else ''
-
+    if hardware_data is None:
+        hardware_data = get_hardware_data(rpi_info, config)
+    if network_data is None:
+        network_data = get_network_data(rpi_info)
     return {
         'board_info': {
             'model_name': rpi_info.model_name,
@@ -51,10 +59,10 @@ def get_generic_data(rpi_info: RPiSystemInfo, config: AppConfig) -> dict[str, di
             'internet_connection_status': rpi_info.check_internet_connection(),
             'public_ip': rpi_info.get_public_ip(),
         },
-        'cpu_info': get_cpu_data(rpi_info, config),
-        'ram_info': get_ram_data(rpi_info),
-        'eth0_info': rpi_info.get_network_interface_info('eth0'),
-        'wlan0_info': rpi_info.get_network_interface_info('wlan0'),
+        'cpu_info': hardware_data['cpu_info'],
+        'ram_info': hardware_data['ram_info'],
+        'eth0_info': network_data['eth0_info'],
+        'wlan0_info': network_data['wlan0_info'],
     }
 
 
@@ -178,7 +186,7 @@ def get_gpu_data(rpi_info: RPiSystemInfo) -> dict[str, Any]:
     """
     codecs_info = rpi_info.get_gpu_codecs_info()
     return {
-        'memory_size': '76 Mb',
+        'memory_size': rpi_info.get_gpu_memory(),
         'H264': codecs_info['H264'],
         'MPG2': codecs_info['MPG2'],
         'WVC1': codecs_info['WVC1'],
@@ -186,6 +194,7 @@ def get_gpu_data(rpi_info: RPiSystemInfo) -> dict[str, Any]:
         'MJPG': codecs_info['MJPG'],
         'WMV9': codecs_info['WMV9'],
     }
+
 
 def get_network_data(rpi_info: RPiSystemInfo) -> dict[str, Any]:
     """
