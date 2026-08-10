@@ -9,8 +9,10 @@ from dotenv import load_dotenv
 @dataclass(frozen=True)
 class AppConfig:
     PORT: int = 8080
-    PAGE_CACHE_TIMEOUT: int = 10
+    PAGE_CACHE_TIMEOUT: int = 5
     PAGE_TITLE: str = 'Raspberry Pi System Info'
+    METRICS_UPDATE_INTERVAL: int = 15
+    METRICS_TTL: int = 30
     CPU_ORANGE_TEMP_THRESHOLD: float = 50.0
     CPU_RED_TEMP_THRESHOLD: float = 60.0
     TEXT_GREEN_COLOR: str = "#00FF40"
@@ -34,6 +36,8 @@ class AppConfig:
             PORT=int(os.getenv("PORT", cls.PORT)),
             PAGE_CACHE_TIMEOUT=int(os.getenv("PAGE_CACHE_TIMEOUT", cls.PAGE_CACHE_TIMEOUT)),
             PAGE_TITLE=os.getenv("PAGE_TITLE", cls.PAGE_TITLE),
+            METRICS_UPDATE_INTERVAL=int(os.getenv("METRICS_UPDATE_INTERVAL", cls.METRICS_UPDATE_INTERVAL)),
+            METRICS_TTL=int(os.getenv("METRICS_TTL", cls.METRICS_TTL)),
             CPU_ORANGE_TEMP_THRESHOLD=float(os.getenv("CPU_ORANGE_TEMP_THRESHOLD", cls.CPU_ORANGE_TEMP_THRESHOLD)),
             CPU_RED_TEMP_THRESHOLD=float(os.getenv("CPU_RED_TEMP_THRESHOLD", cls.CPU_RED_TEMP_THRESHOLD)),
             TEXT_GREEN_COLOR=os.getenv("TEXT_GREEN_COLOR", cls.TEXT_GREEN_COLOR),

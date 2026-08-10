@@ -17,10 +17,18 @@ from logging import Logger
 
 from ..config import AppConfig
 from ..core.system_info import RPiSystemInfo
+from ..core.cache_manager import CacheManager
 from ..core.utils.helpers import format_datetime
 
 
-def register(app: Flask, rpi_info: RPiSystemInfo, cache: Cache, logger: Logger, config: AppConfig) -> None:
+def register(
+        app: Flask,
+        config: AppConfig,
+        cache: Cache,
+        metrics_cache_manager: CacheManager,
+        rpi_info: RPiSystemInfo,
+        logger: Logger
+    ) -> None:
     @app.route('/')
     @cache.cached(timeout=config.PAGE_CACHE_TIMEOUT)
     def index() -> str:
@@ -34,19 +42,25 @@ def register(app: Flask, rpi_info: RPiSystemInfo, cache: Cache, logger: Logger, 
         logger.info(f'Requested {section} tab')
         data: dict[str, Any]
         if section == 'generic':
-            data = get_generic_data(rpi_info, config)
+            hardware_data = metrics_cache_manager.get_hardware()
+            network_data = metrics_cache_manager.get_network()
+            data = get_generic_data(rpi_info, config, hardware_data, network_data)
             return render_template('partials/generic.html', **data)
         elif section == 'hardware':
-            data = get_hardware_data(rpi_info, config)
+            data = metrics_cache_manager.get_hardware()
+            #data = get_hardware_data(rpi_info, config)
             return render_template('partials/hardware.html', **data)
         elif section == 'networks':
-            data = get_network_data(rpi_info)
+            data = metrics_cache_manager.get_network()
+            #data = get_network_data(rpi_info)
             return render_template('partials/networks.html', **data)
         elif section == 'storage':
-            data = get_storage_data(rpi_info)
+            data = metrics_cache_manager.get_storage()
+            #data = get_storage_data(rpi_info)
             return render_template('partials/storage.html', **data)
         elif section == 'processes':
-            data = get_processes_data(rpi_info, config)
+            data = metrics_cache_manager.get_processes()
+            #data = get_processes_data(rpi_info, config)
             return render_template('partials/processes.html', **data)
         else:
             abort(404)

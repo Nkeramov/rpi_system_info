@@ -4,6 +4,7 @@ from flask_caching import Cache
 from .config import AppConfig
 from .core.utils.log_utils import LoggerSingleton
 from .core.system_info import RPiSystemInfo
+from .core.cache_manager import CacheManager
 from .web import routes, error_handlers
 
 
@@ -28,15 +29,17 @@ def create_app(config: AppConfig | None = None) -> Flask:
     app.logger.handlers = logger.handlers
     app.logger.setLevel(logger.level)
 
-    cache = Cache(app, config={
+    page_cache = Cache(app, config={
             "CACHE_TYPE": "SimpleCache",
             "CACHE_DEFAULT_TIMEOUT": config.PAGE_CACHE_TIMEOUT
         }
     )
 
-    rpi_info = RPiSystemInfo(logger=logger)
+    rpi_info = RPiSystemInfo(logger)
 
-    routes.register(app, rpi_info, cache, logger, config)
+    metrics_cache_manager = CacheManager(rpi_info, config, logger)
+
+    routes.register(app, config, page_cache, metrics_cache_manager, rpi_info, logger)
     error_handlers.register(app, logger, config)
 
     return app
