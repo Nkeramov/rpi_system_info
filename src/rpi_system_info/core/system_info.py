@@ -731,89 +731,6 @@ class RPiSystemInfo(metaclass=Singleton):
                 self.logger.error(f"Unexpected error getting disks inodes info: {e}")
         return disks
 
-    def get_processes_info(self) -> list[dict[str, Any]]:
-        """Retrieves info about running processes in system.
-
-        Returns:
-            List of dicts with process info or empty list if error occurs.
-            Each dict contains: user, pid, cpu%, mem%, command, start_time.
-        """
-        self.logger.debug("Started get_processes_info")
-        processes: list[dict[str, Any]] = []
-        command = "ps -eo user,pid,pcpu,pmem,comm,lstart --sort=-pcpu"
-        output = self.__get_shell_cmd_output(command)
-        if output:
-            try:
-                lines = output.splitlines()[1:]
-                if not lines:
-                    self.logger.warning("No processes information available")
-                    return processes
-                for line in lines:
-                    try:
-                        parts = line.split()
-                        process_info = {
-                            'user': parts[0],
-                            'pid': parts[1],
-                            'cpu_percent': float(parts[2]),
-                            'mem_percent': float(parts[3]),
-                            'command': " ".join(parts[4:-5]),
-                            'started_on': datetime.strptime(" ".join(parts[-5:]), "%a %b %d %H:%M:%S %Y"),
-                        }
-                        if process_info['command'] != 'ps':
-                            processes.append(process_info)
-                    except (ValueError, IndexError) as e:
-                        self.logger.warning(f"Skipping malformed process line: {line} ({e})")
-                        continue
-                return processes
-            except Exception as e:
-                self.logger.error(f"Unexpected error getting process info: {e}")
-        return processes
-
-    def get_throttled_state(self) -> dict[str, Any] | None:
-        """
-        Retrieves the throttled status of the Raspberry Pi processor.
-
-        Returns:
-            Dict with raw throttled value, bool flags (under_voltage, arm_frequency_capped,
-            currently_throttled, soft_temperature_limit, under_voltage_occurred,
-            arm_frequency_capped_occurred, throttling_occurred, soft_temperature_limit_occurred)
-            and text description.
-        """
-        command = "vcgencmd get_throttled | cut -d= -f2"
-        throttled = self.__get_shell_cmd_output(command).strip('"')
-        try:
-            throttled_int = int(throttled, 16)
-            status = {
-                "raw_value": throttled_int,
-                "description": "",
-                "under_voltage": bool(throttled_int & 0x1),
-                "arm_frequency_capped": bool(throttled_int & 0x2),
-                "currently_throttled": bool(throttled_int & 0x4),
-                "soft_temperature_limit": bool(throttled_int & 0x8),
-                "under_voltage_occurred": bool(throttled_int & 0x10000),
-                "arm_frequency_capped_occurred": bool(throttled_int & 0x20000),
-                "throttling_occurred": bool(throttled_int & 0x40000),
-                "soft_temperature_limit_occurred": bool(throttled_int & 0x80000),
-            }
-            descriptions = []
-            if status["under_voltage"]:
-                descriptions.append("Undervoltage detected")
-            if status["arm_frequency_capped"]:
-                descriptions.append("Arm frequency capped")
-            if status["currently_throttled"]:
-                descriptions.append("Currently throttled")
-            if status["soft_temperature_limit"]:
-                descriptions.append("Soft temperature limit active")
-            if not descriptions:
-                descriptions.append("No active issues")
-            status["description"] = '; '.join(descriptions)
-            return status
-        except ValueError as e:
-            self.logger.error(f"Error while converting throttled value {throttled} to int: {e}")
-        except Exception as e:
-            self.logger.error(f"Failed to read throttled status: {e}")
-        return None
-
     def get_sd_card_info(self) -> list[dict[str, str | None]]:
         """
         Retrieve information about SD cards (type 'SD') from the sysfs interface,
@@ -935,6 +852,185 @@ class RPiSystemInfo(metaclass=Singleton):
         except OSError:
             pass
         return sd_cards
+
+    def get_processes_info(self) -> list[dict[str, Any]]:
+        """Retrieves info about running processes in system.
+
+        Returns:
+            List of dicts with process info or empty list if error occurs.
+            Each dict contains: user, pid, cpu%, mem%, command, start_time.
+        """
+        self.logger.debug("Started get_processes_info")
+        processes: list[dict[str, Any]] = []
+        command = "ps -eo user,pid,pcpu,pmem,comm,lstart --sort=-pcpu"
+        output = self.__get_shell_cmd_output(command)
+        if output:
+            try:
+                lines = output.splitlines()[1:]
+                if not lines:
+                    self.logger.warning("No processes information available")
+                    return processes
+                for line in lines:
+                    try:
+                        parts = line.split()
+                        process_info = {
+                            'user': parts[0],
+                            'pid': parts[1],
+                            'cpu_percent': float(parts[2]),
+                            'mem_percent': float(parts[3]),
+                            'command': " ".join(parts[4:-5]),
+                            'started_on': datetime.strptime(" ".join(parts[-5:]), "%a %b %d %H:%M:%S %Y"),
+                        }
+                        if process_info['command'] != 'ps':
+                            processes.append(process_info)
+                    except (ValueError, IndexError) as parse_error:
+                        self.logger.warning(f"Skipping malformed process line: {line} ({parse_error})")
+                        continue
+                return processes
+            except Exception as e:
+                self.logger.error(f"Unexpected error getting process info: {e}")
+        return processes
+
+    def get_tmux_sessions(self) -> list[dict[str, Any]]:
+        """
+        Retrieves info about active tmux sessions.
+
+        Returns:
+            A list of dicts with tmux session info.
+            Each dict contains: session name, number of windows in the session, creation datetime.
+            Returns an empty list if tmux is not available, no sessions exist, or an error occurs.
+        """
+        self.logger.debug("Started get_tmux_sessions")
+        sessions: list[dict[str, Any]] = []
+        command = "tmux ls"
+        output = self.__get_shell_cmd_output(command)
+        if output:
+            try:
+                if isinstance(output, bytes):
+                    output = output.decode('utf-8')
+                else:
+                    output = str(output)
+                lines = output.splitlines()
+                if not lines:
+                    self.logger.warning("No tmux sessions found or tmux server not running")
+                    return sessions
+                date_pattern = r"\(created\s+(.*?)\)"
+                for line in lines:
+                    try:
+                        if ": " not in line:
+                            self.logger.warning(f"Skipping malformed line (missing ': '): {line}")
+                            continue
+                        name_part, rest = line.split(": ", 1)
+
+                        if " windows (" not in rest:
+                            self.logger.warning(f"Skipping malformed line (missing 'windows ('): {line}")
+                            continue
+                        windows_str, _ = rest.split(" windows (", 1)
+                        windows = int(windows_str.strip())
+
+                        match = re.search(date_pattern, rest)
+                        if not match:
+                            self.logger.warning(f"Skipping line (no creation date found): {line}")
+                            continue
+                        created_str = match.group(1)
+                        created_dt = datetime.strptime(created_str, "%a %b %d %H:%M:%S %Y")
+
+                        sessions.append({
+                            "name": name_part.strip(),
+                            "windows": windows,
+                            "created": created_dt
+                        })
+                    except (ValueError, IndexError) as parse_error:
+                        self.logger.warning(f"Skipping malformed line: {line} ({parse_error})")
+                        continue
+                return sessions
+            except Exception as e:
+                self.logger.error(f"Unexpected error while parsing tmux sessions: {e}")
+        return sessions
+
+    def get_gpu_codecs_info(self, codecs: list[str] | None = None) -> dict[str, bool]:
+        """
+        Retrieves the enabled/disabled status of GPU hardware codecs on a Raspberry Pi.
+
+        This method executes `vcgencmd codec_enabled` for each specified codec,
+        parses the output, and returns a dictionary with boolean values.
+
+        Args:
+            codecs: Optional list of codec names to check. If not provided,
+                    defaults to ["H264", "MPG2", "WVC1", "MPG4", "MJPG", "WMV9"].
+
+        Returns:
+            A dictionary where keys are codec names (as given in the input list)
+            and values are True if the codec is enabled, False otherwise.
+        """
+        if codecs is None:
+            codecs = ["H264", "MPG2", "WVC1", "MPG4", "MJPG", "WMV9"]
+        status_dict: dict[str, bool] = {}
+        for codec in codecs:
+            try:
+                cmd = f"vcgencmd codec_enabled {codec}"
+                output = self.__get_shell_cmd_output(cmd)
+                if '=' not in output:
+                    self.logger.warning(f"Unexpected output format for codec '{codec}': {output!r}")
+                    status_dict[codec] = False
+                    continue
+                _, status_str = output.split('=', 1)
+                status_str = status_str.strip().lower()
+                status_dict[codec] = (status_str == "enabled")
+            except subprocess.CalledProcessError as e:
+                self.logger.error(f"Failed to check codec '{codec}' (exit code {e.returncode}): {e.stderr}")
+                status_dict[codec] = False
+            except Exception as e:
+                self.logger.error(f"Unexpected error while checking codec '{codec}': {e}")
+                status_dict[codec] = False
+        return status_dict
+
+    def get_throttled_state(self) -> dict[str, Any] | None:
+        """
+        Retrieves the throttled status of the Raspberry Pi processor.
+
+        Returns:
+            Dict with raw throttled value, bool flags (under_voltage, arm_frequency_capped,
+            currently_throttled, soft_temperature_limit, under_voltage_occurred,
+            arm_frequency_capped_occurred, throttling_occurred, soft_temperature_limit_occurred)
+            and text description.
+        """
+        command = "vcgencmd get_throttled | cut -d= -f2"
+        throttled = self.__get_shell_cmd_output(command).strip('"')
+        try:
+            throttled_int = int(throttled, 16)
+            status = {
+                "raw_value": throttled_int,
+                "description": "",
+                "under_voltage": bool(throttled_int & 0x1),
+                "arm_frequency_capped": bool(throttled_int & 0x2),
+                "currently_throttled": bool(throttled_int & 0x4),
+                "soft_temperature_limit": bool(throttled_int & 0x8),
+                "under_voltage_occurred": bool(throttled_int & 0x10000),
+                "arm_frequency_capped_occurred": bool(throttled_int & 0x20000),
+                "throttling_occurred": bool(throttled_int & 0x40000),
+                "soft_temperature_limit_occurred": bool(throttled_int & 0x80000),
+            }
+            descriptions = []
+            if status["under_voltage"]:
+                descriptions.append("Undervoltage detected")
+            if status["arm_frequency_capped"]:
+                descriptions.append("Arm frequency capped")
+            if status["currently_throttled"]:
+                descriptions.append("Currently throttled")
+            if status["soft_temperature_limit"]:
+                descriptions.append("Soft temperature limit active")
+            if not descriptions:
+                descriptions.append("No active issues")
+            status["description"] = '; '.join(descriptions)
+            return status
+        except ValueError as e:
+            self.logger.error(f"Error while converting throttled value {throttled} to int: {e}")
+        except Exception as e:
+            self.logger.error(f"Failed to read throttled status: {e}")
+        return None
+
+
 
 
 def main() -> None:

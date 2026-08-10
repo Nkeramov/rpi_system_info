@@ -1,12 +1,151 @@
 <div class="row t-header toggle-header">
     <div class="t-header-img">
-        <img src="static/images/storage.png" style="width:32px">
+        <img src="static/images/sd_card.png">
     </div>
     <div>
-        <h5>Disks Usage Details<span class="item-count"> ( total {{ disks_details | length }} ) </span></h5>
+        <h5>SD Card Info</h5>
     </div>
 </div>
 <div class="toggle-content">
+    <div class="row t-row">
+        <div class="four columns">
+            Device
+        </div>
+        <div class="six columns">
+            {{sd_card_info.device}}
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns">
+            Type
+        </div>
+        <div class="six columns">
+            {{sd_card_info.type}}
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns">
+            Name
+        </div>
+        <div class="six columns">
+            {{sd_card_info.name}}
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns">
+            OEM/Application Id (OID)
+        </div>
+        <div class="six columns">
+            {{sd_card_info.oemid}}
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns">
+            Serial Number
+        </div>
+        <div class="six columns">
+            {{sd_card_info.serial_number}}
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns">
+            Manufacturer Id
+        </div>
+        <div class="six columns">
+            {{sd_card_info.manufacturer_id}}
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns">
+            Date of Manufactured
+        </div>
+        <div class="six columns">
+            {{sd_card_info.manufactured_date}}
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns">
+            Logical Block Size
+        </div>
+        <div class="six columns">
+            {{sd_card_info.logical_block_size}}
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns">
+            Physical Block Size
+        </div>
+        <div class="six columns">
+            {{sd_card_info.physical_block_size}}
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns">
+            Hardware Revision
+        </div>
+        <div class="six columns">
+            {{sd_card_info.hardware_revision}}
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns">
+            Firmware Revision
+        </div>
+        <div class="six columns">
+            {{sd_card_info.firmware_revision}}
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns">
+            CID Register
+        </div>
+        <div class="six columns">
+            {{sd_card_info.cid_register}}
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns">
+            CSD Register
+        </div>
+        <div class="six columns">
+            {{sd_card_info.csd_register}}
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns">
+            DSR Register
+        </div>
+        <div class="six columns">
+            {{sd_card_info.dsr_register}}
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns">
+            SCR Register
+        </div>
+        <div class="six columns">
+            {{sd_card_info.scr_register}}
+        </div>
+    </div>                    
+    <div class="row t-row">
+        <div class="four columns">
+            OCR Register
+        </div>
+        <div class="six columns">
+            {{sd_card_info.ocr_register}}
+        </div>
+    </div>                    
+</div>
+
+<div class="row t-header toggle-header collapses">
+    <div class="t-header-img">
+        <img src="static/images/storage.png" style="width:32px">
+    </div>
+    <div>
+        <h5>Disks Usage Info<span class="item-count"> ( total {{ disks_info | length }} ) </span></h5>
+    </div>
+</div>
+<div class="toggle-content collapses">
     <table class="u-full-width sortable">
         <thead>
             <tr>
@@ -19,7 +158,7 @@
             </tr>
         </thead>
         <tbody>
-            {% for disk in disks_details %}
+            {% for disk in disks_info %}
             <tr>
                 <td class="tal">{{disk.filesystem}}</td>
                 <td class="tac">{{disk.size}}</td>
@@ -33,154 +172,17 @@
     </table>
 </div>
 
-<div class="row t-header toggle-header">
-    <div class="t-header-img">
-        <img src="static/images/sd_card.png">
-    </div>
-    <div>
-        <h5>SD Card Details</h5>
-    </div>
-</div>
-<div class="toggle-content">
-    <div class="row t-row">
-        <div class="four columns">
-            Device
-        </div>
-        <div class="six columns">
-            {{sd_card_details.device}}
-        </div>
-    </div>
-    <div class="row t-row">
-        <div class="four columns">
-            Type
-        </div>
-        <div class="six columns">
-            {{sd_card_details.type}}
-        </div>
-    </div>
-    <div class="row t-row">
-        <div class="four columns">
-            Name
-        </div>
-        <div class="six columns">
-            {{sd_card_details.name}}
-        </div>
-    </div>
-    <div class="row t-row">
-        <div class="four columns">
-            OEM/Application Id (OID)
-        </div>
-        <div class="six columns">
-            {{sd_card_details.oemid}}
-        </div>
-    </div>
-    <div class="row t-row">
-        <div class="four columns">
-            Serial Number
-        </div>
-        <div class="six columns">
-            {{sd_card_details.serial_number}}
-        </div>
-    </div>
-    <div class="row t-row">
-        <div class="four columns">
-            Manufacturer Id
-        </div>
-        <div class="six columns">
-            {{sd_card_details.manufacturer_id}}
-        </div>
-    </div>
-    <div class="row t-row">
-        <div class="four columns">
-            Date of Manufactured
-        </div>
-        <div class="six columns">
-            {{sd_card_details.manufactured_date}}
-        </div>
-    </div>
-    <div class="row t-row">
-        <div class="four columns">
-            Logical Block Size
-        </div>
-        <div class="six columns">
-            {{sd_card_details.logical_block_size}}
-        </div>
-    </div>
-    <div class="row t-row">
-        <div class="four columns">
-            Physical Block Size
-        </div>
-        <div class="six columns">
-            {{sd_card_details.physical_block_size}}
-        </div>
-    </div>
-    <div class="row t-row">
-        <div class="four columns">
-            Hardware Revision
-        </div>
-        <div class="six columns">
-            {{sd_card_details.hardware_revision}}
-        </div>
-    </div>
-    <div class="row t-row">
-        <div class="four columns">
-            Firmware Revision
-        </div>
-        <div class="six columns">
-            {{sd_card_details.firmware_revision}}
-        </div>
-    </div>
-    <div class="row t-row">
-        <div class="four columns">
-            CID Register
-        </div>
-        <div class="six columns">
-            {{sd_card_details.cid_register}}
-        </div>
-    </div>
-    <div class="row t-row">
-        <div class="four columns">
-            CSD Register
-        </div>
-        <div class="six columns">
-            {{sd_card_details.csd_register}}
-        </div>
-    </div>
-    <div class="row t-row">
-        <div class="four columns">
-            DSR Register
-        </div>
-        <div class="six columns">
-            {{sd_card_details.dsr_register}}
-        </div>
-    </div>
-    <div class="row t-row">
-        <div class="four columns">
-            SCR Register
-        </div>
-        <div class="six columns">
-            {{sd_card_details.scr_register}}
-        </div>
-    </div>                    
-    <div class="row t-row">
-        <div class="four columns">
-            OCR Register
-        </div>
-        <div class="six columns">
-            {{sd_card_details.ocr_register}}
-        </div>
-    </div>                    
-</div>
 
-<div class="row t-header toggle-header">
+
+<div class="row t-header toggle-header collapsed">
     <div class="t-header-img">
         <img src="static/images/inodes.png" style="width:32px">
     </div>
     <div>
-        <h5>Disks Inodes Details<span class="item-count"> ( total {{ disks_inodes_details | length }} ) </span></h5>
+        <h5>Disks Inodes Info<span class="item-count"> ( total {{ disks_inodes_info | length }} ) </span></h5>
     </div>
 </div>
-<div class="toggle-content">
+<div class="toggle-content collapsed">
     <table class="u-full-width sortable">
         <thead>
             <tr>
@@ -193,7 +195,7 @@
             </tr>
         </thead>
         <tbody>
-            {% for disk in disks_inodes_details %}
+            {% for disk in disks_inodes_info %}
             <tr>
                 <td class="tal">{{disk.filesystem}}</td>
                 <td class="tac">{{disk.inodes}}</td>

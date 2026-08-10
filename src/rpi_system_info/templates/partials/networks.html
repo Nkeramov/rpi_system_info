@@ -3,7 +3,7 @@
         <img src="static/images/ethernet_adapter.png">
     </div>
     <div>
-        <h5>Ethernet Adapter Details (eth0 interface)</h5>
+        <h5>Ethernet Adapter Info (eth0 interface)</h5>
     </div>
 </div>
 <div class="toggle-content">
@@ -12,8 +12,8 @@
             MAC address
         </div>
         <div class="six columns">
-        {% if eth_info.mac %}
-            {{eth_info.mac}}
+        {% if eth0_info.mac %}
+            {{eth0_info.mac}}
         {% else %}
             Unknown
         {% endif %}
@@ -24,8 +24,8 @@
             IP address
         </div>
         <div class="six columns t-row">
-        {% if eth_info.state == 'UP' %}
-            {{eth_info.ip}}
+        {% if eth0_info.state == 'UP' %}
+            {{eth0_info.ip}}
         {% else %}
             Not connected
         {% endif %}
@@ -36,8 +36,8 @@
             Default gateway
         </div>
         <div class="six columns t-row">
-        {% if eth_info.state == 'UP' %}
-            {{eth_info.gateway}}
+        {% if eth0_info.state == 'UP' %}
+            {{eth0_info.gateway}}
         {% else %}
             Not connected
         {% endif %}
@@ -48,8 +48,8 @@
             Network mask
         </div>
         <div class="six columns t-row">
-        {% if eth_info.state == 'UP' %}
-            {{eth_info.mask}}
+        {% if eth0_info.state == 'UP' %}
+            {{eth0_info.mask}}
         {% else %}
             Not connected
         {% endif %}
@@ -60,8 +60,8 @@
             Broadcast IP address
         </div>
         <div class="six columns t-row">
-        {% if eth_info.state == 'UP' %}
-            {{eth_info.broadcast}}
+        {% if eth0_info.state == 'UP' %}
+            {{eth0_info.broadcast}}
         {% else %}
             Not connected
         {% endif %}
@@ -73,7 +73,7 @@
         <img src="static/images/wifi_adapter.png">
     </div>
     <div>
-        <h5>Wi-Fi Adapter Details (wlan0 interface)</h5>
+        <h5>Wi-Fi Adapter Info (wlan0 interface)</h5>
     </div>
 </div>
 <div class="toggle-content">
@@ -82,8 +82,8 @@
             MAC address
         </div>
         <div class="six columns">
-        {% if wlan_info.mac %}
-            {{wlan_info.mac}}
+        {% if wlan0_info.mac %}
+            {{wlan0_info.mac}}
         {% else %}
             Unknown
         {% endif %}
@@ -106,8 +106,8 @@
             IP address
         </div>
         <div class="six columns t-row">
-        {% if wlan_info.state == 'UP' %}
-            {{wlan_info.ip}}
+        {% if wlan0_info.state == 'UP' %}
+            {{wlan0_info.ip}}
         {% else %}
             Not connected
         {% endif %}
@@ -118,8 +118,8 @@
             Default gateway
         </div>
         <div class="six columns t-row">
-        {% if wlan_info.state == 'UP' %}
-            {{wlan_info.gateway}}
+        {% if wlan0_info.state == 'UP' %}
+            {{wlan0_info.gateway}}
         {% else %}
             Not connected
         {% endif %}
@@ -130,8 +130,8 @@
             Network mask
         </div>
         <div class="six columns t-row">
-        {% if wlan_info.state == 'UP' %}
-            {{wlan_info.mask}}
+        {% if wlan0_info.state == 'UP' %}
+            {{wlan0_info.mask}}
         {% else %}
             Not connected
         {% endif %}
@@ -142,15 +142,15 @@
             Broadcast IP address
         </div>
         <div class="six columns t-row">
-        {% if wlan_info.state == 'UP' %}
-            {{wlan_info.broadcast}}
+        {% if wlan0_info.state == 'UP' %}
+            {{wlan0_info.broadcast}}
         {% else %}
             Not connected
         {% endif %}
         </div>
     </div>
 </div>
-{% if wlan_info.state != 'DOWN' %}
+{% if wlan0_info.state != 'DOWN' %}
 <div class="row t-header toggle-header collapsed">
     <div class="t-header-img">
         <img src="static/images/wifi.png">
@@ -193,7 +193,7 @@
         <img src="static/images/bluetooth.png">
     </div>
     <div>
-        <h5>Bluetooth Details (hci0 interface)</h5>
+        <h5>Bluetooth Info (hci0 interface)</h5>
     </div>
 </div>
 <div class="toggle-content collapsed">

@@ -1,0 +1,230 @@
+<div class="row t-header toggle-header">
+    <div class="t-header-img">
+        <img src="static/images/cpu.png">
+    </div>
+    <div>
+        <h5>CPU Info</h5>
+    </div>
+</div>
+<div class="toggle-content">
+    <div class="row t-row">
+        <div class="four columns">
+            Architecture
+        </div>
+        <div class="six columns">
+            {{cpu_info.architecture}}
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns">
+            Model
+        </div>
+        <div class="six columns">
+            {{cpu_info.model}}
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns">
+            Usage
+        </div>
+        <div class="six columns">
+            {{cpu_info.usage}} %
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns">
+            Temperature
+        </div>
+        <div class="six columns" style="color:{{cpu_info.temperature_color}}">
+            {{cpu_info.temperature_value}} &#176;C
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns">
+            Cores Count
+        </div>
+        <div class="six columns">
+            {{cpu_info.cores_count}}
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns">
+            Core Frequency
+        </div>
+        <div class="six columns">
+            {{cpu_info.cur_core_frequency}} MHz (min={{cpu_info.min_core_frequency}} MHz, max={{cpu_info.max_core_frequency}} MHz)
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns">
+            Core Voltage
+        </div>
+        <div class="six columns">
+            {{cpu_info.core_voltage}} V
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns">
+            L1 Data Cache Size
+        </div>
+        <div class="six columns">
+            {{cpu_info.cache_sizes.L1d}} KiB
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns">
+            L1 Instructions Cache Size
+        </div>
+        <div class="six columns">
+            {{cpu_info.cache_sizes.L1i}} KiB
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns">
+            L2 Cache Size
+        </div>
+        <div class="six columns">
+            {{cpu_info.cache_sizes.L2}} KiB
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns">
+            Overvoltage allowed
+        </div>
+        <div class="six columns">
+            {{cpu_info.overvoltage_allowed}}
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns">
+            OTP programming allowed
+        </div>
+        <div class="six columns">
+            {{cpu_info.otp_programming_allowed}}
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns">
+            OTP reading allowed
+        </div>
+        <div class="six columns">
+            {{cpu_info.otp_reading_allowed}}
+        </div>
+    </div>
+</div>
+<div class="row t-header toggle-header">
+    <div class="t-header-img">
+        <img src="static/images/ram.png">
+   </div>
+   <div>
+        <h5>RAM Info</h5>
+   </div>
+</div>
+<div class="toggle-content">
+    <div class="row t-row">
+        <div class="four columns">
+            Memory Size
+        </div>
+        <div class="six columns t-row">
+            {{ram_info.size}} MB
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns">
+            Total Memory
+        </div>
+        <div class="six columns t-row">
+            {{ram_info.total}} MB
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns">
+            Used Memory
+        </div>
+        <div class="six columns">
+            {{ram_info.used}} MB
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns">
+            Free Memory
+        </div>
+        <div class="six columns">
+            {{ram_info.free}} MB
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns">
+            Cache Memory
+        </div>
+        <div class="six columns">
+            {{ram_info.cache}} MB
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns">
+            Available Memory
+        </div>
+        <div class="six columns">
+            {{ram_info.available}} MB
+        </div>
+    </div>
+</div>
+<div class="row t-header toggle-header collapsed">
+    <div class="t-header-img">
+        <img src="static/images/videocard.png">
+   </div>
+   <div>
+        <h5>GPU Info</h5>
+   </div>
+</div>
+<div class="toggle-content collapsed">
+    <div class="row t-row">
+        <div class="four columns">
+            Memory Size (from RAM)
+        </div>
+        <div class="six columns t-row">
+            {{gpu_info.memory_size}}
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns">
+            Codec MPG2
+        </div>
+        <div class="six columns t-row">
+            {{ 'Enabled' if gpu_info.MPG2 else 'Disabled' }}
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns">
+            Codec WVC1
+        </div>
+        <div class="six columns t-row">
+            {{ 'Enabled' if gpu_info.WVC1 else 'Disabled' }}
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns">
+            Codec MPG4
+        </div>
+        <div class="six columns t-row">
+            {{ 'Enabled' if gpu_info.MPG4 else 'Disabled' }}
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns">
+            Codec MJPG
+        </div>
+        <div class="six columns t-row">
+            {{ 'Enabled' if gpu_info.MJPG else 'Disabled' }}
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns">
+            Codec WMV9
+        </div>
+        <div class="six columns t-row">
+            {{ 'Enabled' if gpu_info.WMV9 else 'Disabled' }}
+        </div>
+    </div>
+</div>

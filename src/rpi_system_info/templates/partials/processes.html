@@ -1,32 +1,63 @@
- <div class="row t-header">
+<div class="row t-header toggle-header collapsed">
     <div class="t-header-img">
         <img src="static/images/processes.png" style="width:32px">
     </div>
     <div>
-        <h5>Running Processes<span class="item-count"> ( total {{ processes_details | length }} ) </span></h5>
+        <h5>Running Processes<span class="item-count"> ( total {{ processes_info | length }} ) </span></h5>
     </div>
 </div>
-<table class="u-full-width sortable">
-    <thead>
-        <tr>
-            <th class="tal">User</th>
-            <th class="tac">PID</th>
-            <th class="tac">CPU%</th>
-            <th class="tac">MEM%</th>
-            <th class="tal">Command</th>
-            <th class="tac">Started On</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for process in processes_details %}
-        <tr>
-            <td class="tal">{{process.user}}</td>
-            <td class="tac">{{process.pid}}</td>
-            <td class="tac">{{process.cpu_percent}}</td>
-            <td class="tac">{{process.mem_percent}}</td>
-            <td class="tal">{{process.command}}</td>
-            <td class="tac">{{process.started_on}}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div class="toggle-content collapsed">
+    <table class="u-full-width sortable">
+        <thead>
+            <tr>
+                <th class="tal">User</th>
+                <th class="tac">PID</th>
+                <th class="tac">CPU%</th>
+                <th class="tac">MEM%</th>
+                <th class="tal">Command</th>
+                <th class="tac">Started On</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for process in processes_info %}
+            <tr>
+                <td class="tal">{{process.user}}</td>
+                <td class="tac">{{process.pid}}</td>
+                <td class="tac">{{process.cpu_percent}}</td>
+                <td class="tac">{{process.mem_percent}}</td>
+                <td class="tal">{{process.command}}</td>
+                <td class="tac">{{process.started_on}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="row t-header toggle-header collapsed">
+    <div class="t-header-img">
+        <img src="static/images/tmux.png" style="width:32px">
+    </div>
+    <div>
+        <h5>Tmux Sessions Info<span class="item-count"> ( total {{ tmux_sessions_info | length }} ) </span></h5>
+    </div>
+</div>
+<div class="toggle-content collapsed">
+    <table class="u-full-width sortable">
+        <thead>
+            <tr>
+                <th class="tac">Name</th>
+                <th class="tac">Windows</th>
+                <th class="tac">Created</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for session in tmux_sessions_info %}
+            <tr>
+                <td class="tac">{{session.name}}</td>
+                <td class="tac">{{session.windows}}</td>
+                <td class="tac">{{session.created}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
