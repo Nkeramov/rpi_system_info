@@ -202,8 +202,44 @@
             MAC address
         </div>
         <div class="six columns">
-        {% if bluetooth_mac_address %}
-            {{bluetooth_mac_address}}
+        {% if bt_hci0_info.mac %}
+            {{bt_hci0_info.mac}}
+        {% else %}
+            Unknown
+        {% endif %}
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns t-caption">
+            State
+        </div>
+        <div class="six columns">
+        {% if bt_hci0_info.state %}
+            {{bt_hci0_info.state}}
+        {% else %}
+            Unknown
+        {% endif %}
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns t-caption">
+            Name
+        </div>
+        <div class="six columns">
+        {% if bt_hci0_info.name %}
+            {{bt_hci0_info.name}}
+        {% else %}
+            Unknown
+        {% endif %}
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns t-caption">
+            Manufacturer
+        </div>
+        <div class="six columns">
+        {% if bt_hci0_info.manufacturer %}
+            {{bt_hci0_info.manufacturer}}
         {% else %}
             Unknown
         {% endif %}

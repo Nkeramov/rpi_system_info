@@ -536,32 +536,66 @@ class RPiSystemInfo(metaclass=Singleton):
         self.logger.debug(f"Network interface {interface} info: {', '.join(f'{k}: {v}' for k, v in nic_info.items())}")
         return nic_info
 
-    def get_bluetooth_mac_address(self, interface: str = 'hci0') -> str:
-        """Retrieves the MAC address for a specific Bluetooth interface.
-
-        Uses `hcitool dev` to list all Bluetooth controllers and extracts the MAC
-        address for the given interface name.
+    def get_bluetooth_interface_info(self, interface: str = 'hci0') -> dict[str, str]:
+        """
+        Retrieves detailed information about a specific Bluetooth interface.
 
         Args:
-            interface: The Bluetooth interface name (default: 'hci0').
+            interface: Bluetooth interface name (default: 'hci0').
 
         Returns:
-            The MAC address in uppercase, or an empty string if the command fails,
-            the specified interface is not found, or parsing fails.
+            A dictionary with keys: 'mac', 'state', 'name', 'manufacturer'.
+            Values are strings; empty if the interface is not found or parsing fails.
         """
-        command = "hcitool dev"
+        bt_fields = ['mac', 'state', 'name', 'manufacturer']
+        bt_info = dict.fromkeys(bt_fields, "")
+        command = "hciconfig -a"
         output = self.__get_shell_cmd_output(command)
         if output:
-            try:
-                lines = output.splitlines()[1:]
-                for line in lines:
-                    parts = line.split()
-                    if len(parts) >= 2 and parts[0] == interface:
-                        return parts[1].upper()
-                self.logger.error(f"Bluetooth interface '{interface}' not found in output: {output}")
-            except (IndexError, ValueError) as e:
-                self.logger.error(f"Failed to parse {command} command output: {output} ({e})")
-        return ''
+            lines = output.splitlines()
+            start_idx = None
+            for i, line in enumerate(lines):
+                if line.strip().startswith(interface + ':'):
+                    start_idx = i
+                    break
+            if start_idx is None:
+                self.logger.error(f"Bluetooth interface '{interface}' not found in output")
+                return {}
+            block_lines = []
+            for j in range(start_idx, len(lines)):
+                if j > start_idx and lines[j].strip().startswith('hci') and ':' in lines[j]:
+                    break
+                block_lines.append(lines[j])
+
+            for line in block_lines:
+                stripped = line.strip()
+                try:
+                    if 'BD Address:' in stripped:
+                        parts = stripped.split('BD Address:')
+                        if len(parts) > 1:
+                            mac_addr = parts[1].strip().split()[0]
+                            if mac_addr:
+                                bt_info['mac'] = mac_addr.upper()
+                    elif 'Name:' in stripped:
+                        parts = stripped.split('Name:')
+                        if len(parts) > 1:
+                            name = parts[1].strip().strip("'")
+                            if name:
+                                bt_info['name'] = name
+                    elif 'Manufacturer:' in stripped:
+                        parts = stripped.split('Manufacturer:')
+                        if len(parts) > 1:
+                            manufacturer = parts[1].strip()
+                            if manufacturer:
+                                bt_info['manufacturer'] = manufacturer
+                    elif stripped and ':' not in stripped and not stripped.startswith('hci'):
+                        if not bt_info['state']:
+                            bt_info['state'] = stripped
+                except (IndexError, ValueError, AttributeError) as parse_err:
+                    self.logger.warning(f"Failed to parse line '{stripped}': {parse_err}")
+        else:
+            self.logger.error(f"No output from {command}")
+        return bt_info
 
     def get_available_wifi_networks(self) -> list[dict[str, str]]:
         """Retrieves info about available Wi-Fi networks.

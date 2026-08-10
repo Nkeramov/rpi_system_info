@@ -211,7 +211,7 @@ def get_network_data(rpi_info: RPiSystemInfo) -> dict[str, Any]:
         'eth0_info': rpi_info.get_network_interface_info('eth0'),
         'wlan0_info': rpi_info.get_network_interface_info('wlan0'),
         'wifi_network_name': rpi_info.get_wifi_network_name(),
-        'bluetooth_mac_address': rpi_info.get_bluetooth_mac_address(),
+        'bt_hci0_info': rpi_info.get_bluetooth_interface_info(),
         'available_wifi_networks': rpi_info.get_available_wifi_networks(),
     }
 
