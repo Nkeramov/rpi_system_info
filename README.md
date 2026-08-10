@@ -13,34 +13,33 @@ This project is a simple web server that displays system information about your 
     <img src="title.png" width="75%">
 </div>
 
-The interface is divided into 4 tabs:
+The interface is divided into 5 tabs:
 - 1️⃣  *General*: 
     - Board Info: host name, operating system, system time and uptime, model, revision, manufacturer, serial number. 
-    - Key Metrics: CPU usage, CPU temperature, CPU core frequency, total RAM, available RAM, Eth0 and Wlan0 interfaces IP addresses, internet connection status and public IP (if connections is active).
+    - Key Metrics: CPU usage, CPU temperature, CPU core frequency, total RAM, available RAM, Eth0 and Wlan0 interfaces IP addresses, internet connection status and public IP (if connection is active).
 - 2️⃣  *Hardware*:
     - CPU Info: model, architecture, cores count, cores frequency (current, min, max), cores voltage, temperature, usage, cache sizes, overvoltage allowed, OTP programming allowed, OTP reading allowed).
     - RAM Info: size, total, used, free, cache, available.
-    - GPU Info: memory size (from RAM), codecs status (for MPG2, WVC1, MPG4, MJPG, WMV9).
+    - GPU Info: memory size (from RAM), status for for MPG2, WVC1, MPG4, MJPG, WMV9 codecs.
 - 3️⃣  *Networks*:
-    - Ethernet Adapter Info for Eth0 interface: MAC and IP adresses, default gateway, network mask, broadcast IP adress.
-    - Wi-Fi Afapter Info for Wlan0 interface: MAC and IP adresses, default gateway, network mask, broadcast IP adress, Wi-Fi network name (if connected).
+    - Ethernet Adapter Info (for eth0 interface): MAC and IP adresses, default gateway, network mask, broadcast IP adress.
+    - Wi-Fi Afapter Info (for wlan0 interface): MAC and IP adresses, default gateway, network mask, broadcast IP adress, Wi-Fi network name (if connected).
     - Available Wi-Fi Networks: SSID, channel, rate, signal, bars, security). If the networks list only shows the network the Raspberry Pi is connected to, you need to force a scan using the `sudo nmcli dev wifi rescan` command. This will be fixed in future versions.
     - Bluetooth Adapter Info (for hci0 interface): MAC address.
 - 4️⃣  *Storage*:
-    - SD Card Info: name, device, serial number, manufacturer id, registers info and other.
-    - Disks Usage Info: file system, size, used, available, used%, mounted on.
-    - Disks Inodes Info: file system, inodes, used, free, used%, mounted on.
+    - SD Card Info: name, device, serial number, manufacturer id and name (if it was possible to determine), registers info and other.
+    - Disks Usage Info: file system, size, used, available, used percent, mounted on.
+    - Disks Inodes Info: file system, inodes, used, free, used percent, mounted on.
 - 5️⃣  *Processes*:
-    - Running Processes Info: shows only running tasks (user, PID, CPU%, MEM%, command, started on time).
-    - Tmux Sessions Info: show active tmux sessions info (name, windows in the session, created time).
-
-The contents of the tabs are loaded dynamically when they are opened.
+    - Running Processes Info: user, PID, CPU percent, memory percent, command, start time.
+    - Tmux Sessions Info: session name, number of windows in the session, create time.
 
 Some information is parsed from the device's [revision code](https://www.raspberrypi.com/documentation/computers/raspberry-pi.html#raspberry-pi-revision-codes) located in /proc/cpuinfo.
 
-Information about Wi-Fi networks, disks, processes, tmux sesions is presented in the form of tables. You can sort the tables by clicking on the column in the header.
+Some information is presented in the form of tables (Wi-Fi networks, disks, running processes, tmux sesions). You can sort the tables by clicking on the column in the header.
 
-The web server is based on Flask framework. By default the application will run on port 8080. It can be changed in env file. Gunicorn is used to launch.
+The web server is based on Flask framework. Gunicorn is used to launch. By default the application will run on port 8080. Tab contents are dynamically loaded when a tab is activated. Tab contents are cached, with a default cache time of 30 seconds. Both the port and page caching time can be changed in the environment file.
+
 
 ## 🚀 Quick start
 
