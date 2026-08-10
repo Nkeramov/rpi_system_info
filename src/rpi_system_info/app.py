@@ -30,7 +30,7 @@ def create_app(config: AppConfig | None = None) -> Flask:
 
     cache = Cache(app, config={
             "CACHE_TYPE": "SimpleCache",
-            "CACHE_DEFAULT_TIMEOUT": config.INDEX_PAGE_CACHE_TIMEOUT
+            "CACHE_DEFAULT_TIMEOUT": config.PAGE_CACHE_TIMEOUT
         }
     )
 
