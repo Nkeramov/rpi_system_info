@@ -95,7 +95,7 @@ class RPiSystemInfo(metaclass=Singleton):
                 object.__setattr__(self, 'otp_programming_allowed', decoded_data['otp_programming_allowed'])
             if 'otp_reading_allowed' in decoded_data:
                 object.__setattr__(self, 'otp_reading_allowed', decoded_data['otp_reading_allowed'])
-            self.logger.info("RPiSystemInfo info fully initialized")
+            self.logger.info("RPiSystemInfo initialized")
         except (ValueError, TypeError) as e:
             self.logger.error(f"Invalid revision code '{fetched_revision_code}': {e}")
             raise ValueError(f"Cannot initialize with revision code '{fetched_revision_code}': {e}") from e
@@ -1061,6 +1061,32 @@ class RPiSystemInfo(metaclass=Singleton):
                 self.logger.error(f"Unexpected error while checking codec '{codec}': {e}")
                 status_dict[codec] = False
         return status_dict
+
+    def get_gpu_memory(self) -> int | None:
+        """Retrieves the GPU memory size using the 'vcgencmd get_mem gpu' command.
+
+        Returns:
+            The GPU memory size in Mb, or None if the command fails or the output cannot be parsed.
+        """
+        command = "vcgencmd get_mem gpu"
+        output = self.__get_shell_cmd_output(command)
+        if output:
+            try:
+                if not output.startswith("gpu="):
+                    self.logger.error(f"Unexpected GPU memory output prefix: '{output}'")
+                    return None
+                mem_part = output[4:]
+                if mem_part.endswith("MB"):
+                    mem_size = int(mem_part[:-2])
+                elif mem_part.endswith("M"):
+                    mem_size = int(mem_part[:-1])
+                else:
+                    self.logger.error(f"Unknown unit in GPU memory output: '{output}'")
+                    return None
+                return mem_size
+            except (ValueError, IndexError) as e:
+                self.logger.error(f"Error parsing GPU memory from '{result}': {e}")
+        return None
 
     def get_throttled_state(self) -> dict[str, Any] | None:
         """
