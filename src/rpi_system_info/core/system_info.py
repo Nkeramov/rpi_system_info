@@ -889,8 +889,12 @@ class RPiSystemInfo(metaclass=Singleton):
                     except (OSError, UnicodeDecodeError):
                         info[field] = None
 
-                key = (info['type'], info['manufacturer_id'])
-                info['manufacturer'] = manufacturers_db.get(key)
+
+                if info['type'] is not None and info['manufacturer_id'] is not None:
+                    key = (info['type'], info['manufacturer_id'])
+                    info['manufacturer'] = manufacturers_db.get(key)
+                else:
+                    info['manufacturer'] = None
 
                 fs_info = None
                 block_dir = os.path.join(dev_dir, "block")
@@ -1085,7 +1089,7 @@ class RPiSystemInfo(metaclass=Singleton):
                     return None
                 return mem_size
             except (ValueError, IndexError) as e:
-                self.logger.error(f"Error parsing GPU memory from '{result}': {e}")
+                self.logger.error(f"Error parsing GPU memory from '{output}': {e}")
         return None
 
     def get_throttled_state(self) -> dict[str, Any] | None:

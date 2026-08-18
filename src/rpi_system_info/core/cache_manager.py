@@ -1,16 +1,23 @@
 import threading
 import time
 from logging import Logger
-from typing import Any, Callable
+from typing import TypedDict, Any, Callable, cast
 
+from ..config import AppConfig
+from .system_info import RPiSystemInfo
 from .data_providers import get_hardware_data, get_network_data, get_storage_data, get_processes_data
+
+
+class CacheEntry(TypedDict):
+    timestamp: float
+    data: dict[str, Any]
 
 
 class CacheManager:
     def __init__(
         self,
-        rpi_info,
-        config,
+        rpi_info: RPiSystemInfo,
+        config: AppConfig,
         logger: Logger,
         background_updates: bool = True
     ):
@@ -29,12 +36,13 @@ class CacheManager:
         self.ttl = getattr(config, 'METRICS_TTL', 30)
         self.background_updates = background_updates
 
-        self._cache: dict[str, dict[str, Any]] = {}
+        self._cache: dict[str, CacheEntry] = {}
         self._lock = threading.RLock()
 
         self._stop_event = threading.Event()
 
-        self._providers = {
+        Provider = tuple[Callable[..., dict[str, Any]], tuple[Any, ...], dict[Any, Any]]
+        self._providers: dict[str, Provider] = {
             'hardware': (get_hardware_data, (self.rpi_info, self.config), {}),
             'network': (get_network_data, (self.rpi_info,), {}),
             'storage': (get_storage_data, (self.rpi_info,), {}),
@@ -42,12 +50,10 @@ class CacheManager:
         }
 
         self._update_all()
-
+        self._thread: threading.Thread | None = None
         if self.background_updates:
             self._thread = threading.Thread(target=self._updater_loop, daemon=True)
             self._thread.start()
-        else:
-            self._thread = None
 
         self.logger.info(
             f"CacheManager initialized with update_interval={self.update_interval}s, "
@@ -55,7 +61,7 @@ class CacheManager:
             f"providers={list(self._providers.keys())}"
         )
 
-    def _update_all(self):
+    def _update_all(self) -> None:
         """Calls all providers and updates the cache."""
         timestamps = {}
         with self._lock:
@@ -77,14 +83,14 @@ class CacheManager:
             except Exception as e:
                 self.logger.error(f"Failed to update {key}: {e}")
 
-    def _updater_loop(self):
+    def _updater_loop(self) -> None:
         """Background update loop."""
         while not self._stop_event.is_set():
             if self._stop_event.wait(self.update_interval):
                 break
             self._update_all()
 
-    def _get_or_refresh(self, key: str) -> Any:
+    def _get_or_refresh(self, key: str) -> dict[str, Any]:
         """
         Returns the data for the key, synchronously updating it if necessary,
         if it is missing or older than the TTL.
@@ -112,21 +118,21 @@ class CacheManager:
             self.logger.error(f"Failed to refresh {key}: {e}")
             with self._lock:
                 entry = self._cache.get(key)
-                return entry['data'] if entry else {}
+                return entry['data'] if entry else cast(dict[str, Any], {})
 
-    def get_hardware(self) -> dict:
+    def get_hardware(self) -> dict[str, Any]:
         return self._get_or_refresh('hardware')
 
-    def get_storage(self) -> dict:
+    def get_storage(self) -> dict[str, Any]:
         return self._get_or_refresh('storage')
 
-    def get_network(self) -> dict:
+    def get_network(self) -> dict[str, Any]:
         return self._get_or_refresh('network')
 
-    def get_processes(self) -> dict:
+    def get_processes(self) -> dict[str, Any]:
         return self._get_or_refresh('processes')
 
-    def get(self, key: str) -> Any:
+    def get(self, key: str) -> dict[str, Any]:
         return self._get_or_refresh(key)
 
     def get_timestamp(self, key: str) -> float | None:
@@ -134,11 +140,11 @@ class CacheManager:
             entry = self._cache.get(key)
             return entry['timestamp'] if entry else None
 
-    def force_refresh(self):
+    def force_refresh(self) -> None:
         """Forced synchronous update of all data."""
         self._update_all()
 
-    def force_refresh_by_key(self, key: str):
+    def force_refresh_by_key(self, key: str) -> None:
         """Forced update of one key."""
         if key not in self._providers:
             raise ValueError(f"Unknown provider key: {key}")
@@ -155,7 +161,7 @@ class CacheManager:
             self.logger.error(f"Failed to refresh {key}: {e}")
             raise
 
-    def stop(self):
+    def stop(self) -> None:
         """Stops the background thread, if one is running."""
         if self._thread and self._thread.is_alive():
             self._stop_event.set()
