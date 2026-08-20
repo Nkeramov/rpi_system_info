@@ -212,9 +212,9 @@ def get_gpu_data(rpi_info: RPiSystemInfo) -> dict[str, Any]:
             - MJPG (bool): Status of MJPG codec.
             - WMV9 (bool): Status of WMV9 codec.
     """
-    codecs_info = rpi_info.get_gpu_codecs_info()
+    codecs_info = rpi_info.gpu_codecs_info
     return {
-        'memory_size': rpi_info.get_gpu_memory(),
+        'memory_size': rpi_info.gpu_memory_size,
         'H264': codecs_info['H264'],
         'MPG2': codecs_info['MPG2'],
         'WVC1': codecs_info['WVC1'],

@@ -197,6 +197,14 @@
     </div>
     <div class="row t-row">
         <div class="four columns">
+            Codec H264
+        </div>
+        <div class="six columns t-row">
+            {{ 'Enabled' if gpu_info.H264 else 'Disabled' }}
+        </div>
+    </div>
+    <div class="row t-row">
+        <div class="four columns">
             Codec MPG2
         </div>
         <div class="six columns t-row">

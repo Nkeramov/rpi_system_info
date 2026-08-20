@@ -337,6 +337,62 @@ class RPiSystemInfo(metaclass=Singleton):
         return cache_sizes
 
     @cached_property
+    def gpu_memory_size(self) -> int:
+        """Retrieves the GPU memory size using the 'vcgencmd get_mem gpu' command.
+
+        Returns:
+            The GPU memory size in Mb, or 0 if the command fails or the output cannot be parsed.
+        """
+        mem_size = 0
+        command = "vcgencmd get_mem gpu"
+        output = self.__get_shell_cmd_output(command)
+        if output:
+            try:
+                if not output.startswith("gpu="):
+                    self.logger.error(f"Unexpected GPU memory output prefix: '{output}'")
+                else:
+                    mem_part = output[4:]
+                    if mem_part.endswith("MB"):
+                        mem_size = int(mem_part[:-2])
+                    elif mem_part.endswith("M"):
+                        mem_size = int(mem_part[:-1])
+                    else:
+                        self.logger.error(f"Unknown unit in GPU memory output: '{output}'")
+            except (ValueError, IndexError) as e:
+                self.logger.error(f"Error parsing GPU memory from '{output}': {e}")
+        return mem_size
+
+    @cached_property
+    def gpu_codecs_info(self) -> dict[str, bool]:
+        """
+        Retrieves the enabled/disabled status of GPU hardware codecs on a Raspberry Pi.
+
+        This method executes `vcgencmd codec_enabled` for each codec from list:
+        H264, MPG2, WVC1, MPG4, MJPG, WMV9 parses the output, and returns statuses.
+
+        Returns:
+            A dictionary where keys are codec names (as stated above)
+            and values are True if the codec is enabled, False otherwise.
+        """
+        codecs = ["H264", "MPG2", "WVC1", "MPG4", "MJPG", "WMV9"]
+        status_dict: dict[str, bool] = dict.fromkeys(codecs, False)
+        for codec in codecs:
+            try:
+                cmd = f"vcgencmd codec_enabled {codec}"
+                output = self.__get_shell_cmd_output(cmd)
+                if '=' not in output:
+                    self.logger.warning(f"Unexpected output format for codec '{codec}': {output!r}")
+                    continue
+                _, status_str = output.split('=', 1)
+                status_str = status_str.strip().lower()
+                status_dict[codec] = (status_str == "enabled")
+            except subprocess.CalledProcessError as e:
+                self.logger.error(f"Failed to check codec '{codec}' (exit code {e.returncode}): {e.stderr}")
+            except Exception as e:
+                self.logger.error(f"Unexpected error while checking codec '{codec}': {e}")
+        return status_dict
+
+    @cached_property
     def hostname(self) -> str:
         """Retrieves the hostname using the 'hostname' command.
 
@@ -1042,69 +1098,6 @@ class RPiSystemInfo(metaclass=Singleton):
             except Exception as e:
                 self.logger.error(f"Unexpected error while parsing tmux sessions: {e}")
         return sessions
-
-    def get_gpu_codecs_info(self, codecs: list[str] | None = None) -> dict[str, bool]:
-        """
-        Retrieves the enabled/disabled status of GPU hardware codecs on a Raspberry Pi.
-
-        This method executes `vcgencmd codec_enabled` for each specified codec,
-        parses the output, and returns a dictionary with boolean values.
-
-        Args:
-            codecs: Optional list of codec names to check. If not provided,
-                    defaults to ["H264", "MPG2", "WVC1", "MPG4", "MJPG", "WMV9"].
-
-        Returns:
-            A dictionary where keys are codec names (as given in the input list)
-            and values are True if the codec is enabled, False otherwise.
-        """
-        if codecs is None:
-            codecs = ["H264", "MPG2", "WVC1", "MPG4", "MJPG", "WMV9"]
-        status_dict: dict[str, bool] = {}
-        for codec in codecs:
-            try:
-                cmd = f"vcgencmd codec_enabled {codec}"
-                output = self.__get_shell_cmd_output(cmd)
-                if '=' not in output:
-                    self.logger.warning(f"Unexpected output format for codec '{codec}': {output!r}")
-                    status_dict[codec] = False
-                    continue
-                _, status_str = output.split('=', 1)
-                status_str = status_str.strip().lower()
-                status_dict[codec] = (status_str == "enabled")
-            except subprocess.CalledProcessError as e:
-                self.logger.error(f"Failed to check codec '{codec}' (exit code {e.returncode}): {e.stderr}")
-                status_dict[codec] = False
-            except Exception as e:
-                self.logger.error(f"Unexpected error while checking codec '{codec}': {e}")
-                status_dict[codec] = False
-        return status_dict
-
-    def get_gpu_memory(self) -> int | None:
-        """Retrieves the GPU memory size using the 'vcgencmd get_mem gpu' command.
-
-        Returns:
-            The GPU memory size in Mb, or None if the command fails or the output cannot be parsed.
-        """
-        command = "vcgencmd get_mem gpu"
-        output = self.__get_shell_cmd_output(command)
-        if output:
-            try:
-                if not output.startswith("gpu="):
-                    self.logger.error(f"Unexpected GPU memory output prefix: '{output}'")
-                    return None
-                mem_part = output[4:]
-                if mem_part.endswith("MB"):
-                    mem_size = int(mem_part[:-2])
-                elif mem_part.endswith("M"):
-                    mem_size = int(mem_part[:-1])
-                else:
-                    self.logger.error(f"Unknown unit in GPU memory output: '{output}'")
-                    return None
-                return mem_size
-            except (ValueError, IndexError) as e:
-                self.logger.error(f"Error parsing GPU memory from '{output}': {e}")
-        return None
 
     def get_throttled_state(self) -> dict[str, Any] | None:
         """
