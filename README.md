@@ -19,7 +19,7 @@ The interface is divided into 5 tabs:
     - Key Metrics: CPU metrics (usage, temperature, core frequency), RAM metrics (total, available), IP addresses of network interfaces eth0 and wlan0, internet connection status and public IP (if connection is active).
 - 2️⃣  *Hardware*:
     - CPU Info: model, architecture, cores count, cores frequency (current, min, max), cores voltage, temperature, usage, cache sizes, overvoltage allowed, OTP programming allowed, OTP reading allowed).
-    - RAM Info: size, total, used, free, cache, available.
+    - RAM Info: capacity information and utilization (size, total, used, free, cache, available).
     - GPU Info: memory size (from RAM), status for for MPG2, WVC1, MPG4, MJPG, WMV9 codecs.
 - 3️⃣  *Networks*:
     - Ethernet Adapter Info (for eth0 interface): MAC and IP adresses, default gateway, network mask, broadcast IP adress.
@@ -28,8 +28,8 @@ The interface is divided into 5 tabs:
     - Bluetooth Adapter Info (for hci0 interface): MAC address, status, name and adapter manufacturer.
 - 4️⃣  *Storage*:
     - SD Card Info: name, device, serial number, manufacturer id and name (if it was possible to determine), registers info (CID, CSD, DSR, SCR, OCR), logical and physical block sizes.
-    - Disks Usage Info: file system, size, used, available, used percent, mounted on.
-    - Disks Inodes Info: file system, inodes, used, free, used percent, mounted on.
+    - Disks Usage Info: disks space information and utilization (file system, size, used, available, used percent, mounted on).
+    - Disks Inodes Info: disks inodes utilization (file system, inodes, used, free, used percent, mounted on).
 - 5️⃣  *Processes*:
     - Running Processes Info: user, PID, CPU and MEM percent, command, start time.
     - Tmux Sessions Info: session name, number of windows in the session, create time.
@@ -90,6 +90,25 @@ The configuration file is located in the `.env` file. You can copy the `env.exam
 cp env.example .env
 ```
 
+## Requirements
+
+- Python 3.11+
+- Works on all Raspberry Pi models running Raspberry Pi OS / Raspbian
+
+## Color Coding
+
+Thresholds for CPU usage and temperature, as well as memory usage:
+
+
+| Color  | Meaning         | CPU / RAM | Temperature |
+|--------|-----------------|-----------|-------------|
+| 🟢 Green  | Normal          | < 65%     | < 55°C      |
+| 🟡 Yellow | Warning         | 65–85%    | 55–70°C     |
+| 🔴 Red    | Critical        | > 85%     | > 70°C      |
+
+
+The table shows my settings, you can specify your desired ones in the env file.
+
 ## ⚙️  Adding to startup
 
 You can set up automatic script launch at system startup.
@@ -125,3 +144,5 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 - [Raspberry Pi hardware](https://www.raspberrypi.com/documentation/computers/raspberry-pi.html)
 - [Raspberry Pi revision codes](https://www.raspberrypi.com/documentation/computers/raspberry-pi.html#raspberry-pi-revision-codes)
 - [How to Benchmark a Raspberry Pi Using Vcgencmd](https://www.tomshardware.com/how-to/raspberry-pi-benchmark-vcgencmd)
+- [RPI vcgencmd usage](https://elinux.org/RPI_vcgencmd_usage)
+- [RPi Hub](https://elinux.org/RPi_Hub)
