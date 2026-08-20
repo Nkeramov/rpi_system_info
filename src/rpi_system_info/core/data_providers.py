@@ -66,7 +66,10 @@ def get_generic_data(
     }
 
 
-def get_hardware_data(rpi_info: RPiSystemInfo, config: AppConfig) -> dict[str, dict[str, Any]]:
+def get_hardware_data(
+        rpi_info: RPiSystemInfo,
+        config: AppConfig
+    ) -> dict[str, dict[str, Any]]:
     """
     Return all data needed for the "Hardware" tab.
 
@@ -85,12 +88,15 @@ def get_hardware_data(rpi_info: RPiSystemInfo, config: AppConfig) -> dict[str, d
     """
     return {
         'cpu_info': get_cpu_data(rpi_info, config),
-        'ram_info': get_ram_data(rpi_info),
+        'ram_info': get_ram_data(rpi_info, config),
         'gpu_info': get_gpu_data(rpi_info),
     }
 
 
-def get_cpu_data(rpi_info: RPiSystemInfo, config: AppConfig) -> dict[str, Any]:
+def get_cpu_data(
+        rpi_info: RPiSystemInfo,
+        config: AppConfig
+    ) -> dict[str, Any]:
     """
     Collect current CPU information.
 
@@ -122,12 +128,21 @@ def get_cpu_data(rpi_info: RPiSystemInfo, config: AppConfig) -> dict[str, Any]:
             - otp_reading_allowed (str): 'Yes' or 'No'.
     """
     temperature = rpi_info.get_cpu_temperature()
-    color = config.TEXT_GREEN_COLOR
+    temperature_color = config.TEMPERATURE_NORMAL_COLOR
     if temperature is not None:
-        if config.CPU_ORANGE_TEMP_THRESHOLD < temperature < config.CPU_RED_TEMP_THRESHOLD:
-            color = config.TEXT_ORANGE_COLOR
-        elif temperature >= config.CPU_RED_TEMP_THRESHOLD:
-            color = config.TEXT_RED_COLOR
+        if config.TEMPERATURE_WARNING_THRESHOLD < temperature <= config.TEMPERATURE_CRITICAL_THRESHOLD:
+            temperature_color = config.TEMPERATURE_WARNING_COLOR
+        elif temperature > config.TEMPERATURE_CRITICAL_THRESHOLD:
+            temperature_color = config.TEMPERATURE_CRITICAL_COLOR
+
+    usage = rpi_info.get_cpu_usage()
+    usage_color = config.USAGE_NORMAL_COLOR
+    if usage is not None:
+        if config.USAGE_WARNING_THRESHOLD < usage <= config.USAGE_CRITICAL_THRESHOLD:
+            usage_color = config.USAGE_WARNING_COLOR
+        elif usage > config.USAGE_CRITICAL_THRESHOLD:
+            usage_color = config.USAGE_CRITICAL_COLOR
+
     voltage = rpi_info.get_cpu_core_voltage()
     freqs = rpi_info.get_cpu_core_frequencies()
     return {
@@ -139,16 +154,20 @@ def get_cpu_data(rpi_info: RPiSystemInfo, config: AppConfig) -> dict[str, Any]:
         'max_core_frequency': freqs.get('max'),
         'core_voltage': f"{voltage:.3f}" if voltage is not None else None,
         'cache_sizes': rpi_info.cpu_cache_sizes,
-        'usage': rpi_info.get_cpu_usage(),
-        'temperature_value': temperature,
-        'temperature_color': color,
+        'usage': usage,
+        'usage_color': usage_color,
+        'temperature': temperature,
+        'temperature_color': temperature_color,
         'overvoltage_allowed': 'Yes' if rpi_info.overvoltage_allowed else 'No',
         'otp_programming_allowed': 'Yes' if rpi_info.otp_programming_allowed else 'No',
         'otp_reading_allowed': 'Yes' if rpi_info.otp_reading_allowed else 'No',
     }
 
 
-def get_ram_data(rpi_info: RPiSystemInfo) -> dict[str, str]:
+def get_ram_data(
+        rpi_info: RPiSystemInfo,
+        config: AppConfig
+    ) -> dict[str, Any]:
     """
     Retrieve current RAM information.
 
@@ -164,7 +183,16 @@ def get_ram_data(rpi_info: RPiSystemInfo) -> dict[str, str]:
             - cache (str) Memory used by the page cache and slabs (in MB).
             - available (str): Estimation of how much memory is available (in MB).
     """
-    return rpi_info.get_ram_info()
+    ram_data = rpi_info.get_ram_info()
+    usage = ram_data['usage']
+    usage_color = config.USAGE_NORMAL_COLOR
+    if usage is not None:
+        if config.USAGE_WARNING_THRESHOLD < usage <= config.USAGE_CRITICAL_THRESHOLD:
+            usage_color = config.USAGE_WARNING_COLOR
+        elif usage > config.USAGE_CRITICAL_THRESHOLD:
+            usage_color = config.USAGE_CRITICAL_COLOR
+    ram_data['usage_color'] = usage_color
+    return ram_data
 
 
 def get_gpu_data(rpi_info: RPiSystemInfo) -> dict[str, Any]:

@@ -24,19 +24,19 @@
         </div>
     </div>
     <div class="row t-row">
-        <div class="four columns">
+        <div class="four columns" style="color:{{cpu_info.usage_color}}">
             Usage
         </div>
-        <div class="six columns">
+        <div class="six columns" style="color:{{cpu_info.usage_color}}">
             {{cpu_info.usage}} %
         </div>
     </div>
     <div class="row t-row">
-        <div class="four columns">
+        <div class="four columns" style="color:{{cpu_info.temperature_color}}">
             Temperature
         </div>
         <div class="six columns" style="color:{{cpu_info.temperature_color}}">
-            {{cpu_info.temperature_value}} &#176;C
+            {{cpu_info.temperature}} &#176;C
         </div>
     </div>
     <div class="row t-row">
@@ -130,6 +130,14 @@
         </div>
     </div>
     <div class="row t-row">
+        <div class="four columns" style="color:{{ram_info.usage_color}}">
+            Memory Usage
+        </div>
+        <div class="six columns" style="color:{{ram_info.usage_color}}">
+            {{ram_info.usage}} %
+        </div>
+    </div>
+    <div class="row t-row">
         <div class="four columns">
             Total Memory
         </div>
@@ -161,11 +169,11 @@
             {{ram_info.cache}} MB
         </div>
     </div>
-    <div class="row t-row">
-        <div class="four columns">
+    <div class="row t-row">                                                                                                                                                                
+        <div class="four columns" style="color:{{ram_info.usage_color}}">
             Available Memory
         </div>
-        <div class="six columns">
+        <div class="six columns" style="color:{{ram_info.usage_color}}">
             {{ram_info.available}} MB
         </div>
     </div>
