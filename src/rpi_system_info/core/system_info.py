@@ -11,11 +11,12 @@ from datetime import datetime
 from enum import Enum
 from functools import cached_property
 from string import hexdigits
-from typing import Any, Literal
+from typing import Any, Literal, TypeAlias
 
 from .utils.cls_utils import Singleton
 from .utils.log_utils import LoggerSingleton
 
+Number: TypeAlias = int | float
 
 class ModelType(Enum):
     UNKNOWN = -100
@@ -397,7 +398,7 @@ class RPiSystemInfo(metaclass=Singleton):
         """Retrieves the CPU temperature using the 'vcgencmd' command.
 
         Returns:
-            The CPU temperature, or None if the command fails.
+            The CPU temperature as float, or None if the command fails.
         """
         command = "vcgencmd measure_temp | cut -d= -f2 | cut -d\\' -f1"
         result = self.__get_shell_cmd_output(command)
@@ -436,24 +437,30 @@ class RPiSystemInfo(metaclass=Singleton):
                     self.logger.error(f"CPU frequency processing error: {e}")
         return core_frequencies
 
-    def get_cpu_usage(self) -> str:
+    def get_cpu_usage(self) -> float | None:
         """Retrieves the CPU usage using the 'top' command.
 
         Returns:
-            The CPU usage, or None if the command fails. Note that the output format is dependent on 'top'.
+            The CPU usage as float, or None if the command fails.
         """
         command = "top -b -n2 | grep 'Cpu(s)'| tail -n 1 | awk '{print $2 + $4 }'"
-        return self.__get_shell_cmd_output(command)
+        result = self.__get_shell_cmd_output(command)
+        try:
+            if result is not None:
+                return float(result)
+        except ValueError:
+            self.logger.error(f"Error while converting CPU usage value '{result}' to float")
+        return None
 
-    def get_ram_info(self, unit: str = 'm') -> dict[str, str]:
+    def get_ram_info(self, unit: str = 'm') -> dict[str, Any]:
         """Retrieves RAM info in specified units (b, k, m, g). Uses a safer approach.
 
         Returns:
             The RAM info dict with total, used, free, cache and available memory volume in passed unit.
         """
         ram_fields = ['total', 'used', 'free', 'cache', 'available']
-        ram_info = dict.fromkeys(ram_fields, "")
-        ram_info['size'] = str(self.memory_size)
+        ram_info: dict[str, Any] = dict.fromkeys(ram_fields, 0)
+        ram_info['size'] = self.memory_size
         if unit not in ['b', 'k', 'm', 'g']:
             self.logger.error(f"Requested unknown RAM volume unit: {unit}")
             return ram_info
@@ -463,13 +470,20 @@ class RPiSystemInfo(metaclass=Singleton):
             try:
                 lines = output.splitlines()
                 fields = lines[1].split()
-                ram_info['total'] = fields[1]
-                ram_info['used'] = fields[2]
-                ram_info['free'] = fields[3]
-                ram_info['cache'] = fields[5]
-                ram_info['available'] = fields[6]
-            except (IndexError, ValueError) as e:
-                self.logger.error(f"Failed to parse 'free' command output: {output} ({e})")
+                ram_info['total'] = int(fields[1])
+                ram_info['used'] = int(fields[2])
+                ram_info['free'] = int(fields[3])
+                ram_info['cache'] = int(fields[5])
+                ram_info['available'] = int(fields[6])
+                available = ram_info.get('available')
+                total = ram_info.get('total')
+                if available is not None and total is not None and total != 0:
+                    ram_info['usage'] = round(100.0 - available / total * 100.0, 1)
+                else:
+                    ram_info['usage'] = None
+                    self.logger.warning("RAM available or total is invalid (available=%s, total=%s)", available, total)
+            except (IndexError, ValueError) as parse_err:
+                self.logger.error(f"Failed to parse 'free' command output: {output} ({parse_err})")
         return ram_info
 
     def get_network_interface_info(self, interface: str='eth0') -> dict[str, str]:
