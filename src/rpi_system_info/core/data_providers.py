@@ -17,7 +17,7 @@ def get_generic_data(
         rpi_info: RPiSystemInfo,
         config: AppConfig,
         hardware_data: dict[str, dict[str, Any]] | None = None,
-        network_data: dict[str, Any] | None = None
+        network_data: dict[str, Any] | None = None,
     ) -> dict[str, dict[str, Any]]:
     """
     Return all data needed for the "Generic" tab.
@@ -68,7 +68,7 @@ def get_generic_data(
 
 def get_hardware_data(
         rpi_info: RPiSystemInfo,
-        config: AppConfig
+        config: AppConfig,
     ) -> dict[str, dict[str, Any]]:
     """
     Return all data needed for the "Hardware" tab.
@@ -95,7 +95,7 @@ def get_hardware_data(
 
 def get_cpu_data(
         rpi_info: RPiSystemInfo,
-        config: AppConfig
+        config: AppConfig,
     ) -> dict[str, Any]:
     """
     Collect current CPU information.
@@ -128,12 +128,12 @@ def get_cpu_data(
             - otp_reading_allowed (str): 'Yes' or 'No'.
     """
     temperature = rpi_info.get_cpu_temperature()
-    temperature_color = config.TEMPERATURE_NORMAL_COLOR
+    temperature_color = config.TEMP_NORMAL_COLOR
     if temperature is not None:
-        if config.TEMPERATURE_WARNING_THRESHOLD < temperature <= config.TEMPERATURE_CRITICAL_THRESHOLD:
-            temperature_color = config.TEMPERATURE_WARNING_COLOR
-        elif temperature > config.TEMPERATURE_CRITICAL_THRESHOLD:
-            temperature_color = config.TEMPERATURE_CRITICAL_COLOR
+        if config.TEMP_WARNING_THRESHOLD < temperature <= config.TEMP_CRITICAL_THRESHOLD:
+            temperature_color = config.TEMP_WARNING_COLOR
+        elif temperature > config.TEMP_CRITICAL_THRESHOLD:
+            temperature_color = config.TEMP_CRITICAL_COLOR
 
     usage = rpi_info.get_cpu_usage()
     usage_color = config.USAGE_NORMAL_COLOR
@@ -166,7 +166,7 @@ def get_cpu_data(
 
 def get_ram_data(
         rpi_info: RPiSystemInfo,
-        config: AppConfig
+        config: AppConfig,
     ) -> dict[str, Any]:
     """
     Retrieve current RAM information.
@@ -226,10 +226,10 @@ def get_gpu_data(rpi_info: RPiSystemInfo) -> dict[str, Any]:
 
 def get_network_data(rpi_info: RPiSystemInfo) -> dict[str, Any]:
     """
-    Collect network interface and Wi‑Fi related information.
+    Collect network interface and Wi-Fi related information.
 
-    This includes Ethernet and Wi‑Fi interface details, the current SSID,
-    Bluetooth MAC address, and a list of available Wi‑Fi networks with signal
+    This includes Ethernet and Wi-Fi interface details, the current SSID,
+    Bluetooth MAC address, and a list of available Wi-Fi networks with signal
     strengths.
 
     Args:

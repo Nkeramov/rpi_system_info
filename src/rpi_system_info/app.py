@@ -2,10 +2,10 @@ from flask import Flask
 from flask_caching import Cache
 
 from .config import AppConfig
-from .core.utils.log_utils import LoggerSingleton
-from .core.system_info import RPiSystemInfo
 from .core.cache_manager import CacheManager
-from .web import routes, error_handlers
+from .core.system_info import RPiSystemInfo
+from .core.utils.log_utils import LoggerSingleton
+from .web import error_handlers, routes
 
 
 def create_app(config: AppConfig | None = None) -> Flask:
@@ -31,8 +31,8 @@ def create_app(config: AppConfig | None = None) -> Flask:
 
     page_cache = Cache(app, config={
             "CACHE_TYPE": "SimpleCache",
-            "CACHE_DEFAULT_TIMEOUT": config.PAGE_CACHE_TIMEOUT
-        }
+            "CACHE_DEFAULT_TIMEOUT": config.PAGE_CACHE_TIMEOUT,
+        },
     )
 
     rpi_info = RPiSystemInfo(logger)

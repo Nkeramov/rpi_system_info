@@ -100,15 +100,15 @@ class LoggerSingleton(metaclass=Singleton):
         __logger (Logger): The internal logger instance.
         __allow_reinitialization (bool): Whether to allow re-initialization.
         DEFAULT_FORMAT (str): Default log message format.
-        DEFAULT_DATE_FORMAT (str): Default date/time format.
+        DFLT_DATE_FMT (str): Default date/time format.
     """
     __logger: Logger = logging.getLogger('SuperLogger')
     __allow_reinitialization: bool = False
     _initialized: bool = False
-    _config: LoggerConfig = {}
+    _config: LoggerConfig = LoggerConfig()
 
     DEFAULT_FORMAT = '%(asctime)s | %(levelname)s | %(module)s | %(funcName)s | %(message)s'
-    DEFAULT_DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
+    DFLT_DATE_FMT = '%Y-%m-%d %H:%M:%S'
 
     def __init__(
         self,
@@ -137,7 +137,7 @@ class LoggerSingleton(metaclass=Singleton):
             log_file (str | None): Log file name.
             level (str | None): Logging level (e.g., 'INFO'). Defaults to 'INFO'.
             msg_format (str | None): Message format. Defaults to DEFAULT_FORMAT.
-            date_format (str | None): Date format. Defaults to DEFAULT_DATE_FORMAT.
+            date_format (str | None): Date format. Defaults to DFLT_DATE_FMT.
             colored (bool): Whether to enable colors in console output.
             max_size_mb (int): Maximum file size in MB before rotation.
             keep (int): Number of archived log files to keep.
@@ -153,7 +153,7 @@ class LoggerSingleton(metaclass=Singleton):
                 log_file=log_file,
                 level=level or "INFO",
                 msg_format=msg_format or self.DEFAULT_FORMAT,
-                date_format=date_format or self.DEFAULT_DATE_FORMAT,
+                date_format=date_format or self.DFLT_DATE_FMT,
                 colored=colored,
                 max_size_mb=max_size_mb,
                 keep=keep,
@@ -392,7 +392,7 @@ class LoggerSingleton(metaclass=Singleton):
             "log_file": log_file if log_file is not None else config.get("log_file"),
             "level": level if level is not None else config.get("level", "INFO"),
             "msg_format": msg_format if msg_format is not None else config.get("msg_format", cls.DEFAULT_FORMAT),
-            "date_format": date_format if date_format is not None else config.get("date_format", cls.DEFAULT_DATE_FORMAT),
+            "date_format": date_format if date_format is not None else config.get("date_format", cls.DFLT_DATE_FMT),
             "colored": colored if colored is not None else config.get("colored", False),
             "max_size_mb": max_size_mb if max_size_mb is not None else config.get("max_size_mb", 10),
             "keep": keep if keep is not None else config.get("keep", 10),

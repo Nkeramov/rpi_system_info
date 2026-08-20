@@ -1,11 +1,12 @@
 import threading
 import time
+from collections.abc import Callable
 from logging import Logger
-from typing import TypedDict, Any, Callable, cast
+from typing import Any, TypedDict, cast
 
 from ..config import AppConfig
+from .data_providers import get_hardware_data, get_network_data, get_processes_data, get_storage_data
 from .system_info import RPiSystemInfo
-from .data_providers import get_hardware_data, get_network_data, get_storage_data, get_processes_data
 
 
 class CacheEntry(TypedDict):
@@ -19,7 +20,7 @@ class CacheManager:
         rpi_info: RPiSystemInfo,
         config: AppConfig,
         logger: Logger,
-        background_updates: bool = True
+        background_updates: bool = True,
     ):
         """
         rpi_info: An instance of RPiSystemInfo containing all system data.
@@ -41,8 +42,8 @@ class CacheManager:
 
         self._stop_event = threading.Event()
 
-        Provider = tuple[Callable[..., dict[str, Any]], tuple[Any, ...], dict[Any, Any]]
-        self._providers: dict[str, Provider] = {
+        provider = tuple[Callable[..., dict[str, Any]], tuple[Any, ...], dict[Any, Any]]
+        self._providers: dict[str, provider] = {
             'hardware': (get_hardware_data, (self.rpi_info, self.config), {}),
             'network': (get_network_data, (self.rpi_info,), {}),
             'storage': (get_storage_data, (self.rpi_info,), {}),
@@ -58,14 +59,14 @@ class CacheManager:
         self.logger.info(
             f"CacheManager initialized with update_interval={self.update_interval}s, "
             f"TTL={self.ttl}s, background_updates={self.background_updates}, "
-            f"providers={list(self._providers.keys())}"
+            f"providers={list(self._providers.keys())}",
         )
 
     def _update_all(self) -> None:
         """Calls all providers and updates the cache."""
         timestamps = {}
         with self._lock:
-            for key in self._providers.keys():
+            for key in self._providers:
                 entry = self._cache.get(key)
                 timestamps[key] = entry['timestamp'] if entry and 'timestamp' in entry else 0.0
         sorted_keys = sorted(timestamps.keys(), key=lambda k: timestamps[k])
@@ -77,7 +78,7 @@ class CacheManager:
                 with self._lock:
                     self._cache[key] = {
                         'data': data,
-                        'timestamp': time.time()
+                        'timestamp': time.time(),
                     }
                 self.logger.debug(f"Successfully updated in the background: {key}")
             except Exception as e:
@@ -110,7 +111,7 @@ class CacheManager:
             with self._lock:
                 self._cache[key] = {
                     'data': new_data,
-                    'timestamp': time.time()
+                    'timestamp': time.time(),
                 }
             self.logger.debug(f"Sync refresh: {key}")
             return new_data
@@ -154,7 +155,7 @@ class CacheManager:
             with self._lock:
                 self._cache[key] = {
                     'data': data,
-                    'timestamp': time.time()
+                    'timestamp': time.time(),
                 }
             self.logger.info(f"Successfully force refresh of {key}")
         except Exception as e:

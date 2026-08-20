@@ -1057,10 +1057,6 @@ class RPiSystemInfo(metaclass=Singleton):
         output = self.__get_shell_cmd_output(command)
         if output:
             try:
-                if isinstance(output, bytes):
-                    output = output.decode('utf-8')
-                else:
-                    output = str(output)
                 lines = output.splitlines()
                 if not lines:
                     self.logger.warning("No tmux sessions found or tmux server not running")
@@ -1089,7 +1085,7 @@ class RPiSystemInfo(metaclass=Singleton):
                         sessions.append({
                             "name": name_part.strip(),
                             "windows": windows,
-                            "created": created_dt
+                            "created": created_dt,
                         })
                     except (ValueError, IndexError) as parse_error:
                         self.logger.warning(f"Skipping malformed line: {line} ({parse_error})")

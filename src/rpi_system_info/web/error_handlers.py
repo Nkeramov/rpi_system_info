@@ -1,6 +1,7 @@
 from logging import Logger
+
 from flask import Flask, render_template, url_for
-from werkzeug.exceptions import NotFound, InternalServerError
+from werkzeug.exceptions import InternalServerError, NotFound
 
 from ..config import AppConfig
 
