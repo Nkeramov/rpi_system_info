@@ -2,7 +2,7 @@ import logging
 import logging.handlers
 from logging import Logger, LogRecord
 from pathlib import Path
-from typing import Any, ClassVar, TypedDict
+from typing import ClassVar, TypedDict
 
 from colorama import Fore, Style
 
@@ -85,7 +85,6 @@ class LoggerConfig(TypedDict, total=False):
     encoding: str
     file_msg_format: str | None
     file_date_format: str | None
-    kwargs: dict[str, Any]
 
 
 class LoggerSingleton(metaclass=Singleton):
@@ -125,7 +124,6 @@ class LoggerSingleton(metaclass=Singleton):
         encoding: str = "utf-8",
         file_msg_format: str | None = None,
         file_date_format: str | None = None,
-        **kwargs: Any,
     ) -> None:
         """
         Initialize (or re-initialize) the logger.
@@ -146,7 +144,6 @@ class LoggerSingleton(metaclass=Singleton):
             encoding (str): File encoding (default 'utf-8').
             file_msg_format (str | None): Separate format for file handler (uses msg_format if None).
             file_date_format (str | None): Separate date format for file handler (uses date_format if None).
-            **kwargs: Additional arguments passed to the formatter.
         """
         if not type(self)._initialized or type(self).__allow_reinitialization:
             self._initialize_logger(
@@ -162,7 +159,6 @@ class LoggerSingleton(metaclass=Singleton):
                 encoding=encoding,
                 file_msg_format=file_msg_format,
                 file_date_format=file_date_format,
-                **kwargs,
             )
             type(self)._initialized = True
 
@@ -180,7 +176,6 @@ class LoggerSingleton(metaclass=Singleton):
         encoding: str = "utf-8",
         file_msg_format: str | None = None,
         file_date_format: str | None = None,
-        **kwargs: Any,
     ) -> None:
         """
         Configure the logger handlers. Clears any existing handlers.
@@ -212,7 +207,6 @@ class LoggerSingleton(metaclass=Singleton):
             date_format=date_format,
             colored=colored,
             colors=colors,
-            **kwargs,
         )
 
         if log_dir and log_file:
@@ -241,7 +235,6 @@ class LoggerSingleton(metaclass=Singleton):
             "encoding": encoding,
             "file_msg_format": file_msg_format,
             "file_date_format": file_date_format,
-            "kwargs": kwargs,
         }
 
     def _add_stream_handler(
@@ -251,7 +244,6 @@ class LoggerSingleton(metaclass=Singleton):
         date_format: str,
         colored: bool,
         colors: dict[str, str] | None = None,
-        **kwargs: Any,
     ) -> None:
         """
         Add a console (stdout) handler.
@@ -267,7 +259,7 @@ class LoggerSingleton(metaclass=Singleton):
         stream_handler = logging.StreamHandler()
         stream_handler.setLevel(level)
         formatter = (
-            CustomColoredFormatter(fmt=msg_format, datefmt=date_format, colors=colors, **kwargs)
+            CustomColoredFormatter(fmt=msg_format, datefmt=date_format, colors=colors)
             if colored
             else logging.Formatter(fmt=msg_format, datefmt=date_format)
         )
@@ -355,7 +347,6 @@ class LoggerSingleton(metaclass=Singleton):
         encoding: str | None = None,
         file_msg_format: str | None = None,
         file_date_format: str | None = None,
-        **kwargs: Any,
     ) -> None:
         """
         Update the logger configuration.
@@ -378,7 +369,6 @@ class LoggerSingleton(metaclass=Singleton):
             encoding (str | None): File encoding.
             file_msg_format (str | None): Separate format for file handler.
             file_date_format (str | None): Separate date format for file handler.
-            **kwargs: Additional arguments for the formatter.
 
         Note:
             This method is thread-safe due to the singleton lock.
@@ -400,7 +390,6 @@ class LoggerSingleton(metaclass=Singleton):
             "encoding": encoding if encoding is not None else config.get("encoding", "utf-8"),
             "file_msg_format": file_msg_format if file_msg_format is not None else config.get("file_msg_format"),
             "file_date_format": file_date_format if file_date_format is not None else config.get("file_date_format"),
-            "kwargs": kwargs if kwargs else config.get("kwargs", {}),
         }
 
         # Re-initialize with the merged configuration
